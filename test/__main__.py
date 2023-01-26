@@ -27,6 +27,9 @@ def create_int_stream() -> Stream[int]:
     return Stream(range(10_000)).map(lambda x: x**2)
 
 
+string = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
+assert Stream(string).distinct().sum() == "pjwa nsvoidfb,cmg"
+
 assert (
     sum(create_int_stream())
     == create_int_stream().reduce(lambda x, y: x + y)
