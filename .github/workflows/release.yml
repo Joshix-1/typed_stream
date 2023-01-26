@@ -107,8 +107,8 @@ jobs:
       - name: Version
         id: version
         run: |
-          echo -n '::set-output name=VERSION::'
-          ./typed_stream.py
+          echo -n "VERSION=" >> $GITHUB_OUTPUT
+          ./typed_stream/version.py >> $GITHUB_OUTPUT
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
@@ -123,6 +123,9 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+      - mypy
+      - test
+      - check_stupid_mistakes
     permissions: {}
     steps:
       - name: Setup Python
