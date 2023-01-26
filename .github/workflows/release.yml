@@ -1,0 +1,144 @@
+name: Release
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'typed_stream/version.py'
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: yes
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install build frontend
+        run: pip install "build>=0.9,<2"
+      - name: Build
+        run: python -m build
+      - name: Upload as build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: dist
+
+  check_stupid_mistakes:
+    name: Check stupid mistakes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install required stuff
+        run: pip install black>=23.1a1 isort
+      - name: Run isort
+        run: isort . --check-only
+      - name: Run Black
+        run: black . --check --diff
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "🤦"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Run tests
+        run: python3 -m test
+
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install mypy
+        run: pip install mypy typing_extensions
+      - name: Run mypy
+        run: mypy -p typed_stream -p test
+
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - build
+      - mypy
+      - test
+      - check_stupid_mistakes
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+      - name: Version
+        id: version
+        run: |
+          echo -n '::set-output name=VERSION::'
+          ./typed_stream.py
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            *.tar.gz
+            *.whl
+
+  pypi:
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    permissions: {}
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+      - name: Install Twine
+        run: pip install "twine==4.*"
+      - name: Run Twine
+        run: |
+          twine check --strict *.tar.gz *.whl
+          twine upload --verbose --disable-progress-bar *.tar.gz *.whl
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

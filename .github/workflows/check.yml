@@ -1,0 +1,101 @@
+name: Check
+on: [ push, pull_request ]
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: yes
+
+jobs:
+
+  fix_stupid_mistakes:
+    name: Fix stupid mistakes
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'branch'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install required stuff
+        run: pip install autoflake black>=23.1a1 isort
+      - name: Run autoflake
+        run: autoflake --recursive --in-place --remove-all-unused-imports --remove-unused-variables --remove-duplicate-keys .
+      - name: Run isort
+        run: isort .
+      - name: Run Black
+        run: black .
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "🤦"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Run tests
+        run: python3 -m test
+
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install mypy
+        run: pip install mypy typing_extensions
+      - name: Run mypy
+        run: mypy -p scripts -p typed_stream -p test
+
+  flake8:
+    name: Flake8
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Flake8
+        run: pip install flake8
+      - name: Run Flake8
+        run: flake8
+
+  bandit:
+    name: Bandit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Bandit
+        run: pip install bandit
+      - name: Run Bandit
+        run: bandit -c pyproject.toml -r an_website
