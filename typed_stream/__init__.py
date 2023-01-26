@@ -20,10 +20,14 @@ from itertools import chain
 from types import EllipsisType
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
+from .version import VERSION
+
+__version__ = VERSION
 __all__ = (
     "Stream",
     "StreamEmptyError",
     "StreamFinishedError",
+    "VERSION",
 )
 
 T = TypeVar("T")
