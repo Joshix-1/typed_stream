@@ -10,7 +10,7 @@ mapping: dict[int, str] = (
 )
 assert mapping == {1: "1", 2: "2", 3: "3"}
 
-assert Stream([1, 2, 3]).collect(lambda x: sum(x)) == 6
+assert Stream([1, 2, 3]).sum() == 6
 int_var: int = Stream([1, 2, 3]).max()
 assert int_var == 3
 int_var = Stream([1, 2, 3]).min()
@@ -31,6 +31,8 @@ assert (
     sum(create_int_stream())
     == create_int_stream().reduce(lambda x, y: x + y)
     == create_int_stream().reduce(int.__add__)
+    == create_int_stream().sum()
+    # pylint: disable=unnecessary-lambda
     == create_int_stream().collect(lambda x: sum(x))
 )
 
@@ -45,7 +47,7 @@ assert Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2]).collect(
     list
 ) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 assert Stream([1, 2, 3, 4, 5]).limit(3).collect(list) == [1, 2, 3]
-assert Stream([]).limit(3).collect(list) == []
+assert not Stream([]).limit(3).collect(list)
 assert Stream([1]).limit(3).collect(list) == [1]
 assert Stream([1, 2, 3, 4, 5]).count() == 5
 assert Stream([1, 4, 5]).last() == 5

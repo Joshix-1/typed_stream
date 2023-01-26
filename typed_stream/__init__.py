@@ -40,8 +40,20 @@ Num = TypeVar("Num", int, float)
 SLT = TypeVar("SLT", bound="SupportsLessThan")
 
 
-class SupportsLessThan(Protocol):
+class SupportsLessThan(Protocol):  # pylint: disable=too-few-public-methods
+    """A class that supports comparison with less than."""
+
     def __lt__(self: SLT, other: SLT) -> bool:
+        ...
+
+
+SA = TypeVar("SA", bound="SupportsAdd")
+
+
+class SupportsAdd(Protocol):  # pylint: disable=too-few-public-methods
+    """A class that supports addition."""
+
+    def __add__(self: SA, other: SA) -> SA:
         ...
 
 
@@ -265,12 +277,8 @@ class Stream(Iterable[T]):
         """
         self._check_finished()
         return self._finish(
-            Stream(map(fun, self._data))
-        )  # pylint: disable=bad-builtin
-
-    # def chunk(self, size: int) -> "Stream[Stream[T]]":
-    #     """Create a new stream with the values split into chunks of the size."""
-    #     self._check_finished()
+            Stream(map(fun, self._data))  # pylint: disable=bad-builtin
+        )
 
     def max(self: "Stream[SLT]") -> SLT:
         """Return the biggest element of the stream."""
@@ -313,3 +321,7 @@ class Stream(Iterable[T]):
         for val in self._data:
             result = fun(result, val)
         return self._finish(result)
+
+    def sum(self: "Stream[SA]") -> SA:
+        """Calculate the sum of the elements."""
+        return self.reduce(lambda x, y: x + y)
