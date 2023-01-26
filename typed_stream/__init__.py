@@ -34,8 +34,16 @@ T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
+SC_IN = TypeVar("SC_IN", contravariant=True)
+SC_OUT = TypeVar("SC_OUT", covariant=True)
 
-Num = TypeVar("Num", int, float)
+
+class StarCallable(Protocol[SC_IN, SC_OUT]):  # pylint: disable=too-few-public-methods
+    """A class representing a function, that takes many arguments."""
+
+    def __call__(self, *args: SC_IN) -> SC_OUT:
+        ...
+
 
 SLT = TypeVar("SLT", bound="SupportsLessThan")
 
@@ -140,7 +148,7 @@ class Stream(Iterable[T]):
 
         def next_chunk() -> Iterator[T]:
             i = 0
-            for i, val in zip(range(size), data):
+            for i, val in zip(range(size), data, strict=False):
                 yield val
             if i + 1 < size:
                 raise StreamFinishedError()
@@ -339,6 +347,11 @@ class Stream(Iterable[T]):
         for val in self._data:
             result = fun(result, val)
         return self._finish(result)
+
+    def starcollect(self, fun: StarCallable[T, K]) -> K:
+        """Collect the values of this Stream. This finishes the Stream."""
+        self._check_finished()
+        return fun(*self)
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
