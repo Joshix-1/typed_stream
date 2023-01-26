@@ -1,4 +1,6 @@
 """The tests for the Stream."""
+# pylint: disable=unnecessary-lambda
+
 from typed_stream import Stream
 
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
@@ -27,15 +29,14 @@ def create_int_stream() -> Stream[int]:
     return Stream(range(10_000)).map(lambda x: x**2)
 
 
-string = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
-assert Stream(string).distinct().sum() == "pjwa nsvoidfb,cmg"
+STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
+assert Stream(STRING).distinct().sum() == "pjwa nsvoidfb,cmg"
 
 assert (
     sum(create_int_stream())
     == create_int_stream().reduce(lambda x, y: x + y)
     == create_int_stream().reduce(int.__add__)
     == create_int_stream().sum()
-    # pylint: disable=unnecessary-lambda
     == create_int_stream().collect(lambda x: sum(x))
 )
 
@@ -60,3 +61,11 @@ assert Stream([]).empty()
 assert not Stream([1]).empty()
 
 assert Stream([1, 2, 3]).chain([4, 5, 6]).collect(tuple) == (1, 2, 3, 4, 5, 6)
+
+assert Stream(range(25)).chunk(5).map(lambda x: list(x)).collect(tuple) == (
+    [0, 1, 2, 3, 4],
+    [5, 6, 7, 8, 9],
+    [10, 11, 12, 13, 14],
+    [15, 16, 17, 18, 19],
+    [20, 21, 22, 23, 24],
+)

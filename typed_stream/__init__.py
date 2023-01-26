@@ -57,9 +57,6 @@ class SupportsAdd(Protocol):  # pylint: disable=too-few-public-methods
         ...
 
 
-value: SupportsLessThan = 1
-
-
 class _StreamErrorBase(Exception):
     """Internal base class for StreamErrors."""
 
@@ -135,6 +132,27 @@ class Stream(Iterable[T]):
         self._check_finished()
         self._data = chain(self._data, iterable)
         return self
+
+    def chunk(self, size: int) -> "Stream[Stream[T]]":
+        """Split stream into chunks of the specified size."""
+        self._check_finished()
+        data = iter(self)
+
+        def next_chunk() -> Iterator[T]:
+            i = 0
+            for i, val in zip(range(size), data):
+                yield val
+            if i + 1 < size:
+                raise StreamFinishedError()
+
+        def chunks() -> Iterator[Stream[T]]:
+            while True:  # pylint: disable=while-used
+                try:
+                    yield Stream(list(next_chunk()))
+                except StreamFinishedError:
+                    return
+
+        return Stream(chunks())
 
     if TYPE_CHECKING:  # noqa: C901
 
