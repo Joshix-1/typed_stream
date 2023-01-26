@@ -1,3 +1,4 @@
+"""The tests for the Stream."""
 from typed_stream import Stream
 
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
@@ -22,6 +23,7 @@ assert str_var == "1"
 
 
 def create_int_stream() -> Stream[int]:
+    """Create an int stream."""
     return Stream(range(10_000)).map(lambda x: x**2)
 
 

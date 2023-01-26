@@ -44,12 +44,16 @@ class SupportsLessThan(Protocol):
 value: SupportsLessThan = 1
 
 
-class StreamFinishedError(Exception):
-    pass
+class _StreamErrorBase(Exception):
+    """Internal base class for StreamErrors."""
 
 
-class StreamEmptyError(Exception):
-    pass
+class StreamFinishedError(_StreamErrorBase):
+    """You cannot perform operations on a finished Stream."""
+
+
+class StreamEmptyError(_StreamErrorBase):
+    """The Stream is empty."""
 
 
 class Stream(Iterable[T]):
@@ -67,7 +71,8 @@ class Stream(Iterable[T]):
     ) -> None:
         """Create a new Stream.
 
-        To create a finished Stream do Stream(...)."""
+        To create a finished Stream do Stream(...).
+        """
         if not isinstance(data, EllipsisType):
             self._data = iter(data)
 
@@ -115,8 +120,8 @@ class Stream(Iterable[T]):
         self._data = chain(self._data, iterable)
         return self
 
+    if TYPE_CHECKING:  # noqa: C901
 
-    if TYPE_CHECKING:
         @overload
         def collect(self, fun: type[tuple[Any, ...]]) -> tuple[T, ...]:
             ...
@@ -190,7 +195,7 @@ class Stream(Iterable[T]):
         return self.filter(lambda val: not fun(val))
 
     def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[T]":
-        """Use built-in filter() to filter values."""
+        """Use built-in filter to filter values."""
         self._check_finished()
         self._data = filter(fun, self._data)  # pylint: disable=bad-builtin
         return self
@@ -248,7 +253,6 @@ class Stream(Iterable[T]):
 
     def map(self, fun: Callable[[T], K]) -> "Stream[K]":
         """Map each value to another.
-
 
         This lazily finishes the current Stream and creates a new one.
 
