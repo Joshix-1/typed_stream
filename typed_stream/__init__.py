@@ -19,7 +19,7 @@ import concurrent.futures
 from collections.abc import Callable, Iterable, Iterator
 from itertools import chain, count, repeat
 from types import EllipsisType
-from typing import Optional, TYPE_CHECKING, Any, Protocol, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 from .version import VERSION
 
