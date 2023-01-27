@@ -15,10 +15,11 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 from collections.abc import Callable, Iterable, Iterator
-from itertools import chain
+from itertools import chain, count, repeat
 from types import EllipsisType
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
+from typing import Optional, TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 from .version import VERSION
 
@@ -38,7 +39,9 @@ SC_IN = TypeVar("SC_IN", contravariant=True)
 SC_OUT = TypeVar("SC_OUT", covariant=True)
 
 
-class StarCallable(Protocol[SC_IN, SC_OUT]):  # pylint: disable=too-few-public-methods
+class StarCallable(
+    Protocol[SC_IN, SC_OUT]
+):  # pylint: disable=too-few-public-methods
     """A class representing a function, that takes many arguments."""
 
     def __call__(self, *args: SC_IN) -> SC_OUT:
@@ -114,6 +117,16 @@ class Stream(Iterable[T]):
         if self._is_finished():
             return "Stream(...)"
         return self._finish(str(list(self._data)))
+
+    @staticmethod
+    def from_value(value: K) -> Stream[K]:
+        """Create an endless Stream of the same value."""
+        return Stream(repeat(value))
+
+    @staticmethod
+    def counting(start: int = 0, step: int = 1) -> Stream[int]:
+        """Create an endless counting Stream."""
+        return Stream(count(start, step))
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
@@ -232,6 +245,10 @@ class Stream(Iterable[T]):
             return True
         return False
 
+    def enumerate(self, start_index: int = 0) -> Stream[tuple[int, T]]:
+        """Map the values to a tuple of index and value."""
+        return Stream(enumerate(self, start=start_index))
+
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Exclude values if the function returns a truthy value."""
         return self.filter(lambda val: not fun(val))
@@ -313,6 +330,19 @@ class Stream(Iterable[T]):
     def min(self: "Stream[SLT]") -> SLT:
         """Return the smallest element of the stream."""
         return self.reduce(lambda x, y: y if y < x else x)
+
+    def concurrent_map(
+        self, fun: Callable[[T], K], max_workers: int | None = None
+    ) -> Stream[K]:
+        """Maps values concurrently.
+
+        See: https://docs.python.org/3/library/concurrent.futures.html
+        """
+        self._check_finished()
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=max_workers
+        ) as executor:
+            return self._finish(Stream(executor.map(fun, self._data)))
 
     def peek(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
