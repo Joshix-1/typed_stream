@@ -119,14 +119,14 @@ class Stream(Iterable[T]):
         return self._finish(str(list(self._data)))
 
     @staticmethod
-    def from_value(value: K) -> Stream[K]:
-        """Create an endless Stream of the same value."""
-        return Stream(repeat(value))
-
-    @staticmethod
     def counting(start: int = 0, step: int = 1) -> Stream[int]:
         """Create an endless counting Stream."""
         return Stream(count(start, step))
+
+    @staticmethod
+    def from_value(value: K) -> Stream[K]:
+        """Create an endless Stream of the same value."""
+        return Stream(repeat(value))
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
@@ -154,7 +154,7 @@ class Stream(Iterable[T]):
         self._data = chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> "Stream[Stream[T]]":
+    def chunk(self, size: int) -> "Stream[Stream[T]]":  # noqa: C901
         """Split stream into chunks of the specified size."""
         self._check_finished()
         data = iter(self)
