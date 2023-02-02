@@ -161,7 +161,7 @@ class Stream(Iterable[T]):
 
         def next_chunk() -> Iterator[T]:
             i = 0
-            for i, val in zip(range(size), data, strict=False):
+            for i, val in zip(range(size), data, strict=False):  # noqa: B007
                 yield val
             if i + 1 < size:
                 raise StreamFinishedError()
@@ -334,7 +334,7 @@ class Stream(Iterable[T]):
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None
     ) -> Stream[K]:
-        """Maps values concurrently.
+        """Map values concurrently.
 
         See: https://docs.python.org/3/library/concurrent.futures.html
         """

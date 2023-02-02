@@ -2,7 +2,7 @@
 """This script contains the version of this package.
 
 Update this to create a new release.
-To get the version run this script.
+To get the version of this package run this script.
 """
 
 VERSION = "0.0.1"
