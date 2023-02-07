@@ -1,7 +1,11 @@
 """The tests for the Stream."""
+from pathlib import Path
+from typing import TypeGuard
+
+from typed_stream import FileStream, Stream
+
 # pylint: disable=unnecessary-lambda
 
-from typed_stream import Stream
 
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
 assert tpl == (1, 2, 3)
@@ -68,4 +72,26 @@ assert Stream(range(25)).chunk(5).map(lambda x: list(x)).collect(tuple) == (
     [10, 11, 12, 13, 14],
     [15, 16, 17, 18, 19],
     [20, 21, 22, 23, 24],
+)
+
+int_list: list[int] = Stream([None, 1, 2, 3, 4, 0, 23]).filter().collect(list)
+assert int_list == [1, 2, 3, 4, 23]
+
+
+def is_str(value: object) -> TypeGuard[str]:
+    """Type guard strings."""
+    return isinstance(value, str)
+
+
+str_stream: Stream[str] = Stream([None, "1", "2", "3", 4, 0, 23]).filter(is_str)
+assert str_stream.collect(list) == ["1", "2", "3"]
+
+
+assert (
+    FileStream(Path(__file__).parent / "input.txt")
+    .map(str.strip)
+    .filter(lambda string: string and not string.startswith("#"))
+    .map(int)
+    .sum()
+    == 7
 )

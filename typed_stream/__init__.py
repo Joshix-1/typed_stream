@@ -16,15 +16,26 @@
 from __future__ import annotations
 
 import concurrent.futures
+import contextlib
 from collections.abc import Callable, Iterable, Iterator
 from itertools import chain, count, repeat
+from os import PathLike
 from types import EllipsisType
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Protocol,
+    TextIO,
+    TypeGuard,
+    TypeVar,
+    overload,
+)
 
 from .version import VERSION
 
 __version__ = VERSION
 __all__ = (
+    "FileStream",
     "Stream",
     "StreamEmptyError",
     "StreamFinishedError",
@@ -34,6 +45,16 @@ __all__ = (
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+
+TGC_CHECKED = TypeVar("TGC_CHECKED", covariant=True, bound=object)
+
+
+class TypeGuardingCallable(Protocol[TGC_CHECKED]):
+    """A class representing a function that type guards."""
+
+    def __call__(self, value: Any) -> TypeGuard[TGC_CHECKED]:
+        ...
+
 
 SC_IN = TypeVar("SC_IN", contravariant=True)
 SC_OUT = TypeVar("SC_OUT", covariant=True)
@@ -253,7 +274,25 @@ class Stream(Iterable[T]):
         """Exclude values if the function returns a truthy value."""
         return self.filter(lambda val: not fun(val))
 
-    def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[T]":
+    if TYPE_CHECKING:  # noqa: C901
+
+        @overload
+        def filter(self: Stream[K | None]) -> Stream[K]:
+            ...
+
+        @overload
+        def filter(self) -> Stream[T]:
+            ...
+
+        @overload
+        def filter(self, fun: TypeGuardingCallable[K]) -> Stream[K]:
+            ...
+
+        @overload
+        def filter(self, fun: Callable[[T], object]) -> Stream[T]:
+            ...
+
+    def filter(self, fun: Callable[[T], Any] | None = None) -> Stream[Any]:
         """Use built-in filter to filter values."""
         self._check_finished()
         self._data = filter(fun, self._data)  # pylint: disable=bad-builtin
@@ -386,3 +425,69 @@ class Stream(Iterable[T]):
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
         return self.reduce(lambda x, y: x + y)
+
+
+class LazyFileIterator(Iterator[str]):
+    """Iterate over a file line by line. Only open it when necessary."""
+
+    path: bytes | PathLike[bytes] | PathLike[str] | str
+    encoding: str
+    _iterator: Iterator[str] | None
+    _file_object: TextIO | None
+
+    __slots__ = ("path", "encoding", "_iterator", "_file_object")
+
+    def __init__(
+        self,
+        path: bytes | PathLike[bytes] | PathLike[str] | str,
+        encoding: str = "UTF-8",
+    ) -> None:
+        self.path = path
+        self.encoding = encoding
+        self._iterator = None
+        self._file_object = None
+
+    def _close(self) -> None:
+        if self._file_object:
+            self._file_object.close()
+            self._file_object = None
+            self._iterator = None
+
+    def __iter__(self) -> Iterator[str]:
+        return self
+
+    def __del__(self) -> None:
+        self._close()
+
+    def __next__(self) -> str:
+        if self._iterator is None:
+            self._file_object = open(  # noqa: SIM115
+                self.path, mode="r", encoding=self.encoding
+            )
+            self._iterator = iter(self._file_object)
+
+        try:
+            return next(self._iterator)
+        except BaseException:
+            with contextlib.suppress(Exception):
+                self._close()
+            raise
+
+
+class FileStream(Stream[str]):
+    """Lazily iterate over a file."""
+
+    def __init__(
+        self,
+        data: bytes | PathLike[bytes] | PathLike[str] | str,
+        encoding: str = "UTF-8",
+    ) -> None:
+        """Create a new FileStream.
+
+        To create a finished FileStream do FileStream(...).
+        """
+        super().__init__(
+            ...
+            if isinstance(data, EllipsisType)
+            else LazyFileIterator(data, encoding=encoding)
+        )

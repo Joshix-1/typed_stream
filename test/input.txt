@@ -1,0 +1,14 @@
+# even numbers:
+2
+4
+12
+
+# odd numbers:
+1
+3
+7
+
+# negative numbers:
+-2
+-9
+-11
