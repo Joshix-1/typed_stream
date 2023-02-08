@@ -19,11 +19,13 @@ import concurrent.futures
 import contextlib
 from collections.abc import Callable, Iterable, Iterator
 from itertools import chain, count, repeat
+from operator import add
 from os import PathLike
 from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Literal,
     Protocol,
     TextIO,
     TypeGuard,
@@ -99,6 +101,21 @@ class StreamFinishedError(_StreamErrorBase):
 
 class StreamEmptyError(_StreamErrorBase):
     """The Stream is empty."""
+
+
+def one(*args: Any) -> Literal[1]:
+    """Return the smallest positive odd number."""
+    return 1
+
+
+def bigger_one(xxx: SLT, yyy: SLT) -> SLT:
+    """Return the bigger element."""
+    return xxx if xxx > yyy else yyy
+
+
+def smaller_one(xxx: SLT, yyy: SLT) -> SLT:
+    """Return the smaller element."""
+    return yyy if xxx > yyy else xxx
 
 
 class Stream(Iterable[T]):
@@ -237,7 +254,7 @@ class Stream(Iterable[T]):
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream."""
         self._check_finished()
-        return sum(self.map(lambda _: 1))
+        return sum(self.map(one))
 
     def distinct(self, use_set: bool = True) -> "Stream[T]":
         """Remove duplicate values.
@@ -364,11 +381,11 @@ class Stream(Iterable[T]):
 
     def max(self: "Stream[SLT]") -> SLT:
         """Return the biggest element of the stream."""
-        return self.reduce(lambda x, y: x if y < x else y)
+        return self.reduce(bigger_one)
 
     def min(self: "Stream[SLT]") -> SLT:
         """Return the smallest element of the stream."""
-        return self.reduce(lambda x, y: y if y < x else x)
+        return self.reduce(smaller_one)
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None
@@ -424,7 +441,7 @@ class Stream(Iterable[T]):
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
-        return self.reduce(lambda x, y: x + y)
+        return self.reduce(add)
 
 
 class LazyFileIterator(Iterator[str]):

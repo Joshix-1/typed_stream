@@ -1,4 +1,5 @@
 """The tests for the Stream."""
+from operator import add
 from pathlib import Path
 from typing import TypeGuard
 
@@ -40,9 +41,15 @@ assert (
     sum(create_int_stream())
     == create_int_stream().reduce(lambda x, y: x + y)
     == create_int_stream().reduce(int.__add__)
+    == create_int_stream().reduce(add)
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
 )
+
+max_: int = Stream([1, 2, 3, -1]).max()
+assert max_ == 3
+min_: int = Stream([1, 2, -1, 3]).min()
+assert min_ == -1
 
 assert tuple(Stream([1, 2, 2, 2, 3]).distinct()) == (1, 2, 3)
 assert tuple(Stream([1, 2, 1, 1, 2, 1, 2, 3, 3, 3, 2, 2, 1]).distinct()) == (
