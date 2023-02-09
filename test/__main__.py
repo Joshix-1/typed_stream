@@ -96,9 +96,12 @@ assert str_stream.collect(list) == ["1", "2", "3"]
 
 assert (
     FileStream(Path(__file__).parent / "input.txt")
-    .map(str.strip)
     .filter(lambda string: string and not string.startswith("#"))
     .map(int)
     .sum()
     == 7
 )
+
+assert FileStream(Path(__file__).parent / "input.txt", keep_line_ends=True).map(
+    lambda x: x[-1]
+).distinct().collect(tuple) == ("\n",)

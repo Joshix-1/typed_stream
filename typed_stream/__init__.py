@@ -38,6 +38,7 @@ from .version import VERSION
 __version__ = VERSION
 __all__ = (
     "FileStream",
+    "LazyFileIteratorRemovingEnds",
     "Stream",
     "StreamEmptyError",
     "StreamFinishedError",
@@ -444,6 +445,9 @@ class Stream(Iterable[T]):
         return self.reduce(add)
 
 
+_PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
+
+
 class LazyFileIterator(Iterator[str]):
     """Iterate over a file line by line. Only open it when necessary."""
 
@@ -456,7 +460,7 @@ class LazyFileIterator(Iterator[str]):
 
     def __init__(
         self,
-        path: bytes | PathLike[bytes] | PathLike[str] | str,
+        path: _PathLikeType,
         encoding: str = "UTF-8",
     ) -> None:
         self.path = path
@@ -491,20 +495,33 @@ class LazyFileIterator(Iterator[str]):
             raise
 
 
+class LazyFileIteratorRemovingEnds(LazyFileIterator):
+    """The same as LazyFileIterator but it removes line-ends from lines."""
+
+    def __next__(self) -> str:
+        """Return the next line, without \n in the end."""
+        return super().__next__().removesuffix("\n")
+
+
 class FileStream(Stream[str]):
     """Lazily iterate over a file."""
 
     def __init__(
         self,
-        data: bytes | PathLike[bytes] | PathLike[str] | str,
+        data: _PathLikeType | EllipsisType,
         encoding: str = "UTF-8",
+        keep_line_ends: bool = False,
     ) -> None:
         """Create a new FileStream.
 
         To create a finished FileStream do FileStream(...).
         """
+        if isinstance(data, EllipsisType):
+            super().__init__(...)
+            return
+
         super().__init__(
-            ...
-            if isinstance(data, EllipsisType)
-            else LazyFileIterator(data, encoding=encoding)
+            LazyFileIterator(data, encoding=encoding)
+            if keep_line_ends
+            else LazyFileIteratorRemovingEnds(data, encoding=encoding)
         )
