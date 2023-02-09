@@ -39,6 +39,7 @@ __version__ = VERSION
 __all__ = (
     "FileStream",
     "Stream",
+    "StreamBase",
     "StreamEmptyError",
     "StreamFinishedError",
     "VERSION",
@@ -118,8 +119,8 @@ def smaller_one(xxx: SLT, yyy: SLT) -> SLT:
     return yyy if xxx > yyy else xxx
 
 
-class Stream(Iterable[T]):
-    """Stream class providing an interface similar to Stream in Java.
+class StreamBase(Iterable[T]):
+    """Stream base class providing an interface similar to Stream in Java.
 
     It is not recommended to store Stream instances in variables,
     instead use method chaining to handle the values and collect them when finished.
@@ -128,16 +129,6 @@ class Stream(Iterable[T]):
     _data: Iterator[T]
     _close_source_callable: Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
-
-    def __init__(
-        self, data: "Iterable[T] | Iterator[T] | EllipsisType"
-    ) -> None:
-        """Create a new Stream.
-
-        To create a finished Stream do Stream(...).
-        """
-        if not isinstance(data, EllipsisType):
-            self._data = iter(data)
 
     def __iter__(self) -> Iterator[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
@@ -455,6 +446,24 @@ class Stream(Iterable[T]):
         return self.reduce(add)
 
 
+class Stream(StreamBase[T]):
+    """Stream class providing an interface similar to Stream in Java.
+
+    It is not recommended to store Stream instances in variables,
+    instead use method chaining to handle the values and collect them when finished.
+    """
+
+    def __init__(
+        self, data: "Iterable[T] | Iterator[T] | EllipsisType"
+    ) -> None:
+        """Create a new Stream.
+
+        To create a finished Stream do Stream(...).
+        """
+        if not isinstance(data, EllipsisType):
+            self._data = iter(data)
+
+
 _PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 LFI: TypeVar = TypeVar("LFI", bound="LazyFileIterator")
 
@@ -531,7 +540,7 @@ class LazyFileIteratorRemovingEnds(LazyFileIterator):
 FS: TypeVar = TypeVar("FS", bound="FileStream")
 
 
-class FileStream(Stream[str]):
+class FileStream(StreamBase[str]):
     """Lazily iterate over a file."""
 
     _file_iterator: LazyFileIterator
