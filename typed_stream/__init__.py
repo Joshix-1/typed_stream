@@ -38,7 +38,6 @@ from .version import VERSION
 __version__ = VERSION
 __all__ = (
     "FileStream",
-    "LazyFileIteratorRemovingEnds",
     "Stream",
     "StreamEmptyError",
     "StreamFinishedError",
@@ -127,7 +126,8 @@ class Stream(Iterable[T]):
     """
 
     _data: Iterator[T]
-    __slots__ = ("_data",)
+    _close_source_callable: Callable[[], None]
+    __slots__ = ("_data", "_close_source_callable")
 
     def __init__(
         self, data: "Iterable[T] | Iterator[T] | EllipsisType"
@@ -143,19 +143,19 @@ class Stream(Iterable[T]):
         """Iterate over the values of this Stream. This finishes the Stream."""
         self._check_finished()
         yield from self._data
-        self._finish(None)
+        self._finish(None, close_source=True)
 
     def __repr__(self) -> str:
         """Convert this Stream to a str. This finishes the Stream."""
         if self._is_finished():
             return "Stream(...)"
-        return self._finish(f"Stream({list(self._data)!r})")
+        return f"Stream({list(self)!r})"
 
     def __str__(self) -> str:
         """Convert this Stream to a str. This finishes the Stream."""
         if self._is_finished():
             return "Stream(...)"
-        return self._finish(str(list(self._data)))
+        return str(list(self))
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> Stream[int]:
@@ -172,11 +172,18 @@ class Stream(Iterable[T]):
         if self._is_finished():
             raise StreamFinishedError()
 
-    def _finish(self, ret: K) -> K:
+    def _finish(self, ret: K, close_source: bool = False) -> K:
         """Mark this Stream as finished."""
         self._check_finished()
+        if close_source:
+            self._close_source()
         del self._data
         return ret
+
+    def _close_source(self) -> None:
+        """Close the source of the Stream. Used in FileStream."""
+        if hasattr(self, "_close_source_callable"):
+            self._close_source_callable()
 
     def _is_finished(self) -> bool:
         """Return whether this Stream is finished."""
@@ -320,9 +327,11 @@ class Stream(Iterable[T]):
         """Return the first element of the Stream. This finishes the Stream."""
         self._check_finished()
         try:
-            return next(iter(self))
+            first = next(iter(self))
         except StopIteration as exc:
             raise StreamEmptyError from exc
+        self._close_source()
+        return first
 
     def flat_map(self, fun: Callable[[T], Iterable[K]]) -> "Stream[K]":
         """Map each value to another.
@@ -344,7 +353,7 @@ class Stream(Iterable[T]):
             raise StreamEmptyError from exc
         for val in self._data:
             last = val
-        return self._finish(last)
+        return self._finish(last, close_source=True)
 
     def limit(self, count: int) -> "Stream[T]":
         """Stop the Stream after count values.
@@ -364,6 +373,7 @@ class Stream(Iterable[T]):
                     yield next(data)
                 except StopIteration:
                     return
+            self._close_source()
 
         return Stream(iterator())
 
@@ -433,7 +443,7 @@ class Stream(Iterable[T]):
             raise StreamEmptyError() from exc
         for val in self._data:
             result = fun(result, val)
-        return self._finish(result)
+        return self._finish(result, close_source=True)
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
@@ -446,12 +456,20 @@ class Stream(Iterable[T]):
 
 
 _PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
+LFI: TypeVar = TypeVar("LFI", bound="LazyFileIterator")
 
 
 class LazyFileIterator(Iterator[str]):
-    """Iterate over a file line by line. Only open it when necessary."""
+    """Iterate over a file line by line. Only open it when necessary.
 
-    path: bytes | PathLike[bytes] | PathLike[str] | str
+    If you only partially iterate the file you have to call .close or use a
+    with statement.
+
+    with LazyFileIterator(...) as lfi:
+        first_line = next(lfi)
+    """
+
+    path: _PathLikeType
     encoding: str
     _iterator: Iterator[str] | None
     _file_object: TextIO | None
@@ -468,7 +486,8 @@ class LazyFileIterator(Iterator[str]):
         self._iterator = None
         self._file_object = None
 
-    def _close(self) -> None:
+    def close(self) -> None:
+        """Close the underlying file."""
         if self._file_object:
             self._file_object.close()
             self._file_object = None
@@ -478,7 +497,7 @@ class LazyFileIterator(Iterator[str]):
         return self
 
     def __del__(self) -> None:
-        self._close()
+        self.close()
 
     def __next__(self) -> str:
         if self._iterator is None:
@@ -491,20 +510,31 @@ class LazyFileIterator(Iterator[str]):
             return next(self._iterator)
         except BaseException:
             with contextlib.suppress(Exception):
-                self._close()
+                self.close()
             raise
+
+    def __enter__(self: LFI) -> LFI:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        self.close()
 
 
 class LazyFileIteratorRemovingEnds(LazyFileIterator):
     """The same as LazyFileIterator but it removes line-ends from lines."""
 
     def __next__(self) -> str:
-        """Return the next line, without \n in the end."""
+        r"""Return the next line without '\n' in the end."""
         return super().__next__().removesuffix("\n")
+
+
+FS: TypeVar = TypeVar("FS", bound="FileStream")
 
 
 class FileStream(Stream[str]):
     """Lazily iterate over a file."""
+
+    _file_iterator: LazyFileIterator
 
     def __init__(
         self,
@@ -520,8 +550,31 @@ class FileStream(Stream[str]):
             super().__init__(...)
             return
 
-        super().__init__(
+        self._file_iterator = (
             LazyFileIterator(data, encoding=encoding)
             if keep_line_ends
             else LazyFileIteratorRemovingEnds(data, encoding=encoding)
         )
+        super().__init__(self._file_iterator)
+
+    def __enter__(self: FS) -> FS:
+        """Enter the matrix."""
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        """Exit the matrix."""
+        self._close_source()
+
+    def _finish(self, ret: K, close_source: bool = False) -> K:
+        """Mark this Stream as finished."""
+        super()._finish(ret, close_source)
+        if isinstance(ret, Stream) and hasattr(self, "_file_iterator"):
+            ret._close_source_callable = self._file_iterator.close
+        return ret
+
+    def _close_source(self) -> None:
+        """Close the source of the Stream. Used in FileStream."""
+        if not hasattr(self, "_file_iterator"):
+            return
+        self._file_iterator.close()
+        del self._file_iterator

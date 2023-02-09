@@ -105,3 +105,7 @@ assert (
 assert FileStream(Path(__file__).parent / "input.txt", keep_line_ends=True).map(
     lambda x: x[-1]
 ).distinct().collect(tuple) == ("\n",)
+
+fs = FileStream(Path(__file__).parent / "input.txt")
+assert fs.limit(10).map(repr).count() == 10
+assert not hasattr(fs, "")
