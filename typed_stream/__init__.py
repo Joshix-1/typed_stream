@@ -456,7 +456,7 @@ class Stream(Iterable[T]):
 
 
 _PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
-LFI: TypeVar = TypeVar("LFI", bound="LazyFileIterator")
+LFI = TypeVar("LFI", bound="LazyFileIterator")
 
 
 class LazyFileIterator(Iterator[str]):
@@ -528,7 +528,7 @@ class LazyFileIteratorRemovingEnds(LazyFileIterator):
         return super().__next__().removesuffix("\n")
 
 
-FS: TypeVar = TypeVar("FS", bound="FileStream")
+FS = TypeVar("FS", bound="FileStream")
 
 
 class FileStream(Stream[str]):

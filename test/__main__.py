@@ -108,4 +108,4 @@ assert FileStream(Path(__file__).parent / "input.txt", keep_line_ends=True).map(
 
 fs = FileStream(Path(__file__).parent / "input.txt")
 assert fs.limit(10).map(repr).count() == 10
-assert not hasattr(fs, "")
+assert not hasattr(fs, "_file_iterator")
