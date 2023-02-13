@@ -15,10 +15,12 @@
 
 from __future__ import annotations
 
+import collections
 import concurrent.futures
 import contextlib
+import functools
+import itertools
 from collections.abc import Callable, Iterable, Iterator
-from itertools import chain, count, repeat
 from operator import add
 from os import PathLike
 from types import EllipsisType
@@ -160,30 +162,35 @@ class Stream(Iterable[T]):
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> Stream[int]:
         """Create an endless counting Stream."""
-        return Stream(count(start, step))
+        return Stream(itertools.count(start, step))
 
     @staticmethod
     def from_value(value: K) -> Stream[K]:
         """Create an endless Stream of the same value."""
-        return Stream(repeat(value))
+        return Stream(itertools.repeat(value))
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
         if self._is_finished():
             raise StreamFinishedError()
 
+    def _close_source(self) -> None:
+        """Close the source of the Stream. Used in FileStream."""
+        if hasattr(self, "_close_source_callable"):
+            self._close_source_callable()
+            del self._close_source_callable
+
     def _finish(self, ret: K, close_source: bool = False) -> K:
         """Mark this Stream as finished."""
         self._check_finished()
         if close_source:
             self._close_source()
+        elif hasattr(self, "_close_source_callable") and isinstance(
+            ret, Stream
+        ):
+            ret._close_source_callable = self._close_source_callable
         del self._data
         return ret
-
-    def _close_source(self) -> None:
-        """Close the source of the Stream. Used in FileStream."""
-        if hasattr(self, "_close_source_callable"):
-            self._close_source_callable()
 
     def _is_finished(self) -> bool:
         """Return whether this Stream is finished."""
@@ -194,10 +201,10 @@ class Stream(Iterable[T]):
         self._check_finished()
         return all(self)
 
-    def chain(self, iterable: Iterable[T]) -> "Stream[T]":
+    def chain(self, iterable: Iterable[K]) -> "Stream[K | T]":
         """Add another iterable to the end of the Stream."""
         self._check_finished()
-        self._data = chain(self._data, iterable)
+        self._data = itertools.chain(self._data, iterable)
         return self
 
     def chunk(self, size: int) -> "Stream[Stream[T]]":  # noqa: C901
@@ -257,12 +264,12 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3]).collect(sum)
         """
         self._check_finished()
-        return self._finish(fun(self._data))
+        return self._finish(fun(self._data), close_source=True)
 
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream."""
         self._check_finished()
-        return sum(self.map(one))
+        return self.map(one).sum()
 
     def distinct(self, use_set: bool = True) -> "Stream[T]":
         """Remove duplicate values.
@@ -342,40 +349,29 @@ class Stream(Iterable[T]):
             - Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2])
         """
         self._check_finished()
-        return Stream(chain.from_iterable(self.map(fun)))
+        return Stream(itertools.chain.from_iterable(self.map(fun)))
+
+    def for_each(self, fun: Callable[[T], Any]) -> None:
+        """Consume all the values of the Stream with the callable."""
+        self._check_finished()
+        for value in self:
+            fun(value)
 
     def last(self) -> T:
         """Return the last element of the Stream. This finishes the Stream."""
-        self._check_finished()
         try:
-            last = next(self._data)
+            return next(iter(self.tail(1)))
         except StopIteration as exc:
-            raise StreamEmptyError from exc
-        for val in self._data:
-            last = val
-        return self._finish(last, close_source=True)
+            raise StreamEmptyError() from exc
 
     def limit(self, count: int) -> "Stream[T]":
         """Stop the Stream after count values.
-
-        This lazily finishes the current Stream and creates a new one.
 
         Example:
             - Stream([1, 2, 3, 4, 5]).limit(3)
         """
         self._check_finished()
-
-        data = iter(self)
-
-        def iterator() -> Iterator[T]:
-            for _ in range(count):
-                try:
-                    yield next(data)
-                except StopIteration:
-                    return
-            self._close_source()
-
-        return Stream(iterator())
+        return self._finish(Stream(itertools.islice(self._data, count)))
 
     def map(self, fun: Callable[[T], K]) -> "Stream[K]":
         """Map each value to another.
@@ -425,10 +421,7 @@ class Stream(Iterable[T]):
 
         return self.map(peek)
 
-    def reduce(
-        self,
-        fun: Callable[[T, T], T],
-    ) -> T:
+    def reduce(self, fun: Callable[[T, T], T]) -> T:
         """Reduce the values of this stream. This finishes the Stream.
 
         Examples:
@@ -437,13 +430,9 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3]).accumulate(lambda x, y: x * y)
         """
         self._check_finished()
-        try:
-            result = next(self._data)
-        except StopIteration as exc:
-            raise StreamEmptyError() from exc
-        for val in self._data:
-            result = fun(result, val)
-        return self._finish(result, close_source=True)
+        return self._finish(
+            functools.reduce(fun, self._data), close_source=True
+        )
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
@@ -453,6 +442,11 @@ class Stream(Iterable[T]):
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
         return self.reduce(add)
+
+    def tail(self, count: int) -> Stream[T]:
+        """Return a stream with the last count items"""
+        self._check_finished()
+        return Stream(collections.deque(iter(self), maxlen=count))
 
 
 _PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
@@ -536,6 +530,8 @@ class FileStream(Stream[str]):
 
     _file_iterator: LazyFileIterator
 
+    __slots__ = ("_file_iterator",)
+
     def __init__(
         self,
         data: _PathLikeType | EllipsisType,
@@ -555,6 +551,7 @@ class FileStream(Stream[str]):
             if keep_line_ends
             else LazyFileIteratorRemovingEnds(data, encoding=encoding)
         )
+        self._close_source_callable = self._close_source
         super().__init__(self._file_iterator)
 
     def __enter__(self: FS) -> FS:
@@ -564,13 +561,6 @@ class FileStream(Stream[str]):
     def __exit__(self, *args: Any) -> None:
         """Exit the matrix."""
         self._close_source()
-
-    def _finish(self, ret: K, close_source: bool = False) -> K:
-        """Mark this Stream as finished."""
-        super()._finish(ret, close_source)
-        if isinstance(ret, Stream) and hasattr(self, "_file_iterator"):
-            ret._close_source_callable = self._file_iterator.close
-        return ret
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
