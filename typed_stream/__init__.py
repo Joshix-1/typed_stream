@@ -201,7 +201,7 @@ class Stream(Iterable[T]):
         self._check_finished()
         return all(self)
 
-    def chain(self, iterable: Iterable[K]) -> "Stream[K | T]":
+    def chain(self, iterable: Iterable[T]) -> "Stream[T]":
         """Add another iterable to the end of the Stream."""
         self._check_finished()
         self._data = itertools.chain(self._data, iterable)
@@ -444,7 +444,7 @@ class Stream(Iterable[T]):
         return self.reduce(add)
 
     def tail(self, count: int) -> Stream[T]:
-        """Return a stream with the last count items"""
+        """Return a stream with the last count items."""
         self._check_finished()
         return Stream(collections.deque(iter(self), maxlen=count))
 
