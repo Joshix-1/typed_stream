@@ -26,7 +26,7 @@ GLOBALS: Final[Mapping[str, Any]] = {
     "tan": math.tan,
 }
 KINDA_SAFE_EXPR: Final[re.Pattern[str]] = re.compile(
-    rf"^(?:[0-9j */()+<>-]|==|<=|>=|\b(?:{'|'.join(GLOBALS)})\b)+$"
+    rf"^(?:[0-9 */()+<>%-]|\bj\b|==|<=|>=|\b(?:{'|'.join(GLOBALS)})\b)+$"
 )
 
 
