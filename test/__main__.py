@@ -86,6 +86,14 @@ assert int_list == [1, 2, 3, 4, 23]
 
 assert Stream.from_value("x").limit(1000).tail(10).count() == 10
 
+assert Stream(range(10_000)).chunk(100).count() == 100
+assert list(Stream(range(10_000)).chunk(100).map(len).distinct()) == [100]
+
+assert Stream.counting().take_while((100).__gt__).count() == 100
+assert list(Stream.counting().take_while((5).__gt__)) == [0, 1, 2, 3, 4]
+assert list(Stream(range(10)).drop_while((5).__gt__)) == [5, 6, 7, 8, 9]
+assert list(Stream(range(10)).tail(5)) == [5, 6, 7, 8, 9]
+
 
 def is_str(value: object) -> TypeGuard[str]:
     """Type guard strings."""
