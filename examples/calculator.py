@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """A simple unsafe calculator."""
 import cmath
-import contextlib
 import math
 import re
 import sys
@@ -63,5 +62,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    with contextlib.suppress(KeyboardInterrupt):
+    try:
         main()
+    except KeyboardInterrupt:
+        print()
