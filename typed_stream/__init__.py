@@ -51,7 +51,7 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class Peeker(Generic[T]):
+class Peeker(Callable[[T], Any]):
     """Peek values of a stream."""
 
     fun: Callable[[T], Any]
