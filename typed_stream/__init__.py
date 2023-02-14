@@ -50,6 +50,23 @@ T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
+
+class Peeker(Generic[T]):
+    """Peek values of a stream."""
+    fun: Callable[[T], Any]
+
+    __slots__ = "fun",
+
+    def __init__(self, fun: Callable[[T], Any]) -> None:
+        """Initialize this class."""
+        self.fun = fun
+
+    def __call__(self, value: T) -> T:
+        """Call fun with value as argument and return value."""
+        self.fun(value)
+        return value
+
+
 TGC_CHECKED = TypeVar("TGC_CHECKED", covariant=True, bound=object)
 
 
@@ -292,7 +309,7 @@ class Stream(Iterable[T]):
 
     def drop_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Drop values as long the function returns a truthy value.
-
+        
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
         """
         self._check_finished()
@@ -313,7 +330,7 @@ class Stream(Iterable[T]):
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Exclude values if the function returns a truthy value.
-
+        
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
         """
         self._check_finished()
@@ -428,12 +445,7 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3]).peek(print)
         """
         self._check_finished()
-
-        def peek(val: T) -> T:
-            fun(val)
-            return val
-
-        return self.map(peek)
+        return self.map(Peeker(fun))
 
     def reduce(self, fun: Callable[[T, T], T]) -> T:
         """Reduce the values of this stream. This finishes the Stream.
@@ -461,10 +473,10 @@ class Stream(Iterable[T]):
         """Return a stream with the last count items."""
         self._check_finished()
         return Stream(collections.deque(iter(self), maxlen=count))
-
+    
     def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.
-
+        
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
         """
         self._check_finished()
