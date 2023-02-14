@@ -55,7 +55,8 @@ V = TypeVar("V")
 def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
     """Chunk data into tuples of length size. The last chunk may be shorter.
 
-    Inspired by batched from: https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
+    Inspired by batched from:
+    https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
     """
     if size < 1:
         raise ValueError("size must be at least one")
