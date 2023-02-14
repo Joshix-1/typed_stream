@@ -136,6 +136,10 @@ class StreamEmptyError(_StreamErrorBase):
     """The Stream is empty."""
 
 
+def noop(*args: Any) -> None:
+    """Do nothing."""
+
+
 def one(*args: Any) -> Literal[1]:
     """Return the smallest positive odd number."""
     return 1
@@ -380,7 +384,7 @@ class Stream(Iterable[T]):
         self._check_finished()
         return Stream(itertools.chain.from_iterable(self.map(fun)))
 
-    def for_each(self, fun: Callable[[T], Any]) -> None:
+    def for_each(self, fun: Callable[[T], Any] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
         self._check_finished()
         for value in self:
