@@ -51,6 +51,17 @@ T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
+def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
+    """Chunk data into tuples of length size. The last chunk may be shorter.
+
+    Inspired by batched from: https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
+    """
+    if size < 1:
+        raise ValueError("size must be at least one")
+    iterator = iter(iterable)
+    while (chunk := tuple(itertools.islice(iterator, size))):
+        yield chunk
+
 
 class Peeker(Generic[T]):
     """Peek values."""
@@ -226,26 +237,10 @@ class Stream(Iterable[T]):
         self._data = itertools.chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> "Stream[Stream[T]]":  # noqa: C901
+    def chunk(self, size: int) -> "Stream[tuple[T, ...]]":
         """Split stream into chunks of the specified size."""
         self._check_finished()
-        data = iter(self)
-
-        def next_chunk() -> Iterator[T]:
-            i = 0
-            for i, val in zip(range(size), data, strict=False):  # noqa: B007
-                yield val
-            if i + 1 < size:
-                raise StreamFinishedError()
-
-        def chunks() -> Iterator[Stream[T]]:
-            while True:  # pylint: disable=while-used
-                try:
-                    yield Stream(list(next_chunk()))
-                except StreamFinishedError:
-                    return
-
-        return Stream(chunks())
+        return Stream(chunked(self, size))
 
     if TYPE_CHECKING:  # noqa: C901
 
