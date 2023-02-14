@@ -51,6 +51,7 @@ T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
+
 def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
     """Chunk data into tuples of length size. The last chunk may be shorter.
 
@@ -59,7 +60,7 @@ def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
     if size < 1:
         raise ValueError("size must be at least one")
     iterator = iter(iterable)
-    while (chunk := tuple(itertools.islice(iterator, size))):
+    while chunk := tuple(itertools.islice(iterator, size)):
         yield chunk
 
 
