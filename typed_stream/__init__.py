@@ -304,7 +304,9 @@ class Stream(Iterable[T]):
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Exclude values if the function returns a truthy value."""
-        return self.filter(lambda val: not fun(val))
+        self._check_finished()
+        self._data = itertools.filterfalse(fun, self._data)
+        return self
 
     if TYPE_CHECKING:  # noqa: C901
 
