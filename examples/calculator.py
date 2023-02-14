@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """A simple unsafe calculator."""
 import sys
-
 from typing import Any
 
 from typed_stream import Stream
