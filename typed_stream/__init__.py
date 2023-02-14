@@ -292,7 +292,7 @@ class Stream(Iterable[T]):
 
     def drop_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Drop values as long the function returns a truthy value.
-        
+
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
         """
         self._check_finished()
@@ -313,7 +313,7 @@ class Stream(Iterable[T]):
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Exclude values if the function returns a truthy value.
-        
+
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
         """
         self._check_finished()
@@ -461,10 +461,10 @@ class Stream(Iterable[T]):
         """Return a stream with the last count items."""
         self._check_finished()
         return Stream(collections.deque(iter(self), maxlen=count))
-    
+
     def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.
-        
+
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
         """
         self._check_finished()
