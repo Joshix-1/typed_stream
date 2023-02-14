@@ -290,6 +290,15 @@ class Stream(Iterable[T]):
 
         return self.exclude(encountered.__contains__).peek(peek_fun)
 
+    def drop_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
+        """Drop values as long the function returns a truthy value.
+        
+        See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
+        """
+        self._check_finished()
+        self._data = itertools.dropwhile(fun, self._data)
+        return self
+
     def empty(self) -> bool:
         """Check whether this doesn't contain any value. This finishes the Stream."""
         try:
@@ -303,7 +312,10 @@ class Stream(Iterable[T]):
         return Stream(enumerate(self, start=start_index))
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
-        """Exclude values if the function returns a truthy value."""
+        """Exclude values if the function returns a truthy value.
+        
+        See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
+        """
         self._check_finished()
         self._data = itertools.filterfalse(fun, self._data)
         return self
@@ -449,6 +461,15 @@ class Stream(Iterable[T]):
         """Return a stream with the last count items."""
         self._check_finished()
         return Stream(collections.deque(iter(self), maxlen=count))
+    
+    def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
+        """Take values as long the function returns a truthy value.
+        
+        See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
+        """
+        self._check_finished()
+        self._data = itertools.takewhile(fun, self._data)
+        return self
 
 
 _PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
