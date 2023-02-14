@@ -27,7 +27,6 @@ from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Generic,
     Literal,
     Protocol,
     TextIO,
@@ -52,8 +51,8 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class Peeker(Generic[T]):
-    """Peek values of a stream."""
+class Peeker(Callable[[T], T]):
+    """Peek values."""
 
     fun: Callable[[T], Any]
 
