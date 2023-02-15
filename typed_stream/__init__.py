@@ -35,7 +35,7 @@ from typing import (
 
 from .lazy_file_iterators import (
     LazyFileIterator,
-    LazyFileIteratorRemovingEnds,
+    LazyFileIteratorRemovingEndsStr,
     PathLikeType,
 )
 from .version import VERSION
@@ -496,7 +496,7 @@ FS = TypeVar("FS", bound="FileStream")
 class FileStream(Stream[str]):
     """Lazily iterate over a file."""
 
-    _file_iterator: LazyFileIterator
+    _file_iterator: LazyFileIterator[str]
 
     __slots__ = ("_file_iterator",)
 
@@ -517,7 +517,7 @@ class FileStream(Stream[str]):
         self._file_iterator = (
             LazyFileIterator(data, encoding=encoding)
             if keep_line_ends
-            else LazyFileIteratorRemovingEnds(data, encoding=encoding)
+            else LazyFileIteratorRemovingEndsStr(data, encoding=encoding)
         )
         self._close_source_callable = self._close_source
         super().__init__(self._file_iterator)

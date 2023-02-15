@@ -1,14 +1,32 @@
 """Utilities for lazy iteration over lines of files."""
 import contextlib
-from os import PathLike
 from collections.abc import Iterator
-from typing import Any, TextIO, TypeVar
+from io import BytesIO
+from os import PathLike
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    AnyStr,
+    TextIO,
+    TypeGuard,
+    TypeVar,
+    cast,
+    overload,
+)
 
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
-LFI = TypeVar("LFI", bound="LazyFileIterator")
+LFI = TypeVar("LFI", "LazyFileIterator[str]", "LazyFileIterator[bytes]")
 
 
-class LazyFileIterator(Iterator[str]):
+def _is_bytes(
+    lfi: "LazyFileIterator[AnyStr]",
+) -> "TypeGuard[LazyFileIterator[bytes]]":
+    """Return True if the lfi is LazyFileIterator[bytes]."""
+    return lfi.encoding is None
+
+
+class LazyFileIterator(Iterator[AnyStr]):
     """Iterate over a file line by line. Only open it when necessary.
 
     If you only partially iterate the file you have to call .close or use a
@@ -19,16 +37,44 @@ class LazyFileIterator(Iterator[str]):
     """
 
     path: PathLikeType
-    encoding: str
-    _iterator: Iterator[str] | None
-    _file_object: TextIO | None
+    encoding: str | None
+    _iterator: Iterator[AnyStr] | None
+    _file_object: IO[AnyStr] | None
 
     __slots__ = ("path", "encoding", "_iterator", "_file_object")
+
+    if TYPE_CHECKING:
+
+        @overload
+        def __init__(
+            self: "LazyFileIterator[str]",
+            path: PathLikeType,
+            *,
+            encoding: str,
+        ) -> None:
+            ...
+
+        @overload
+        def __init__(
+            self: "LazyFileIterator[bytes]",
+            path: PathLikeType,
+        ) -> None:
+            ...
+
+        @overload
+        def __init__(
+            self: "LazyFileIterator[bytes]",
+            path: PathLikeType,
+            *,
+            encoding: None = None,
+        ) -> None:
+            ...
 
     def __init__(
         self,
         path: PathLikeType,
-        encoding: str = "UTF-8",
+        *,
+        encoding: str | None = None,
     ) -> None:
         """Create a LazyFileIterator."""
         self.path = path
@@ -43,7 +89,7 @@ class LazyFileIterator(Iterator[str]):
             self._file_object = None
             self._iterator = None
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> Iterator[AnyStr]:
         """Return self."""
         return self
 
@@ -51,11 +97,25 @@ class LazyFileIterator(Iterator[str]):
         """Close v."""
         self.close()
 
-    def _open_file(self) -> TextIO:
-        """Open the underlying file."""
-        return open(self.path, mode="r", encoding=self.encoding)  # noqa: SIM115
+    if TYPE_CHECKING:
 
-    def __next__(self) -> str:
+        @overload
+        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
+            ...
+
+        @overload
+        def _open_file(self: "LazyFileIterator[str]") -> TextIO:
+            ...
+
+    def _open_file(self) -> IO[Any]:
+        """Open the underlying file."""
+        if _is_bytes(self):
+            return open(self.path, mode="rb", buffering=False)  # noqa: SIM115
+        return open(
+            self.path, mode="rt", encoding=self.encoding, buffering=False
+        )  # noqa: SIM115
+
+    def __next__(self) -> AnyStr:
         """Get the next line."""
         if self._iterator is None:
             self._file_object = self._open_file()
@@ -77,9 +137,17 @@ class LazyFileIterator(Iterator[str]):
         self.close()
 
 
-class LazyFileIteratorRemovingEnds(LazyFileIterator):
-    """The same as LazyFileIterator but it removes line-ends from lines."""
+class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
+    """The same as LazyFileIterator[str] but it removes line-ends from lines."""
 
     def __next__(self) -> str:
         r"""Return the next line without '\n' in the end."""
         return super().__next__().removesuffix("\n")
+
+
+class LazyFileIteratorRemovingEndsBytes(LazyFileIterator[bytes]):
+    """The same as LazyFileIterator[bytes] but it removes line-ends from lines."""
+
+    def __next__(self) -> bytes:
+        r"""Return the next line without '\n' in the end."""
+        return super().__next__().removesuffix(b"\n")
