@@ -51,9 +51,11 @@ __all__ = (
     "VERSION",
 )
 
-T = TypeVar("T")
 K = TypeVar("K")
+T = TypeVar("T")
+U = TypeVar("U")
 V = TypeVar("V")
+W = TypeVar("W")
 Exc = TypeVar("Exc", bound=Exception)
 
 
@@ -379,7 +381,42 @@ class Stream(Iterable[T]):
         self._close_source()
         return first
 
-    def flat_map(self, fun: Callable[[T], Iterable[K]]) -> "Stream[K]":
+    if TYPE_CHECKING:  # noqa: C901
+
+        @overload
+        def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
+            ...
+
+        @overload
+        def flat_map(
+            self, fun: Callable[[T, U], Iterable[K]], arg0: U, /  # noqa: W504
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def flat_map(
+            self,
+            fun: Callable[[T, U, V], Iterable[K]],
+            arg0: U,
+            arg1: V,
+            /,
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def flat_map(
+            self,
+            fun: Callable[[T, U, V, W], Iterable[K]],
+            arg0: U,
+            arg1: V,
+            arg2: W,
+            /,
+        ) -> "Stream[K]":
+            ...
+
+    def flat_map(
+        self, fun: Callable[..., Iterable[K]], /, *args: Any
+    ) -> "Stream[K]":
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
@@ -388,7 +425,7 @@ class Stream(Iterable[T]):
             - Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2])
         """
         self._check_finished()
-        return Stream(itertools.chain.from_iterable(self.map(fun)))
+        return Stream(itertools.chain.from_iterable(self.map(fun, *args)))
 
     def for_each(self, fun: Callable[[T], Any] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
@@ -412,18 +449,44 @@ class Stream(Iterable[T]):
         self._check_finished()
         return self._finish(Stream(itertools.islice(self._data, count)))
 
-    def map(self, fun: Callable[[T], K]) -> "Stream[K]":
+    if TYPE_CHECKING:  # noqa: C901
+
+        @overload
+        def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
+            ...
+
+        @overload
+        def map(self, fun: Callable[[T, U], K], arg0: U, /) -> "Stream[K]":
+            ...
+
+        @overload
+        def map(
+            self, fun: Callable[[T, U, V], K], arg0: U, arg1: V, /  # noqa: W504
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def map(
+            self,
+            fun: Callable[[T, U, V, W], K],
+            arg0: U,
+            arg1: V,
+            arg2: W,
+            /,
+        ) -> "Stream[K]":
+            ...
+
+    def map(self, fun: Callable[..., K], /, *args: Any) -> "Stream[K]":
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
 
         Example:
             - Stream([1, 2, 3]).map(lambda x: x * 3)
+            - Stream([1, 2, 3]).map(operator.mul, 3)
         """
         self._check_finished()
-        return self._finish(
-            Stream(map(fun, self._data))  # pylint: disable=bad-builtin
-        )
+        return self._finish(Stream((fun(value, *args) for value in self._data)))
 
     def max(self: "Stream[SLT]") -> SLT:
         """Return the biggest element of the stream."""

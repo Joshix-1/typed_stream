@@ -1,4 +1,5 @@
 """The tests for the Stream."""
+import operator
 from operator import add
 from pathlib import Path
 from typing import TypeGuard
@@ -31,14 +32,15 @@ assert str_var == "1"
 
 def create_int_stream() -> Stream[int]:
     """Create an int stream."""
-    return Stream(range(10_000)).map(lambda x: x**2)
+    return Stream(range(10_000)).map(operator.pow, 2)
 
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
 assert Stream(STRING).distinct().sum() == "pjwa nsvoidfb,cmg"
 
 assert (
-    sum(create_int_stream())
+    333283335000
+    == sum(create_int_stream())
     == create_int_stream().reduce(lambda x, y: x + y)
     == create_int_stream().reduce(int.__add__)
     == create_int_stream().reduce(add)
@@ -142,7 +144,7 @@ assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
 ).distinct().collect(tuple) == (b"\n"[0],)
 
 bfs: BinaryFileStream = BinaryFileStream(INPUT_TXT)
-assert fs.chain(" ").last() == " "
+assert bfs.chain([b" "]).last() == b" "
 assert not hasattr(fs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
@@ -153,11 +155,16 @@ assert not hasattr(fs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert (
-    fs.limit(10).map(repr).map(len).peek(lambda _: ...).map((1).__add__).count()
+    bfs.limit(10)
+    .map(repr)
+    .map(len)
+    .peek(lambda _: ...)
+    .map((1).__add__)
+    .count()
     == 10
 )
 assert not hasattr(fs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
-assert fs.take_while(len).count() == 4
+assert bfs.take_while(len).count() == 4
 assert not hasattr(fs, "_file_iterator")
