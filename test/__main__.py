@@ -121,7 +121,8 @@ fs = FileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
 assert not hasattr(fs, "_file_iterator")
 
-fs = FileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(list) == [...]
+fs = FileStream(INPUT_TXT)
+assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
 assert not hasattr(fs, "_file_iterator")
 
 fs = FileStream(INPUT_TXT)
@@ -140,22 +141,23 @@ assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
     lambda x: x[-1]
 ).distinct().collect(tuple) == (b"\n"[0],)
 
-fs = BinaryFileStream(INPUT_TXT)
+bfs: BinaryFileStream = BinaryFileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
 assert not hasattr(fs, "_file_iterator")
 
-fs = BinaryFileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(list) == [
-    ...
-]
+bfs = BinaryFileStream(INPUT_TXT)
+assert BinaryFileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(
+    list
+) == [...]
 assert not hasattr(fs, "_file_iterator")
 
-fs = BinaryFileStream(INPUT_TXT)
+bfs = BinaryFileStream(INPUT_TXT)
 assert (
     fs.limit(10).map(repr).map(len).peek(lambda _: ...).map((1).__add__).count()
     == 10
 )
 assert not hasattr(fs, "_file_iterator")
 
-fs = BinaryFileStream(INPUT_TXT)
+bfs = BinaryFileStream(INPUT_TXT)
 assert fs.take_while(len).count() == 4
 assert not hasattr(fs, "_file_iterator")
