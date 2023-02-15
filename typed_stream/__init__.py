@@ -17,12 +17,10 @@ from __future__ import annotations
 
 import collections
 import concurrent.futures
-import contextlib
 import functools
 import itertools
 from collections.abc import Callable, Iterable, Iterator
 from operator import add
-from os import PathLike
 from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
@@ -30,12 +28,16 @@ from typing import (
     Generic,
     Literal,
     Protocol,
-    TextIO,
     TypeGuard,
     TypeVar,
     overload,
 )
 
+from .lazy_file_iterators import (
+    LazyFileIterator,
+    LazyFileIteratorRemovingEnds,
+    PathLikeType,
+)
 from .version import VERSION
 
 __version__ = VERSION
@@ -50,6 +52,7 @@ __all__ = (
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+Exc = TypeVar("Exc", bound=Exception)
 
 
 def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
@@ -487,79 +490,6 @@ class Stream(Iterable[T]):
         return self
 
 
-_PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
-LFI = TypeVar("LFI", bound="LazyFileIterator")
-
-
-class LazyFileIterator(Iterator[str]):
-    """Iterate over a file line by line. Only open it when necessary.
-
-    If you only partially iterate the file you have to call .close or use a
-    with statement.
-
-    with LazyFileIterator(...) as lfi:
-        first_line = next(lfi)
-    """
-
-    path: _PathLikeType
-    encoding: str
-    _iterator: Iterator[str] | None
-    _file_object: TextIO | None
-
-    __slots__ = ("path", "encoding", "_iterator", "_file_object")
-
-    def __init__(
-        self,
-        path: _PathLikeType,
-        encoding: str = "UTF-8",
-    ) -> None:
-        self.path = path
-        self.encoding = encoding
-        self._iterator = None
-        self._file_object = None
-
-    def close(self) -> None:
-        """Close the underlying file."""
-        if self._file_object:
-            self._file_object.close()
-            self._file_object = None
-            self._iterator = None
-
-    def __iter__(self) -> Iterator[str]:
-        return self
-
-    def __del__(self) -> None:
-        self.close()
-
-    def __next__(self) -> str:
-        if self._iterator is None:
-            self._file_object = open(  # noqa: SIM115
-                self.path, mode="r", encoding=self.encoding
-            )
-            self._iterator = iter(self._file_object)
-
-        try:
-            return next(self._iterator)
-        except BaseException:
-            with contextlib.suppress(Exception):
-                self.close()
-            raise
-
-    def __enter__(self: LFI) -> LFI:
-        return self
-
-    def __exit__(self, *args: Any) -> None:
-        self.close()
-
-
-class LazyFileIteratorRemovingEnds(LazyFileIterator):
-    """The same as LazyFileIterator but it removes line-ends from lines."""
-
-    def __next__(self) -> str:
-        r"""Return the next line without '\n' in the end."""
-        return super().__next__().removesuffix("\n")
-
-
 FS = TypeVar("FS", bound="FileStream")
 
 
@@ -572,7 +502,7 @@ class FileStream(Stream[str]):
 
     def __init__(
         self,
-        data: _PathLikeType | EllipsisType,
+        data: PathLikeType | EllipsisType,
         encoding: str = "UTF-8",
         keep_line_ends: bool = False,
     ) -> None:
