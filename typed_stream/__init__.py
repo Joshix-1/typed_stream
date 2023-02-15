@@ -25,6 +25,7 @@ from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
     Any,
+    AnyStr,
     Generic,
     Literal,
     Protocol,
@@ -35,6 +36,7 @@ from typing import (
 
 from .lazy_file_iterators import (
     LazyFileIterator,
+    LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
     PathLikeType,
 )
@@ -490,15 +492,30 @@ class Stream(Iterable[T]):
         return self
 
 
-FS = TypeVar("FS", bound="FileStream")
+class FileStreamBase(Stream[AnyStr]):
+    """ABC for file streams."""
 
-
-class FileStream(Stream[str]):
-    """Lazily iterate over a file."""
-
-    _file_iterator: LazyFileIterator[str]
-
+    _file_iterator: LazyFileIterator[AnyStr]
     __slots__ = ("_file_iterator",)
+
+    def __enter__(self) -> Stream[AnyStr]:
+        """Enter the matrix."""
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        """Exit the matrix."""
+        self._close_source()
+
+    def _close_source(self) -> None:
+        """Close the source of the Stream. Used in FileStream."""
+        if not hasattr(self, "_file_iterator"):
+            return
+        self._file_iterator.close()
+        del self._file_iterator
+
+
+class FileStream(FileStreamBase[str]):
+    """Lazily iterate over a file."""
 
     def __init__(
         self,
@@ -522,17 +539,27 @@ class FileStream(Stream[str]):
         self._close_source_callable = self._close_source
         super().__init__(self._file_iterator)
 
-    def __enter__(self: FS) -> FS:
-        """Enter the matrix."""
-        return self
 
-    def __exit__(self, *args: Any) -> None:
-        """Exit the matrix."""
-        self._close_source()
+class BinaryFileStream(FileStreamBase[bytes]):
+    """Lazily iterate over the lines of a file."""
 
-    def _close_source(self) -> None:
-        """Close the source of the Stream. Used in FileStream."""
-        if not hasattr(self, "_file_iterator"):
+    def __init__(
+        self,
+        data: PathLikeType | EllipsisType,
+        keep_line_ends: bool = False,
+    ) -> None:
+        """Create a new BinaryFileStream.
+
+        To create a finished BinaryFileStream do BinaryFileStream(...).
+        """
+        if isinstance(data, EllipsisType):
+            super().__init__(...)
             return
-        self._file_iterator.close()
-        del self._file_iterator
+
+        self._file_iterator = (
+            LazyFileIterator(data)
+            if keep_line_ends
+            else LazyFileIteratorRemovingEndsBytes(data)
+        )
+        self._close_source_callable = self._close_source
+        super().__init__(self._file_iterator)

@@ -11,7 +11,6 @@ from typing import (
     TextIO,
     TypeGuard,
     TypeVar,
-    cast,
     overload,
 )
 
@@ -52,14 +51,14 @@ class LazyFileIterator(Iterator[AnyStr]):
             *,
             encoding: str,
         ) -> None:
-            ...
+            """Nobody inspects the spammish repetition."""
 
         @overload
         def __init__(
             self: "LazyFileIterator[bytes]",
             path: PathLikeType,
         ) -> None:
-            ...
+            """Nobody inspects the spammish repetition."""
 
         @overload
         def __init__(
@@ -68,7 +67,7 @@ class LazyFileIterator(Iterator[AnyStr]):
             *,
             encoding: None = None,
         ) -> None:
-            ...
+            """Nobody inspects the spammish repetition."""
 
     def __init__(
         self,
@@ -111,9 +110,9 @@ class LazyFileIterator(Iterator[AnyStr]):
         """Open the underlying file."""
         if _is_bytes(self):
             return open(self.path, mode="rb", buffering=False)  # noqa: SIM115
-        return open(
-            self.path, mode="rt", encoding=self.encoding, buffering=False
-        )  # noqa: SIM115
+        return open(  # noqa: SIM115
+            self.path, mode="rt", encoding=self.encoding
+        )
 
     def __next__(self) -> AnyStr:
         """Get the next line."""

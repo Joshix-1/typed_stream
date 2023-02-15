@@ -3,7 +3,7 @@ from operator import add
 from pathlib import Path
 from typing import TypeGuard
 
-from typed_stream import FileStream, Stream
+from typed_stream import BinaryFileStream, FileStream, Stream
 
 # pylint: disable=unnecessary-lambda
 
@@ -103,38 +103,59 @@ def is_str(value: object) -> TypeGuard[str]:
 str_stream: Stream[str] = Stream([None, "1", "2", "3", 4, 0, 23]).filter(is_str)
 assert str_stream.collect(list) == ["1", "2", "3"]
 
+INPUT_TXT = Path(__file__).parent / "input.txt"
 
 assert (
-    FileStream(Path(__file__).parent / "input.txt")
+    FileStream(INPUT_TXT)
     .filter(lambda string: string and not string.startswith("#"))
     .map(int)
     .sum()
     == 7
 )
 
-assert FileStream(Path(__file__).parent / "input.txt", keep_line_ends=True).map(
+assert FileStream(INPUT_TXT, keep_line_ends=True).map(
     lambda x: x[-1]
 ).distinct().collect(tuple) == ("\n",)
 
-fs = FileStream(Path(__file__).parent / "input.txt")
+fs = FileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
 assert not hasattr(fs, "_file_iterator")
 
-fs = FileStream(Path(__file__).parent / "input.txt")
-assert hasattr(fs, "_close_source_callable")
-fs_ = fs.map(lambda _: ...)
-assert hasattr(fs, "_file_iterator")
-assert hasattr(fs_, "_close_source_callable")
-fs_ = fs_.limit(1)
-assert hasattr(fs, "_file_iterator")
-assert hasattr(fs_, "_close_source_callable")
-assert fs_.collect(list) == [...]
-fs._close_source_callable()
+fs = FileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(list) == [...]
 assert not hasattr(fs, "_file_iterator")
 
-fs = FileStream(Path(__file__).parent / "input.txt")
+fs = FileStream(INPUT_TXT)
 assert (
     fs.limit(10).map(repr).map(len).peek(lambda _: ...).map((1).__add__).count()
     == 10
 )
+assert not hasattr(fs, "_file_iterator")
+
+fs = FileStream(INPUT_TXT)
+assert fs.take_while(len).count() == 4
+assert not hasattr(fs, "_file_iterator")
+
+
+assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
+    lambda x: x[-1]
+).distinct().collect(tuple) == (b"\n"[0],)
+
+fs = BinaryFileStream(INPUT_TXT)
+assert fs.chain(" ").last() == " "
+assert not hasattr(fs, "_file_iterator")
+
+fs = BinaryFileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(list) == [
+    ...
+]
+assert not hasattr(fs, "_file_iterator")
+
+fs = BinaryFileStream(INPUT_TXT)
+assert (
+    fs.limit(10).map(repr).map(len).peek(lambda _: ...).map((1).__add__).count()
+    == 10
+)
+assert not hasattr(fs, "_file_iterator")
+
+fs = BinaryFileStream(INPUT_TXT)
+assert fs.take_while(len).count() == 4
 assert not hasattr(fs, "_file_iterator")
