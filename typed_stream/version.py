@@ -5,7 +5,7 @@ Update this to create a new release.
 To get the current version run this script.
 """
 
-VERSION = "0.2.0"
+VERSION = "0.4.0"
 
 if __name__ == "__main__":
     print(VERSION)
