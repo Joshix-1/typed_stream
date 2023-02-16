@@ -109,10 +109,8 @@ class LazyFileIterator(Iterator[AnyStr]):
     def _open_file(self) -> IO[Any]:
         """Open the underlying file."""
         if _is_bytes(self):
-            return open(self.path, mode="rb", buffering=False)  # noqa: SIM115
-        return open(  # noqa: SIM115
-            self.path, mode="rt", encoding=self.encoding
-        )
+            return open(self.path, mode="rb")  # noqa: SIM115
+        return open(self.path, encoding=self.encoding)  # noqa: SIM115
 
     def __next__(self) -> AnyStr:
         """Get the next line."""
