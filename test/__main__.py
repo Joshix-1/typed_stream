@@ -173,3 +173,23 @@ fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
 assert not hasattr(bfs, "_file_iterator")
 assert not hasattr(fs, "_file_iterator")
+
+int_list_begin: list[int] = []
+int_list_end: list[int] = []
+int_stream: Stream[int] = (
+    Stream(range(10_000))
+    .peek(int_list_begin.append)
+    .limit(1000)
+    .drop_while(lambda x: x < 500)
+    .exclude(lambda x: x % 2)
+    .flat_map(range)
+    .filter(lambda x: x % 2)
+    .map(operator.pow, 2)
+    .peek(int_list_end.append)
+)
+assert not int_list_end
+assert not int_list_begin  # the above code did nothing
+assert list(int_stream) == int_list_end
+assert int_list_end  # list(int_stream) consumed the stream
+assert len(int_list_begin) == 1000
+assert repr(int_stream) == "Stream(...)"
