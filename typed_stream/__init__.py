@@ -449,8 +449,9 @@ class Stream(Iterable[T]):
 
     def last(self) -> T:
         """Return the last element of the Stream. This finishes the Stream."""
+        self._check_finished()
         try:
-            return next(iter(self.tail(1)))
+            return tuple(self.tail(1))[-1]
         except StopIteration as exc:
             raise StreamEmptyError() from exc
 
