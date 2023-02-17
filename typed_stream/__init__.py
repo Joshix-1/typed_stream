@@ -48,8 +48,14 @@ __all__ = (
     "Stream",
     "StreamEmptyError",
     "StreamFinishedError",
+    "Streamable",
+    "StreamableSequence",
     "VERSION",
+    "noop",
 )
+
+MAX_PRINT_COUNT = 1000
+"""Prevent crashes from trying to print infinite streams."""
 
 K = TypeVar("K")
 T = TypeVar("T")
@@ -64,6 +70,7 @@ class Streamable(Iterable[T], ABC):
     """Abstract base class defining a Streamable interface."""
 
     def stream(self) -> "Stream[T]":
+        """Return Stream(self)."""
         return Stream(self)
 
 
@@ -208,13 +215,16 @@ class Stream(Iterable[T]):
         """Convert this Stream to a str. This finishes the Stream."""
         if self._is_finished():
             return "Stream(...)"
-        return f"Stream({list(self)!r})"
+        return f"Stream({self})"
 
     def __str__(self) -> str:
         """Convert this Stream to a str. This finishes the Stream."""
         if self._is_finished():
             return "Stream(...)"
-        return str(list(self))
+        list_ = tuple(self.limit(MAX_PRINT_COUNT))
+        if len(list_) == MAX_PRINT_COUNT:
+            return f"{list_} + (...,)"
+        return str(list_)
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> "Stream[int]":

@@ -29,6 +29,8 @@ assert str_var == "3"
 str_var = Stream(["1", "2", "3"]).min()
 assert str_var == "1"
 
+assert isinstance(eval(repr(Stream.from_value(69))), Stream)
+
 
 def create_int_stream() -> Stream[int]:
     """Create an int stream."""
