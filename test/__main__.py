@@ -193,10 +193,6 @@ assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
 assert repr(int_stream) == "Stream(...)"
 
-assert (
-    Stream(["abc", "def", "ghijk"])
-    .flat_map(str.encode, "ASCII")
-    .map(operator.sub, 97)
-    .collect(tuple)
-    == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-)
+assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
+    operator.sub, 97
+).collect(tuple) == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
