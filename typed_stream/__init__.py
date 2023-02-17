@@ -384,7 +384,7 @@ class Stream(Iterable[T]):
         return first
 
     if TYPE_CHECKING:  # noqa: C901
-
+        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
             ...
@@ -465,7 +465,7 @@ class Stream(Iterable[T]):
         return self
 
     if TYPE_CHECKING:  # noqa: C901
-
+        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
             ...
