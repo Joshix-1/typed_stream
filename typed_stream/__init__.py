@@ -562,7 +562,8 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3]).peek(print)
         """
         self._check_finished()
-        return self.map(Peeker(fun))
+        self._data = map(Peeker(fun), self._data)
+        return self
 
     def reduce(self, fun: Callable[[T, T], T]) -> T:
         """Reduce the values of this stream. This finishes the Stream.
