@@ -44,6 +44,7 @@ from .version import VERSION
 
 __version__ = VERSION
 __all__ = (
+    "BinaryFileStream",
     "FileStream",
     "Stream",
     "StreamEmptyError",
