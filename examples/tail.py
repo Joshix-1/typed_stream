@@ -2,24 +2,28 @@
 """A simple tail program."""
 import sys
 
-from typed_stream import FileStream, Stream
+from typed_stream import BinaryFileStream, Stream
 
 
 def tail(*args: str) -> None | str:
-    """Get to the tail."""
+    """Print the tail."""
     if not args:
         return "No file given. To read from stdin use '-'"
     if len(args) > 2:
         return "More than one file given."
-    count = int(args[1]) if len(args) == 2 else 5
+
+    stream: Stream[bytes]
     if args[0] == "-":
         print(
             "Reading from stdin. To read from a file '-' use './-'",
             file=sys.stderr,
         )
-        Stream(sys.stdin).tail(count).for_each(lambda x: print(x, end=""))
+        stream = Stream(sys.stdin.buffer)
     else:
-        FileStream(args[0]).tail(count).map(repr).for_each(print)
+        stream = BinaryFileStream(args[0], True)
+
+    count = int(args[1]) if len(args) == 2 else 10
+    stream.tail(count).for_each(sys.stdout.buffer.write)
     return None
 
 
