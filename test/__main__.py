@@ -145,13 +145,11 @@ assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
 
 bfs: BinaryFileStream = BinaryFileStream(INPUT_TXT)
 assert bfs.chain([b" "]).last() == b" "
-assert not hasattr(fs, "_file_iterator")
+assert not hasattr(bfs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
-assert BinaryFileStream(INPUT_TXT).map(lambda _: ...).limit(1).collect(
-    list
-) == [...]
-assert not hasattr(fs, "_file_iterator")
+assert list(bfs.map(lambda _: ...).limit(1)) == [...]
+assert not hasattr(bfs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert (
@@ -163,8 +161,15 @@ assert (
     .count()
     == 10
 )
-assert not hasattr(fs, "_file_iterator")
+assert not hasattr(bfs, "_file_iterator")
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert bfs.take_while(len).count() == 4
+assert not hasattr(bfs, "_file_iterator")
+
+
+bfs = BinaryFileStream(INPUT_TXT)
+fs = FileStream(INPUT_TXT)
+assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
+assert not hasattr(bfs, "_file_iterator")
 assert not hasattr(fs, "_file_iterator")

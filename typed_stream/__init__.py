@@ -448,7 +448,8 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3, 4, 5]).limit(3)
         """
         self._check_finished()
-        return self._finish(Stream(itertools.islice(self._data, count)))
+        self._data = itertools.islice(self._data, count)
+        return self
 
     if TYPE_CHECKING:  # noqa: C901
 
