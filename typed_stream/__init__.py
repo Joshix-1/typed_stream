@@ -549,8 +549,7 @@ class Stream(Iterable[T]):
         """Reduce the values of this stream. This finishes the Stream.
 
         Examples:
-            - Stream([1, 2, 3]).accumulate(max)
-            - Stream([1, 2, 3]).accumulate(min)
+            - Stream([1, 2, 3]).accumulate(lambda x, y: x + y)
             - Stream([1, 2, 3]).accumulate(lambda x, y: x * y)
         """
         self._check_finished()
@@ -570,7 +569,8 @@ class Stream(Iterable[T]):
     def tail(self, count: int) -> Stream[T]:
         """Return a stream with the last count items."""
         self._check_finished()
-        return Stream(collections.deque(iter(self), maxlen=count))
+        self._data = iter(collections.deque(self._data, maxlen=count))
+        return self
 
     def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.
