@@ -13,8 +13,6 @@
 
 """Java-like typed Stream class for easier handling of generators."""
 
-from __future__ import annotations
-
 import collections
 import concurrent.futures
 import functools
@@ -65,7 +63,7 @@ Exc = TypeVar("Exc", bound=Exception)
 class Streamable(Iterable[T], ABC):
     """Abstract base class defining a Streamable interface."""
 
-    def stream(self) -> Stream[T]:
+    def stream(self) -> "Stream[T]":
         return Stream(self)
 
 
@@ -219,12 +217,12 @@ class Stream(Iterable[T]):
         return str(list(self))
 
     @staticmethod
-    def counting(start: int = 0, step: int = 1) -> Stream[int]:
+    def counting(start: int = 0, step: int = 1) -> "Stream[int]":
         """Create an endless counting Stream."""
         return Stream(itertools.count(start, step))
 
     @staticmethod
-    def from_value(value: K) -> Stream[K]:
+    def from_value(value: K) -> "Stream[K]":
         """Create an endless Stream of the same value."""
         return Stream(itertools.repeat(value))
 
@@ -356,7 +354,7 @@ class Stream(Iterable[T]):
             return True
         return False
 
-    def enumerate(self, start_index: int = 0) -> Stream[tuple[int, T]]:
+    def enumerate(self, start_index: int = 0) -> "Stream[tuple[int, T]]":
         """Map the values to a tuple of index and value."""
         return Stream(enumerate(self, start=start_index))
 
@@ -372,22 +370,22 @@ class Stream(Iterable[T]):
     if TYPE_CHECKING:  # noqa: C901
 
         @overload
-        def filter(self: Stream[K | None]) -> Stream[K]:
+        def filter(self: "Stream[K | None]") -> "Stream[K]":
             ...
 
         @overload
-        def filter(self) -> Stream[T]:
+        def filter(self) -> "Stream[T]":
             ...
 
         @overload
-        def filter(self, fun: TypeGuardingCallable[K]) -> Stream[K]:
+        def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
             ...
 
         @overload
-        def filter(self, fun: Callable[[T], object]) -> Stream[T]:
+        def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
             ...
 
-    def filter(self, fun: Callable[[T], Any] | None = None) -> Stream[Any]:
+    def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":
         """Use built-in filter to filter values."""
         self._check_finished()
         self._data = filter(fun, self._data)  # pylint: disable=bad-builtin
@@ -546,7 +544,7 @@ class Stream(Iterable[T]):
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None
-    ) -> Stream[K]:
+    ) -> "Stream[K]":
         """Map values concurrently.
 
         See: https://docs.python.org/3/library/concurrent.futures.html
