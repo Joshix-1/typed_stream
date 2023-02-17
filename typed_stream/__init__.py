@@ -57,6 +57,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
 W = TypeVar("W")
+X = TypeVar("X")
 Exc = TypeVar("Exc", bound=Exception)
 
 
@@ -415,6 +416,18 @@ class Stream(Iterable[T]):
         ) -> "Stream[K]":
             ...
 
+        @overload
+        def flat_map(
+            self,
+            fun: Callable[[T, U, V, W, X], Iterable[K]],
+            arg0: U,
+            arg1: V,
+            arg2: W,
+            arg3: X,
+            /,
+        ) -> "Stream[K]":
+            ...
+
     def flat_map(
         self, fun: Callable[..., Iterable[K]], /, *args: Any
     ) -> "Stream[K]":
@@ -474,6 +487,18 @@ class Stream(Iterable[T]):
             arg0: U,
             arg1: V,
             arg2: W,
+            /,
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def map(
+            self,
+            fun: Callable[[T, U, V, W, X], K],
+            arg0: U,
+            arg1: V,
+            arg2: W,
+            arg3: X,
             /,
         ) -> "Stream[K]":
             ...
