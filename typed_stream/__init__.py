@@ -65,7 +65,7 @@ Exc = TypeVar("Exc", bound=Exception)
 class Streamable(Iterable[T], ABC):
     """Abstract base class defining a Streamable interface."""
 
-    def to_stream(self) -> Stream[T]:
+    def stream(self) -> Stream[T]:
         return Stream(self)
 
 
