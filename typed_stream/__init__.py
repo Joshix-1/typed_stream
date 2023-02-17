@@ -157,12 +157,12 @@ def one(*args: Any) -> Literal[1]:
 
 def bigger_one(xxx: SLT, yyy: SLT) -> SLT:
     """Return the bigger element."""
-    return xxx if xxx > yyy else yyy
+    return yyy if xxx < yyy else xxx
 
 
 def smaller_one(xxx: SLT, yyy: SLT) -> SLT:
     """Return the smaller element."""
-    return yyy if xxx > yyy else xxx
+    return xxx if xxx < yyy else yyy
 
 
 class Stream(Iterable[T]):
