@@ -19,6 +19,7 @@ import collections
 import concurrent.futures
 import functools
 import itertools
+from abc import ABC
 from collections.abc import Callable, Iterable, Iterator
 from operator import add
 from types import EllipsisType
@@ -61,8 +62,21 @@ X = TypeVar("X")
 Exc = TypeVar("Exc", bound=Exception)
 
 
-def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
-    """Chunk data into tuples of length size. The last chunk may be shorter.
+class Streamable(Iterable[T], ABC):
+    """Abstract base class defining a Streamable interface."""
+
+    def to_stream(self) -> Stream[T]:
+        return Stream(self)
+
+
+class StreamableSequence(tuple[T, ...], Streamable[T]):
+    """A streamable immutable Sequence."""
+
+
+def chunked(
+    iterable: Iterable[T], size: int
+) -> Iterable[StreamableSequence[T]]:
+    """Chunk data into Sequences of length size. The last chunk may be shorter.
 
     Inspired by batched from:
     https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
@@ -70,7 +84,7 @@ def chunked(iterable: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
     if size < 1:
         raise ValueError("size must be at least one")
     iterator = iter(iterable)
-    while chunk := tuple(itertools.islice(iterator, size)):
+    while chunk := StreamableSequence(itertools.islice(iterator, size)):
         yield chunk
 
 
@@ -252,12 +266,18 @@ class Stream(Iterable[T]):
         self._data = itertools.chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> "Stream[tuple[T, ...]]":
+    def chunk(self, size: int) -> "Stream[StreamableSequence[T]]":
         """Split stream into chunks of the specified size."""
         self._check_finished()
         return Stream(chunked(self, size))
 
     if TYPE_CHECKING:  # noqa: C901
+
+        @overload
+        def collect(
+            self, fun: type[StreamableSequence[T]]
+        ) -> StreamableSequence[T]:
+            ...
 
         @overload
         def collect(self, fun: type[tuple[Any, ...]]) -> tuple[T, ...]:
@@ -451,7 +471,7 @@ class Stream(Iterable[T]):
         """Return the last element of the Stream. This finishes the Stream."""
         self._check_finished()
         try:
-            return tuple(self.tail(1))[-1]
+            return self.tail(1)[-1]
         except StopIteration as exc:
             raise StreamEmptyError() from exc
 
@@ -567,11 +587,10 @@ class Stream(Iterable[T]):
         """Calculate the sum of the elements."""
         return self.reduce(add)
 
-    def tail(self, count: int) -> Stream[T]:
-        """Return a stream with the last count items."""
+    def tail(self, count: int) -> StreamableSequence[T]:
+        """Return a Sequence with the last count items."""
         self._check_finished()
-        self._data = iter(collections.deque(self._data, maxlen=count))
-        return self
+        return StreamableSequence(collections.deque(self, maxlen=count))
 
     def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.

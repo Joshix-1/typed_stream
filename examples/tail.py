@@ -23,7 +23,7 @@ def tail(*args: str) -> None | str:
         stream = BinaryFileStream(args[0], True)
 
     count = int(args[1]) if len(args) == 2 else 10
-    stream.tail(count).for_each(sys.stdout.buffer.write)
+    stream.tail(count).to_stream().for_each(sys.stdout.buffer.write)
     return None
 
 
