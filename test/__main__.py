@@ -74,7 +74,6 @@ assert Stream([]).empty()
 assert not Stream([1]).empty()
 
 assert Stream([1, 2, 3]).chain([4, 5, 6]).collect(tuple) == (1, 2, 3, 4, 5, 6)
-
 assert Stream(range(25)).chunk(5).map(lambda x: list(x)).collect(tuple) == (
     [0, 1, 2, 3, 4],
     [5, 6, 7, 8, 9],
@@ -193,3 +192,11 @@ assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
 assert repr(int_stream) == "Stream(...)"
+
+assert (
+    Stream(["abc", "def", "ghijk"])
+    .flat_map(str.encode, "ASCII")
+    .map(operator.sub, 97)
+    .collect(tuple)
+    == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+)
