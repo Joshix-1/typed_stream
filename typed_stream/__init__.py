@@ -481,9 +481,14 @@ class Stream(Iterable[T]):
 
         Example:
             - Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2])
+            - Stream(["abc", "def"]).flat_map(str.encode, "ASCII")
         """
         self._check_finished()
-        return Stream(itertools.chain.from_iterable(self.map(fun, *args)))
+        return Stream(
+            itertools.chain.from_iterable(
+                map(fun, self._data, *(ValueIterator(arg) for arg in args))
+            )
+        )
 
     def for_each(self, fun: Callable[[T], Any] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
@@ -559,11 +564,7 @@ class Stream(Iterable[T]):
         """
         self._check_finished()
         return self._finish(
-            Stream(
-                map(fun, self._data, *(Stream.from_value(arg) for arg in args))
-                if args
-                else map(fun, self._data)
-            )
+            Stream(map(fun, self._data, *(ValueIterator(arg) for arg in args)))
         )
 
     def max(self: "Stream[SLT]") -> SLT:
