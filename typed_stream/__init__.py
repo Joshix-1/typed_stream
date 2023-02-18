@@ -222,7 +222,7 @@ class Stream(Iterable[T]):
         if self._is_finished():
             return "Stream(...)"
         list_ = tuple(self.limit(MAX_PRINT_COUNT))
-        if len(list_) == MAX_PRINT_COUNT:
+        if len(list_) >= MAX_PRINT_COUNT:
             return f"{list_} + (...,)"
         return str(list_)
 
@@ -542,7 +542,13 @@ class Stream(Iterable[T]):
             - Stream([1, 2, 3]).map(operator.mul, 3)
         """
         self._check_finished()
-        return self._finish(Stream((fun(value, *args) for value in self._data)))
+        return self._finish(
+            Stream(
+                map(fun, self._data, *(Stream.from_value(arg) for arg in args))
+                if args
+                else map(fun, self._data)
+            )
+        )
 
     def max(self: "Stream[SLT]") -> SLT:
         """Return the biggest element of the stream."""
