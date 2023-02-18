@@ -66,6 +66,22 @@ X = TypeVar("X")
 Exc = TypeVar("Exc", bound=Exception)
 
 
+class ValueIterator(Iterator[T]):
+    """An iterable that always yields the value."""
+
+    _value: T
+    __slots__ = "_value"
+
+    def __init__(self, value: T) -> None:
+        self._value = value
+
+    def __next__(self) -> T:
+        return self._value
+
+    def __iter__(self) -> Iterator[T]:
+        return self
+
+
 class Streamable(Iterable[T], ABC):
     """Abstract base class defining a Streamable interface."""
 
@@ -234,7 +250,7 @@ class Stream(Iterable[T]):
     @staticmethod
     def from_value(value: K) -> "Stream[K]":
         """Create an endless Stream of the same value."""
-        return Stream(itertools.repeat(value))
+        return Stream(ValueIterator(value))
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
