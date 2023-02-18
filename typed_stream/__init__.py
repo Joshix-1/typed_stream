@@ -66,7 +66,19 @@ X = TypeVar("X")
 Exc = TypeVar("Exc", bound=Exception)
 
 
-class ValueIterator(Iterator[T]):
+class Streamable(Iterable[T], ABC):
+    """Abstract base class defining a Streamable interface."""
+
+    def stream(self) -> "Stream[T]":
+        """Return Stream(self)."""
+        return Stream(self)
+
+
+class StreamableSequence(tuple[T, ...], Streamable[T]):
+    """A streamable immutable Sequence."""
+
+
+class ValueIterator(Iterator[T], Streamable[T]):
     """An iterable that always yields the value."""
 
     _value: T
@@ -80,18 +92,6 @@ class ValueIterator(Iterator[T]):
 
     def __iter__(self) -> Iterator[T]:
         return self
-
-
-class Streamable(Iterable[T], ABC):
-    """Abstract base class defining a Streamable interface."""
-
-    def stream(self) -> "Stream[T]":
-        """Return Stream(self)."""
-        return Stream(self)
-
-
-class StreamableSequence(tuple[T, ...], Streamable[T]):
-    """A streamable immutable Sequence."""
 
 
 def chunked(
@@ -250,7 +250,7 @@ class Stream(Iterable[T]):
     @staticmethod
     def from_value(value: K) -> "Stream[K]":
         """Create an endless Stream of the same value."""
-        return Stream(ValueIterator(value))
+        return ValueIterator(value).stream()
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
