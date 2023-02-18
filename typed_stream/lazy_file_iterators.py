@@ -1,19 +1,8 @@
 """Utilities for lazy iteration over lines of files."""
 import contextlib
 from collections.abc import Iterator
-from io import BytesIO, TextIOWrapper
 from os import PathLike
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    TextIO,
-    TypeGuard,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import IO, TYPE_CHECKING, Any, AnyStr, TypeGuard, TypeVar, overload
 
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 LFI = TypeVar("LFI", "LazyFileIterator[str]", "LazyFileIterator[bytes]")
