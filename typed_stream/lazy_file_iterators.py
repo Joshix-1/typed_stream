@@ -1,7 +1,7 @@
 """Utilities for lazy iteration over lines of files."""
 import contextlib
 from collections.abc import Iterator
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from os import PathLike
 from typing import (
     IO,
@@ -11,6 +11,7 @@ from typing import (
     TextIO,
     TypeGuard,
     TypeVar,
+    cast,
     overload,
 )
 
@@ -96,17 +97,7 @@ class LazyFileIterator(Iterator[AnyStr]):
         """Close v."""
         self.close()
 
-    if TYPE_CHECKING:
-
-        @overload
-        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
-            ...
-
-        @overload
-        def _open_file(self: "LazyFileIterator[str]") -> TextIO:
-            ...
-
-    def _open_file(self) -> IO[Any]:
+    def _open_file(self: "LazyFileIterator[AnyStr]") -> IO[AnyStr]:
         """Open the underlying file."""
         if _is_bytes(self):
             return open(self.path, mode="rb")  # noqa: SIM115

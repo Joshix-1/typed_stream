@@ -21,7 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Typing :: Typed",
 ]
-dynamic = ["version", "description"]
+version = "0.8.1"
+#dynamic = ["version", "description"]
 
 [project.urls]
 Home = "https://github.com/Joshix-1/typed_stream"

@@ -22,7 +22,6 @@ from collections.abc import Callable, Iterable, Iterator
 from operator import add
 from types import EllipsisType
 from typing import (
-    TYPE_CHECKING,
     Any,
     AnyStr,
     Generic,
@@ -74,8 +73,19 @@ class Streamable(Iterable[T], ABC):
         return Stream(self)
 
 
-class StreamableSequence(tuple[T, ...], Streamable[T]):
+class StreamableSequence(Streamable[T]):
     """A streamable immutable Sequence."""
+
+    __slots__ = ("_tuple",)
+
+    def __init__(self, iterable: Iterable[T]) -> None:
+        self._tuple = tuple(iterable)
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self._tuple)
+
+    def __getitem__(self, idx: int) -> T:
+        return self._tuple[idx]
 
 
 class ValueIterator(Iterator[T], Streamable[T]):
@@ -219,7 +229,8 @@ class Stream(Iterable[T]):
 
     _data: Iterator[T]
     _close_source_callable: Callable[[], None]
-    __slots__ = ("_data", "_close_source_callable")
+    __deletable__ = ("_close_source_callable", "_data")
+    __slots__ = ("_close_source_callable", "_data")
 
     def __init__(
         self, data: "Iterable[T] | Iterator[T] | EllipsisType"
@@ -305,39 +316,37 @@ class Stream(Iterable[T]):
         self._check_finished()
         return self._finish(Chunked(self._data, size).stream())
 
-    if TYPE_CHECKING:  # noqa: C901
+    @overload
+    def collect(
+        self, fun: type[StreamableSequence[T]]
+    ) -> StreamableSequence[T]:
+        ...
 
-        @overload
-        def collect(
-            self, fun: type[StreamableSequence[T]]
-        ) -> StreamableSequence[T]:
-            ...
+    @overload
+    def collect(self, fun: type[tuple[Any, ...]]) -> tuple[T, ...]:
+        ...
 
-        @overload
-        def collect(self, fun: type[tuple[Any, ...]]) -> tuple[T, ...]:
-            ...
+    @overload
+    def collect(self, fun: type[set[Any]]) -> set[T]:
+        ...
 
-        @overload
-        def collect(self, fun: type[set[Any]]) -> set[T]:
-            ...
+    @overload
+    def collect(self, fun: type[list[Any]]) -> list[T]:
+        ...
 
-        @overload
-        def collect(self, fun: type[list[Any]]) -> list[T]:
-            ...
+    @overload
+    def collect(self, fun: type[frozenset[Any]]) -> frozenset[T]:
+        ...
 
-        @overload
-        def collect(self, fun: type[frozenset[Any]]) -> frozenset[T]:
-            ...
+    @overload
+    def collect(
+        self: "Stream[tuple[K, V]]", fun: type[dict[Any, Any]]
+    ) -> dict[K, V]:
+        ...
 
-        @overload
-        def collect(
-            self: "Stream[tuple[K, V]]", fun: type[dict[Any, Any]]
-        ) -> dict[K, V]:
-            ...
-
-        @overload
-        def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
-            ...
+    @overload
+    def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
+        ...
 
     def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
         """Collect the values of this Stream. This finishes the Stream.
@@ -403,23 +412,21 @@ class Stream(Iterable[T]):
         self._data = itertools.filterfalse(fun, self._data)
         return self
 
-    if TYPE_CHECKING:  # noqa: C901
+    @overload
+    def filter(self: "Stream[K | None]") -> "Stream[K]":
+        ...
 
-        @overload
-        def filter(self: "Stream[K | None]") -> "Stream[K]":
-            ...
+    @overload
+    def filter(self) -> "Stream[T]":
+        ...
 
-        @overload
-        def filter(self) -> "Stream[T]":
-            ...
+    @overload
+    def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
+        ...
 
-        @overload
-        def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
-            ...
-
-        @overload
-        def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
-            ...
+    @overload
+    def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
+        ...
 
     def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":
         """Use built-in filter to filter values."""
@@ -437,50 +444,49 @@ class Stream(Iterable[T]):
         self._close_source()
         return first
 
-    if TYPE_CHECKING:  # noqa: C901
-        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
-        @overload
-        def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
-            ...
+    # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
+    @overload
+    def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
+        ...
 
-        @overload
-        def flat_map(
-            self, fun: Callable[[T, U], Iterable[K]], arg0: U, /  # noqa: W504
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def flat_map(
+        self, fun: Callable[[T, U], Iterable[K]], arg0: U, /  # noqa: W504
+    ) -> "Stream[K]":
+        ...
 
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            /,
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def flat_map(
+        self,
+        fun: Callable[[T, U, V], Iterable[K]],
+        arg0: U,
+        arg1: V,
+        /,
+    ) -> "Stream[K]":
+        ...
 
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V, W], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            /,
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def flat_map(
+        self,
+        fun: Callable[[T, U, V, W], Iterable[K]],
+        arg0: U,
+        arg1: V,
+        arg2: W,
+        /,
+    ) -> "Stream[K]":
+        ...
 
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V, W, X], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            arg3: X,
-            /,
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def flat_map(
+        self,
+        fun: Callable[[T, U, V, W, X], Iterable[K]],
+        arg0: U,
+        arg1: V,
+        arg2: W,
+        arg3: X,
+        /,
+    ) -> "Stream[K]":
+        ...
 
     def flat_map(
         self, fun: Callable[..., Iterable[K]], /, *args: Any
@@ -496,7 +502,7 @@ class Stream(Iterable[T]):
         self._check_finished()
         return Stream(
             itertools.chain.from_iterable(
-                map(fun, self._data, *(ValueIterator(arg) for arg in args))
+                map(fun, self._data, *[ValueIterator(arg) for arg in args])
             )
         )
 
@@ -524,44 +530,43 @@ class Stream(Iterable[T]):
         self._data = itertools.islice(self._data, count)
         return self
 
-    if TYPE_CHECKING:  # noqa: C901
-        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
-        @overload
-        def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
-            ...
+    # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
+    @overload
+    def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
+        ...
 
-        @overload
-        def map(self, fun: Callable[[T, U], K], arg0: U, /) -> "Stream[K]":
-            ...
+    @overload
+    def map(self, fun: Callable[[T, U], K], arg0: U, /) -> "Stream[K]":
+        ...
 
-        @overload
-        def map(
-            self, fun: Callable[[T, U, V], K], arg0: U, arg1: V, /  # noqa: W504
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def map(
+        self, fun: Callable[[T, U, V], K], arg0: U, arg1: V, /  # noqa: W504
+    ) -> "Stream[K]":
+        ...
 
-        @overload
-        def map(
-            self,
-            fun: Callable[[T, U, V, W], K],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            /,
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def map(
+        self,
+        fun: Callable[[T, U, V, W], K],
+        arg0: U,
+        arg1: V,
+        arg2: W,
+        /,
+    ) -> "Stream[K]":
+        ...
 
-        @overload
-        def map(
-            self,
-            fun: Callable[[T, U, V, W, X], K],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            arg3: X,
-            /,
-        ) -> "Stream[K]":
-            ...
+    @overload
+    def map(
+        self,
+        fun: Callable[[T, U, V, W, X], K],
+        arg0: U,
+        arg1: V,
+        arg2: W,
+        arg3: X,
+        /,
+    ) -> "Stream[K]":
+        ...
 
     def map(self, fun: Callable[..., K], /, *args: Any) -> "Stream[K]":
         """Map each value to another.
@@ -574,7 +579,7 @@ class Stream(Iterable[T]):
         """
         self._check_finished()
         return self._finish(
-            Stream(map(fun, self._data, *(ValueIterator(arg) for arg in args)))
+            Stream(map(fun, self._data, *[ValueIterator(arg) for arg in args]))
         )
 
     def max(self: "Stream[SLT]") -> SLT:
@@ -648,6 +653,7 @@ class FileStreamBase(Stream[AnyStr]):
     """ABC for file streams."""
 
     _file_iterator: LazyFileIterator[AnyStr]
+    __deletable__ = ("_file_iterator",)
     __slots__ = ("_file_iterator",)
 
     def __enter__(self) -> Stream[AnyStr]:

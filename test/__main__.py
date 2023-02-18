@@ -40,7 +40,6 @@ def create_int_stream() -> Stream[int]:
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
 assert Stream(STRING).distinct().sum() == "pjwa nsvoidfb,cmg"
-
 assert (
     333283335000
     == sum(create_int_stream())
