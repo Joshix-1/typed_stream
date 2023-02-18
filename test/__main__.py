@@ -1,10 +1,11 @@
 """The tests for the Stream."""
 import operator
+import pickle
 from operator import add
 from pathlib import Path
 from typing import TypeGuard
 
-from typed_stream import BinaryFileStream, FileStream, Stream
+from typed_stream import BinaryFileStream, FileStream, Stream, noop
 
 # pylint: disable=unnecessary-lambda
 
@@ -198,3 +199,14 @@ assert repr(int_stream) == "Stream(...)"
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
 ).collect(tuple) == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+stream = (
+    Stream(range(1000))
+    .peek(noop)
+    .map(str)
+    # .flat_map(str.encode, "ASCII")
+    # .map(operator.sub, ord("0"))
+    .limit(100)
+    .drop_while("5".__gt__)
+)
+assert list(pickle.loads(pickle.dumps(stream))) == list(map(str, range(5, 100)))
