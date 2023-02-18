@@ -612,8 +612,8 @@ class Stream(Iterable[T]):
         """Reduce the values of this stream. This finishes the Stream.
 
         Examples:
-            - Stream([1, 2, 3]).accumulate(lambda x, y: x + y)
-            - Stream([1, 2, 3]).accumulate(lambda x, y: x * y)
+            - Stream([1, 2, 3]).accumulate(operator.add)
+            - Stream([1, 2, 3]).accumulate(operator.mul)
         """
         self._check_finished()
         return self._finish(
