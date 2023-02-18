@@ -201,7 +201,7 @@ assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
 ).collect(tuple) == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 stream = (
-    Stream(range(1000))
+    Stream(range(1000000000000000000000000000000000000000000000000000000000000))
     .peek(noop)
     .map(str)
     .flat_map(str.encode, "ASCII")
@@ -210,5 +210,12 @@ stream = (
     .map(operator.mul, 10)
     .drop_while((10).__gt__)
     .take_while((90).__gt__)
+    .filter(operator.truth)
+    .exclude(operator.not_)
 )
-assert list(pickle.loads(pickle.dumps(stream))) == list(range(10, 90, 10))
+assert tuple(pickle.loads(pickle.dumps(stream))) == tuple(range(10, 90, 10))
+assert tuple(stream) == tuple(range(10, 90, 10))
+
+stream = Stream.from_value(0).chunk(9)
+assert pickle.loads(pickle.dumps(stream)).first() == (0, 0, 0, 0, 0, 0, 0, 0, 0)
+assert tuple(stream.limit(1000)) == ((0, 0, 0, 0, 0, 0, 0, 0, 0),) * 1000

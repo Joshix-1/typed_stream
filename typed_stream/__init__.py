@@ -82,7 +82,7 @@ class ValueIterator(Iterator[T], Streamable[T]):
     """An iterable that always yields the value."""
 
     _value: T
-    __slots__ = "_value"
+    __slots__ = ("_value",)
 
     def __init__(self, value: T) -> None:
         self._value = value
@@ -90,23 +90,33 @@ class ValueIterator(Iterator[T], Streamable[T]):
     def __next__(self) -> T:
         return self._value
 
-    def __iter__(self) -> Iterator[T]:
-        return self
 
-
-def chunked(
-    iterable: Iterable[T], size: int
-) -> Iterable[StreamableSequence[T]]:
+class Chunked(
+    Iterator[StreamableSequence[T]], Streamable[StreamableSequence[T]]
+):
     """Chunk data into Sequences of length size. The last chunk may be shorter.
 
     Inspired by batched from:
     https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
     """
-    if size < 1:
-        raise ValueError("size must be at least one")
-    iterator = iter(iterable)
-    while chunk := StreamableSequence(itertools.islice(iterator, size)):
-        yield chunk
+
+    _iterator: Iterator[T]
+    chunk_size: int
+
+    __slots__ = "_iterator", "chunk_size"
+
+    def __init__(self, iterable: Iterable[T], chunk_size: int) -> None:
+        if chunk_size < 1:
+            raise ValueError("size must be at least one")
+        self._iterator = iter(iterable)
+        self.chunk_size = chunk_size
+
+    def __next__(self) -> StreamableSequence[T]:
+        if chunk := StreamableSequence(
+            itertools.islice(self._iterator, self.chunk_size)
+        ):
+            return chunk
+        raise StopIteration()
 
 
 class Peeker(Generic[T]):
@@ -293,7 +303,7 @@ class Stream(Iterable[T]):
     def chunk(self, size: int) -> "Stream[StreamableSequence[T]]":
         """Split stream into chunks of the specified size."""
         self._check_finished()
-        return Stream(chunked(self, size))
+        return self._finish(Chunked(self._data, size).stream())
 
     if TYPE_CHECKING:  # noqa: C901
 
