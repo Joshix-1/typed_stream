@@ -57,12 +57,12 @@ __all__ = (
 MAX_PRINT_COUNT = 1000
 """Prevent crashes from trying to print infinite streams."""
 
-K = TypeVar("K")
-T = TypeVar("T")
-U = TypeVar("U")
-V = TypeVar("V")
-W = TypeVar("W")
-X = TypeVar("X")
+K = TypeVar("K", bound=object)
+T = TypeVar("T", bound=object)
+U = TypeVar("U", bound=object)
+V = TypeVar("V", bound=object)
+W = TypeVar("W", bound=object)
+X = TypeVar("X", bound=object)
 Exc = TypeVar("Exc", bound=Exception)
 
 
@@ -76,6 +76,11 @@ class Streamable(Iterable[T], ABC):
 
 class StreamableSequence(tuple[T, ...], Streamable[T]):
     """A streamable immutable Sequence."""
+
+
+def create_streamable_sequence(iterable: Iterator[T]) -> StreamableSequence[T]:
+    """Create a StreamableSequence."""
+    return StreamableSequence(iterable)
 
 
 class ValueIterator(Iterator[T], Streamable[T]):
@@ -339,6 +344,10 @@ class Stream(Iterable[T]):
     if TYPE_CHECKING:  # noqa: C901
 
         @overload
+        def collect(self) -> StreamableSequence[T]:
+            ...
+
+        @overload
         def collect(
             self, fun: type[StreamableSequence[T]]
         ) -> StreamableSequence[T]:
@@ -370,7 +379,9 @@ class Stream(Iterable[T]):
         def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
             ...
 
-    def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
+    def collect(
+        self, fun: Callable[[Iterator[T]], object] = StreamableSequence
+    ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
 
         Examples:
