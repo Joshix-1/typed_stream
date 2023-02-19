@@ -32,6 +32,23 @@ assert str_var == "1"
 
 assert isinstance(eval(repr(Stream.from_value(69))), Stream)
 
+assert Stream(range(5)).map(str).enumerate().collect(tuple) == (
+    (0, "0"),
+    (1, "1"),
+    (2, "2"),
+    (3, "3"),
+    (4, "4"),
+)
+
+indices: list[int] = (
+    Stream(range(5)).map(str).enumerate().map(lambda x: x.idx).collect(list)
+)
+assert indices == list(range(5))
+values: list[str] = (
+    Stream(range(5)).map(str).enumerate().map(lambda x: x.val).collect(list)
+)
+assert values == list(map(str, range(5)))
+
 
 def create_int_stream() -> Stream[int]:
     """Create an int stream."""

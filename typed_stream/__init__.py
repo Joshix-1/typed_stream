@@ -79,7 +79,7 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
 
 
 class ValueIterator(Iterator[T], Streamable[T]):
-    """An iterable that always yields the value."""
+    """An iterable that always yields the given value."""
 
     _value: T
     __slots__ = ("_value",)
@@ -117,6 +117,37 @@ class Chunked(
         ):
             return chunk
         raise StopIteration()
+
+
+class IndexValueTuple(tuple[int, T], Generic[T]):
+    """A tuple to hold index and value."""
+
+    @property
+    def idx(self) -> int:
+        """The index."""
+        return self[0]
+
+    @property
+    def val(self) -> T:
+        """The value."""
+        return self[1]
+
+
+class Enumerator(Iterator[IndexValueTuple[T]]):
+    """Like enumerate() but yielding IndexValueTuples."""
+
+    _iterator: Iterator[T]
+    _curr_idx: int
+
+    __slots__ = ("_iterator", "_curr_idx")
+
+    def __init__(self, iterable: Iterable[T], start_index: int) -> None:
+        self._iterator = iter(iterable)
+        self._curr_idx = start_index - 1
+
+    def __next__(self) -> IndexValueTuple[T]:
+        self._curr_idx += 1
+        return IndexValueTuple((self._curr_idx, next(self._iterator)))
 
 
 class Peeker(Generic[T]):
@@ -390,9 +421,11 @@ class Stream(Iterable[T]):
             return True
         return False
 
-    def enumerate(self, start_index: int = 0) -> "Stream[tuple[int, T]]":
+    def enumerate(
+        self: "Stream[T]", start_index: int = 0
+    ) -> "Stream[IndexValueTuple[T]]":
         """Map the values to a tuple of index and value."""
-        return Stream(enumerate(self, start=start_index))
+        return self._finish(Stream(Enumerator(self._data, start_index)))
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Exclude values if the function returns a truthy value.
