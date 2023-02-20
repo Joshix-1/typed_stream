@@ -104,6 +104,24 @@ class Stream(Iterable[T]):
             return f"{list_} + (...,)"
         return str(list_)
 
+    def __getitem__(self, item: int) -> T:  # noqa: C901
+        """Finish the stream by collecting."""
+        self._check_finished()
+        if isinstance(item, int):
+            if not item:  # == 0
+                return self.first()
+            if item > 0:
+                index, value = self.limit(item + 1).enumerate().last()
+                if index != item:
+                    raise IndexError(
+                        f"Stream only has {index + 1} elements and no index {item}."
+                    )
+                return value
+            return self.tail(abs(item))[0]
+        if not isinstance(item, slice):  # type: ignore[unreachable]
+            raise TypeError("Argument to __getitem__ should be int or slice.")
+        raise TypeError("slicing not yet supported")
+
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> "Stream[int]":
         """Create an endless counting Stream."""

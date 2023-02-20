@@ -245,3 +245,9 @@ assert tuple(stream) == tuple(range(10, 90, 10))
 stream = Stream.from_value(0).chunk(9)
 assert pickle.loads(pickle.dumps(stream)).first() == (0, 0, 0, 0, 0, 0, 0, 0, 0)
 assert tuple(stream.limit(1000)) == ((0, 0, 0, 0, 0, 0, 0, 0, 0),) * 1000
+
+for i in range(100):
+    assert Stream(range(10_000))[i] == i
+    if not i:
+        continue
+    assert Stream(range(10_000))[-i] == 10_000 - i
