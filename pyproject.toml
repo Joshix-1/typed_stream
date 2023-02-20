@@ -45,6 +45,5 @@ skip_gitignore = true
 packages = ["typed_stream", "test", "examples"]
 python_version = "3.10"
 show_error_codes = true
-sqlite_cache = true
 strict = true
 warn_unreachable = true

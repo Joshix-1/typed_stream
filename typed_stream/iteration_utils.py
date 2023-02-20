@@ -102,7 +102,7 @@ class Enumerator(Iterator[IndexValueTuple[T]]):
         self._iterator = iter(iterable)
         self._curr_idx = start_index
 
-    def __next__(self) -> IndexValueTuple[T]:
+    def __next__(self: "Enumerator[T]") -> IndexValueTuple[T]:
         """Return the next IndexValueTuple."""
         tuple_: tuple[int, T] = (self._curr_idx, next(self._iterator))
         self._curr_idx += 1

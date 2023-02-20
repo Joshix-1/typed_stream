@@ -104,7 +104,21 @@ class Stream(Iterable[T]):
             return f"{list_} + (...,)"
         return str(list_)
 
-    def __getitem__(self, item: int) -> T:  # noqa: C901
+    if TYPE_CHECKING:
+
+        @overload
+        def __getitem__(self, item: int) -> T:  # noqa: D105
+            ...
+
+        @overload
+        def __getitem__(  # noqa: D105
+            self, item: slice
+        ) -> StreamableSequence[T]:
+            ...
+
+    def __getitem__(  # noqa: C901
+        self, item: slice | int
+    ) -> StreamableSequence[T] | T:
         """Finish the stream by collecting."""
         self._check_finished()
         if isinstance(item, int):
@@ -118,9 +132,22 @@ class Stream(Iterable[T]):
                     )
                 return value
             return self.tail(abs(item))[0]
-        if not isinstance(item, slice):  # type: ignore[unreachable]
+        if not isinstance(item, slice):
             raise TypeError("Argument to __getitem__ should be int or slice.")
-        raise TypeError("slicing not yet supported")
+        if (  # pylint: disable=too-many-boolean-expressions
+            (item.start is None or item.start >= 0)
+            and (item.step is None or item.step >= 0)
+            and (item.stop is None or item.stop >= 0)
+        ):
+            return self._finish(
+                StreamableSequence(
+                    itertools.islice(
+                        self._data, item.start, item.stop, item.step
+                    )
+                ),
+                close_source=True,
+            )
+        raise ValueError("Values in slice should not be negative.")
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> "Stream[int]":

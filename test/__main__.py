@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TypeGuard
 
 from typed_stream import BinaryFileStream, FileStream, Stream
+from typed_stream.iteration_utils import IndexValueTuple
 
 from .test_functions import noop
 
@@ -49,7 +50,12 @@ indices: list[int] = (
     Stream(range(5)).map(str).enumerate().map(lambda x: x.idx).collect(list)
 )
 assert indices == list(range(5))
-values: list[str] = (
+enumeration_stream: Stream[IndexValueTuple[str]] = (
+    Stream(range(5)).map(str).enumerate()
+)
+values: list[str] = enumeration_stream.map(lambda x: x.val).collect(list)
+assert values == list(map(str, range(5)))
+values = (
     Stream(range(5)).map(str).enumerate().map(lambda x: x.val).collect(list)
 )
 assert values == list(map(str, range(5)))
@@ -251,3 +257,10 @@ for i in range(100):
     if not i:
         continue
     assert Stream(range(10_000))[-i] == 10_000 - i
+
+assert Stream(range(100))[:10] == tuple(range(10))
+assert Stream(range(100))[90:] == tuple(range(90, 100))
+assert Stream(range(1000))[90:100] == tuple(range(90, 100))
+assert Stream(range(1000))[90:100:2] == tuple(range(90, 100, 2))
+
+assert Stream(range(1000))[20:44:5] == tuple(range(20, 44, 5))
