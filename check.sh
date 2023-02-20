@@ -11,7 +11,7 @@ if [ -d venv ]; then
   fi
 fi
 
-pip_install="python3 -m pip install --disable-pip-version-check --require-virtualenv --quiet"
+pip_install="python3 -m pip install -U --disable-pip-version-check --require-virtualenv --quiet"
 ${pip_install} "pip>=23.0" wheel; exit_code="$?"
 if [ "${exit_code}" -ne 0 ] && [ "${exit_code}" -ne 3 ]; then
   echo "Installing pip>=23.0 and wheel failed"
