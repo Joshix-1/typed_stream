@@ -43,7 +43,7 @@ def calculate(expression: str) -> str | int | float | complex:
     if not KINDA_SAFE_EXPR.match(expression):
         return f"Error: Input has to match {KINDA_SAFE_EXPR!r}"
     try:
-        result = eval(expression, {**GLOBALS})
+        result = eval(expression, {**GLOBALS})  # nosec: B307
     except Exception as exc:
         return f"Error: {exc!r}"
     if not isinstance(result, (int, float, complex)):

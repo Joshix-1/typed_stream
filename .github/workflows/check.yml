@@ -21,8 +21,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install required packages
-        run: pip install autoflake "black>=23.1a1" isort
+      - name: Install requirements
+        run: pip install -r requirements-dev.txt
       - name: Run autoflake
         run: autoflake --recursive --in-place --remove-all-unused-imports --remove-unused-variables --remove-duplicate-keys .
       - name: Run isort
@@ -61,8 +61,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install mypy
-        run: pip install mypy typing_extensions
+      - name: Install requirements
+        run: pip install -r requirements-dev.txt
       - name: Run mypy
         run: mypy
 
@@ -78,8 +78,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install Flake8
-        run: pip install flake8 flake8-bugbear flake8-comprehensions flake8-docstrings flake8-no-pep420 flake8-rst-docstrings flake8-scream flake8-simplify pep8-naming
+      - name: Install requirements
+        run: pip install -r requirements-dev.txt
       - name: Run Flake8
         run: flake8
 
@@ -95,7 +95,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install Bandit
-        run: pip install bandit[toml]
+      - name: Install requirements
+        run: pip install -r requirements-dev.txt
       - name: Run Bandit
-        run: bandit -c pyproject.toml -r an_website
+        run: bandit -c pyproject.toml -r typed_stream examples
