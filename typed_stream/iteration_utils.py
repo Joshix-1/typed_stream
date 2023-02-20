@@ -100,12 +100,13 @@ class Enumerator(Iterator[IndexValueTuple[T]]):
     def __init__(self, iterable: Iterable[T], start_index: int) -> None:
         """Like enumerate() but yielding IndexValueTuples."""
         self._iterator = iter(iterable)
-        self._curr_idx = start_index - 1
+        self._curr_idx = start_index
 
     def __next__(self) -> IndexValueTuple[T]:
         """Return the next IndexValueTuple."""
+        tuple_: tuple[int, T] = (self._curr_idx, next(self._iterator))
         self._curr_idx += 1
-        return IndexValueTuple((self._curr_idx, next(self._iterator)))
+        return IndexValueTuple(tuple_)
 
 
 class Peeker(Generic[T]):

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, TypeVar, overload
 
 from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamFinishedError
-from .functions import bigger_one, noop, one, smaller_one
+from .functions import noop, one
 from .iteration_utils import (
     Chunked,
     Enumerator,
@@ -433,11 +433,11 @@ class Stream(Iterable[T]):
 
     def max(self: "Stream[SLT]") -> SLT:
         """Return the biggest element of the stream."""
-        return self.reduce(bigger_one)
+        return max(self)
 
     def min(self: "Stream[SLT]") -> SLT:
         """Return the smallest element of the stream."""
-        return self.reduce(smaller_one)
+        return min(self)
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None

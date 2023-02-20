@@ -14,7 +14,6 @@
 """Java-like typed Stream class for easier handling of generators."""
 
 from .exceptions import StreamEmptyError, StreamFinishedError
-from .functions import noop
 from .streamable import Streamable, StreamableSequence
 from .streams import BinaryFileStream, FileStream, Stream
 from .version import VERSION
@@ -29,5 +28,4 @@ __all__ = (
     "Streamable",
     "StreamableSequence",
     "VERSION",
-    "noop",
 )

@@ -12,17 +12,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simple helper functions for easy Stream usage."""
-from collections.abc import Callable
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal
 
-from .types import SupportsLessThan
-
-__all__ = ("bigger_one", "noop", "one", "smaller_one")
-
-SLT = TypeVar("SLT", bound=SupportsLessThan)
-
-bigger_one: Callable[[SLT, SLT], SLT] = max
-smaller_one: Callable[[SLT, SLT], SLT] = min
+__all__ = ("is_even", "is_odd", "noop", "one")
 
 
 def noop(*args: Any) -> None:
@@ -32,3 +24,13 @@ def noop(*args: Any) -> None:
 def one(*args: Any) -> Literal[1]:
     """Return the smallest positive odd number."""
     return 1
+
+
+def is_even(number: int) -> bool:
+    """Check whether a number is even."""
+    return not number % 2
+
+
+def is_odd(number: int) -> bool:
+    """Check whether a number is odd."""
+    return not not number % 2  # noqa: SIM208

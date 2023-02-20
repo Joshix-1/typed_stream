@@ -5,7 +5,9 @@ from operator import add
 from pathlib import Path
 from typing import TypeGuard
 
-from typed_stream import BinaryFileStream, FileStream, Stream, noop
+from typed_stream import BinaryFileStream, FileStream, Stream
+
+from .test_functions import noop
 
 # pylint: disable=unnecessary-lambda
 
