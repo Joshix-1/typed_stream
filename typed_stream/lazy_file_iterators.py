@@ -2,7 +2,6 @@
 import contextlib
 from collections.abc import Iterator
 from io import BytesIO
-from os import PathLike
 from typing import (
     IO,
     TYPE_CHECKING,
@@ -14,7 +13,14 @@ from typing import (
     overload,
 )
 
-PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
+from .types import PathLikeType
+
+__all__ = (
+    "LazyFileIterator",
+    "LazyFileIteratorRemovingEndsStr",
+    "LazyFileIteratorRemovingEndsBytes",
+)
+
 LFI = TypeVar("LFI", "LazyFileIterator[str]", "LazyFileIterator[bytes]")
 
 

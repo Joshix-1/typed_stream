@@ -11,23 +11,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Java-like typed Stream class for easier handling of generators."""
+"""Streamable Interface providing a stream method."""
 
-from .exceptions import StreamEmptyError, StreamFinishedError
-from .functions import noop
-from .streamable import Streamable, StreamableSequence
-from .streams import BinaryFileStream, FileStream, Stream
-from .version import VERSION
+from abc import ABC
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, TypeVar
 
-__version__ = VERSION
-__all__ = (
-    "BinaryFileStream",
-    "FileStream",
-    "Stream",
-    "StreamEmptyError",
-    "StreamFinishedError",
-    "Streamable",
-    "StreamableSequence",
-    "VERSION",
-    "noop",
-)
+if TYPE_CHECKING:
+    from .streams import Stream
+
+__all__ = ("Streamable", "StreamableSequence")
+
+T = TypeVar("T", bound=object)
+
+
+class Streamable(Iterable[T], ABC):
+    """Abstract base class defining a Streamable interface."""
+
+    def stream(self) -> "Stream[T]":
+        """Return Stream(self)."""
+        from .streams import Stream
+
+        return Stream(self)
+
+
+class StreamableSequence(tuple[T, ...], Streamable[T]):
+    """A streamable immutable Sequence."""

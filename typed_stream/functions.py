@@ -11,23 +11,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Java-like typed Stream class for easier handling of generators."""
+"""Simple helper functions for easy Stream usage."""
+from collections.abc import Callable
+from typing import Any, Literal, TypeVar
 
-from .exceptions import StreamEmptyError, StreamFinishedError
-from .functions import noop
-from .streamable import Streamable, StreamableSequence
-from .streams import BinaryFileStream, FileStream, Stream
-from .version import VERSION
+from .types import SupportsLessThan
 
-__version__ = VERSION
-__all__ = (
-    "BinaryFileStream",
-    "FileStream",
-    "Stream",
-    "StreamEmptyError",
-    "StreamFinishedError",
-    "Streamable",
-    "StreamableSequence",
-    "VERSION",
-    "noop",
-)
+__all__ = ("bigger_one", "noop", "one", "smaller_one")
+
+SLT = TypeVar("SLT", bound=SupportsLessThan)
+
+bigger_one: Callable[[SLT, SLT], SLT] = max
+smaller_one: Callable[[SLT, SLT], SLT] = min
+
+
+def noop(*args: Any) -> None:
+    """Do nothing."""
+
+
+def one(*args: Any) -> Literal[1]:
+    """Return the smallest positive odd number."""
+    return 1
