@@ -211,6 +211,12 @@ class Stream(Iterable[T]):
             ...
 
         @overload
+        def collect(
+            self: "Stream[IndexValueTuple[V]]", fun: type[dict[Any, Any]]
+        ) -> dict[int, V]:
+            ...
+
+        @overload
         def collect(self: "Stream[T]", fun: Callable[[Iterator[T]], K]) -> K:
             ...
 

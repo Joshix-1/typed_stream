@@ -37,3 +37,6 @@ class Streamable(Iterable[T], ABC):
 
 class StreamableSequence(tuple[T, ...], Streamable[T]):
     """A streamable immutable Sequence."""
+
+    # Consider overriding __getitem__ __add__ __mul__ __rmul__ to make sure they
+    # do not return a normal tuple, this could improve user experience
