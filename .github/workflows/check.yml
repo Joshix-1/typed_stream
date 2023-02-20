@@ -64,7 +64,7 @@ jobs:
       - name: Install mypy
         run: pip install mypy typing_extensions
       - name: Run mypy
-        run: mypy -p typed_stream -p test -p examples
+        run: mypy
 
   flake8:
     name: Flake8
