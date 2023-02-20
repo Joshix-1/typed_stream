@@ -161,24 +161,28 @@ class Stream(Iterable[T]):
 
         @overload
         def collect(
-            self, fun: "type[StreamableSequence[T]]"
-        ) -> "StreamableSequence[T]":
+            self: "Stream[T]", fun: type[StreamableSequence[T]]
+        ) -> StreamableSequence[T]:
             ...
 
         @overload
-        def collect(self, fun: type[tuple[Any, ...]]) -> tuple[T, ...]:
+        def collect(
+            self: "Stream[T]", fun: type[tuple[Any, ...]]
+        ) -> tuple[T, ...]:
             ...
 
         @overload
-        def collect(self, fun: type[set[Any]]) -> set[T]:
+        def collect(self: "Stream[T]", fun: type[set[Any]]) -> set[T]:
             ...
 
         @overload
-        def collect(self, fun: type[list[Any]]) -> list[T]:
+        def collect(self: "Stream[T]", fun: type[list[Any]]) -> list[T]:
             ...
 
         @overload
-        def collect(self, fun: type[frozenset[Any]]) -> frozenset[T]:
+        def collect(
+            self: "Stream[T]", fun: type[frozenset[Any]]
+        ) -> frozenset[T]:
             ...
 
         @overload
@@ -188,7 +192,7 @@ class Stream(Iterable[T]):
             ...
 
         @overload
-        def collect(self, fun: Callable[[Iterator[T]], K]) -> K:
+        def collect(self: "Stream[T]", fun: Callable[[Iterator[T]], K]) -> K:
             ...
 
     def collect(self, fun: Callable[[Iterator[T]], object]) -> object:

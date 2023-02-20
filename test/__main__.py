@@ -50,6 +50,10 @@ values: list[str] = (
     Stream(range(5)).map(str).enumerate().map(lambda x: x.val).collect(list)
 )
 assert values == list(map(str, range(5)))
+key_value_dict: dict[int, str] = (
+    Stream(range(5)).map(str).enumerate().collect(dict)
+)
+assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
 
 def create_int_stream() -> Stream[int]:
