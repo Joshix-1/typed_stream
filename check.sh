@@ -40,8 +40,8 @@ python3 -m mypy --pretty || FAILED=$(( 8 | FAILED ))
 echo Flake8:
 python3 -m flake8 --show-source || FAILED=$(( 16 | FAILED ))
 
-# echo Pylint:
-# DISABLE_PYSTON=1 python3 -m pylint . || FAILED=$(( 32 | FAILED ))
+echo Pylint:
+python3 -m pylint . || FAILED=$(( 32 | FAILED ))
 
 echo Bandit:
 python3 -m bandit -q -c pyproject.toml -r typed_stream examples || FAILED=$(( 64 | FAILED ))

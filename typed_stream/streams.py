@@ -133,6 +133,7 @@ class Stream(Iterable[T]):
         elif hasattr(self, "_close_source_callable") and isinstance(
             ret, Stream
         ):
+            # pylint: disable=protected-access
             ret._close_source_callable = self._close_source_callable
         del self._data
         return ret
@@ -282,7 +283,7 @@ class Stream(Iterable[T]):
     def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":
         """Use built-in filter to filter values."""
         self._check_finished()
-        self._data = filter(fun, self._data)  # pylint: disable=bad-builtin
+        self._data = filter(fun, self._data)
         return self
 
     def first(self) -> T:
@@ -296,7 +297,7 @@ class Stream(Iterable[T]):
         return first
 
     if TYPE_CHECKING:  # noqa: C901
-        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
+        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
             ...
@@ -383,7 +384,7 @@ class Stream(Iterable[T]):
         return self
 
     if TYPE_CHECKING:  # noqa: C901
-        # TODO: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
+        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
             ...

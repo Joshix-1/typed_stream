@@ -17,11 +17,11 @@ from typing import Any, Literal
 __all__ = ("is_even", "is_odd", "noop", "one")
 
 
-def noop(*args: Any) -> None:
+def noop(*args: Any) -> None:  # pylint: disable=unused-argument
     """Do nothing."""
 
 
-def one(*args: Any) -> Literal[1]:
+def one(*args: Any) -> Literal[1]:  # pylint: disable=unused-argument
     """Return the smallest positive odd number."""
     return 1
 
@@ -33,4 +33,4 @@ def is_even(number: int) -> bool:
 
 def is_odd(number: int) -> bool:
     """Check whether a number is odd."""
-    return not not number % 2  # noqa: SIM208
+    return not not number % 2  # noqa: SIM208  # pylint: disable=unneeded-not

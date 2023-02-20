@@ -4,6 +4,8 @@ import sys
 
 from typed_stream import BinaryFileStream, Stream
 
+# pylint: disable=duplicate-code
+
 
 def head(*args: str) -> None | str:
     """Print the head."""

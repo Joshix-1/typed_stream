@@ -43,8 +43,9 @@ def calculate(expression: str) -> str | int | float | complex:
     if not KINDA_SAFE_EXPR.match(expression):
         return f"Error: Input has to match {KINDA_SAFE_EXPR!r}"
     try:
+        # pylint: disable=eval-used
         result = eval(expression, {**GLOBALS})  # nosec: B307
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable=broad-except
         return f"Error: {exc!r}"
     if not isinstance(result, (int, float, complex)):
         return "Error: NaN"
@@ -57,7 +58,7 @@ def print_result(result: str | int | float | complex) -> None:
     print(result, file=file)
 
 
-def print_prompt(*args: object) -> None:
+def print_prompt(*args: object) -> None:  # pylint: disable=unused-argument
     """Print an input prompt to stderr."""
     print("> ", end="", flush=True, file=sys.stderr)
 

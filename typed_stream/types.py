@@ -25,33 +25,34 @@ __all__ = (
 
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 
-TGC_CHECKED = TypeVar("TGC_CHECKED", covariant=True, bound=object)
+# pylint: disable=invalid-name
+TGC_CHECKED_co = TypeVar("TGC_CHECKED_co", covariant=True, bound=object)
 
 
-class TypeGuardingCallable(Protocol[TGC_CHECKED]):
+class TypeGuardingCallable(Protocol[TGC_CHECKED_co]):
     """A class representing a function that type guards."""
 
-    def __call__(self, value: Any) -> TypeGuard[TGC_CHECKED]:
+    def __call__(self, value: Any) -> TypeGuard[TGC_CHECKED_co]:
         """Return True if value isinstance of TGC_CHECKED."""
 
 
-SC_IN = TypeVar("SC_IN", contravariant=True)
-SC_OUT = TypeVar("SC_OUT", covariant=True)
+# pylint: disable=invalid-name
+SC_IN_contra = TypeVar("SC_IN_contra", contravariant=True)
+SC_OUT_co = TypeVar("SC_OUT_co", covariant=True)
+# pylint: enable=invalid-name
 
 
-class StarCallable(
-    Protocol[SC_IN, SC_OUT]
-):  # pylint: disable=too-few-public-methods
+class StarCallable(Protocol[SC_IN_contra, SC_OUT_co]):
     """A class representing a function, that takes many arguments."""
 
-    def __call__(self, *args: SC_IN) -> SC_OUT:
+    def __call__(self, *args: SC_IN_contra) -> SC_OUT_co:
         """Handle the arguments."""
 
 
 SLT = TypeVar("SLT", bound="SupportsLessThan")
 
 
-class SupportsLessThan(Protocol):  # pylint: disable=too-few-public-methods
+class SupportsLessThan(Protocol):
     """A class that supports comparison with less than."""
 
     def __lt__(self: SLT, other: SLT) -> bool:
@@ -61,7 +62,7 @@ class SupportsLessThan(Protocol):  # pylint: disable=too-few-public-methods
 SA = TypeVar("SA", bound="SupportsAdd")
 
 
-class SupportsAdd(Protocol):  # pylint: disable=too-few-public-methods
+class SupportsAdd(Protocol):
     """A class that supports addition."""
 
     def __add__(self: SA, other: SA) -> SA:

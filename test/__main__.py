@@ -32,7 +32,10 @@ assert str_var == "3"
 str_var = Stream(["1", "2", "3"]).min()
 assert str_var == "1"
 
-assert isinstance(eval(repr(Stream.from_value(69))), Stream)
+assert isinstance(
+    eval(repr(Stream.from_value(69))),  # pylint: disable=eval-used
+    Stream,
+)
 
 assert Stream(range(5)).map(str).enumerate().collect(tuple) == (
     (0, "0"),

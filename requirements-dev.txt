@@ -7,6 +7,8 @@ bandit[toml]
 mypy
 typing_extensions
 
+pylint
+
 flake8
 flake8-bugbear
 flake8-comprehensions
