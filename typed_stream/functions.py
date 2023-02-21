@@ -31,7 +31,7 @@ __all__ = (
     "one",
 )
 
-T = TypeVar("T", bound=object)
+T = TypeVar("T")
 
 is_truthy: Callable[[Any], bool] = operator.truth
 """Check whether a value is truthy."""
@@ -74,15 +74,15 @@ class InstanceChecker(Generic[T]):
         return isinstance(value, self.type_)
 
 
-is_bool = InstanceChecker(bool)
+is_bool: InstanceChecker[bool] = InstanceChecker(bool)
 """Check whether a value is an instance of bool."""
-is_complex = InstanceChecker(complex)
+is_complex: InstanceChecker[complex] = InstanceChecker(complex)
 """Check whether a value is an instance of complex."""
-is_float = InstanceChecker(float)
+is_float: InstanceChecker[float] = InstanceChecker(float)
 """Check whether a value is an instance of float."""
-is_int = InstanceChecker(int)
+is_int: InstanceChecker[int] = InstanceChecker(int)
 """Check whether a value is an instance of int."""
-is_str = InstanceChecker(str)
+is_str: InstanceChecker[str] = InstanceChecker(str)
 """Check whether a value is an instance of str."""
 
 

@@ -53,12 +53,13 @@ __all__ = (
     "Stream",
 )
 
-K = TypeVar("K", bound=object)
-T = TypeVar("T", bound=object)
-U = TypeVar("U", bound=object)
-V = TypeVar("V", bound=object)
-W = TypeVar("W", bound=object)
-X = TypeVar("X", bound=object)
+K = TypeVar("K")
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")
+W = TypeVar("W")
+X = TypeVar("X")
+
 
 SA = TypeVar("SA", bound=SupportsAdd)
 SLT = TypeVar("SLT", bound=SupportsLessThan)
@@ -401,15 +402,21 @@ class Stream(Iterable[T]):
         """Map the values to a tuple of index and value."""
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    if TYPE_CHECKING:
+    @overload
+    def exclude(self: "Stream[K | U]", fun: InstanceChecker[U]) -> "Stream[K]":
+        ...
 
-        @overload
-        def exclude(self: "Stream[None | K]", fun: NoneChecker) -> "Stream[K]":
-            ...
+    @overload
+    def exclude(self: "Stream[None | K]", fun: NoneChecker) -> "Stream[K]":
+        ...
 
-        @overload
-        def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
-            ...
+    @overload
+    def exclude(self: "Stream[Any]", fun: NotNoneChecker) -> "Stream[None]":
+        ...
+
+    @overload
+    def exclude(self: "Stream[T]", fun: Callable[[T], Any]) -> "Stream[T]":
+        ...
 
     def exclude(self, fun: Callable[[T], Any]) -> "Stream[Any]":
         """Exclude values if the function returns a truthy value.
@@ -419,6 +426,10 @@ class Stream(Iterable[T]):
         self._check_finished()
         self._data = itertools.filterfalse(fun, self._data)
         return self
+
+    @overload
+    def filter(self: "Stream[K | None]", fun: NotNoneChecker) -> "Stream[K]":
+        ...
 
     @overload
     def filter(self: "Stream[K | None]") -> "Stream[K]":
@@ -436,10 +447,6 @@ class Stream(Iterable[T]):
     def filter(
         self: "Stream[Any]", fun: TypeGuardingCallable[K]
     ) -> "Stream[K]":
-        ...
-
-    @overload
-    def filter(self: "Stream[K | None]", fun: "NotNoneChecker") -> "Stream[K]":
         ...
 
     @overload
