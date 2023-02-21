@@ -19,10 +19,10 @@ import itertools
 from collections.abc import Callable, Iterable, Iterator
 from operator import add
 from types import EllipsisType
-from typing import TYPE_CHECKING, Any, AnyStr, TypeVar, overload
+from typing import TYPE_CHECKING, Any, AnyStr, Final, TypeVar, overload
 
 from .constants import MAX_PRINT_COUNT
-from .exceptions import StreamEmptyError, StreamFinishedError
+from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
 from .functions import noop, one
 from .iteration_utils import (
     Chunked,
@@ -62,6 +62,13 @@ SA = TypeVar("SA", bound=SupportsAdd)
 SLT = TypeVar("SLT", bound=SupportsLessThan)
 
 
+class _DefaultValueType:
+    __slots__ = ()
+
+
+_DEFAULT_VALUE: Final = _DefaultValueType()
+
+
 class Stream(Iterable[T]):
     """Stream class providing an interface similar to Stream in Java.
 
@@ -86,7 +93,7 @@ class Stream(Iterable[T]):
     def __iter__(self) -> Iterator[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
         self._check_finished()
-        yield from self._data
+        yield from self._data  # FIXME: do not use yield!
         self._finish(None, close_source=True)
 
     def __repr__(self) -> str:
@@ -116,22 +123,11 @@ class Stream(Iterable[T]):
         ) -> StreamableSequence[T]:
             ...
 
-    def __getitem__(  # noqa: C901
-        self, item: slice | int
-    ) -> StreamableSequence[T] | T:
+    def __getitem__(self, item: slice | int) -> StreamableSequence[T] | T:
         """Finish the stream by collecting."""
         self._check_finished()
         if isinstance(item, int):
-            if not item:  # == 0
-                return self.first()
-            if item > 0:
-                index, value = self.limit(item + 1).enumerate().last()
-                if index != item:
-                    raise IndexError(
-                        f"Stream only has {index + 1} elements and no index {item}."
-                    )
-                return value
-            return self.tail(abs(item))[0]
+            return self.nth(item)
         if not isinstance(item, slice):
             raise TypeError("Argument to __getitem__ should be int or slice.")
         if (  # pylint: disable=too-many-boolean-expressions
@@ -430,12 +426,14 @@ class Stream(Iterable[T]):
             fun(value)
 
     def last(self) -> T:
-        """Return the last element of the Stream. This finishes the Stream."""
+        """Return the last element of the Stream. This finishes the Stream.
+
+        raises StreamEmptyError if stream is empty.
+        """
         self._check_finished()
-        try:
-            return self.tail(1)[-1]
-        except StopIteration as exc:
-            raise StreamEmptyError() from exc
+        if tail := self.tail(1):
+            return tail[-1]
+        raise StreamEmptyError()
 
     def limit(self, count: int) -> "Stream[T]":
         """Stop the Stream after count values.
@@ -507,6 +505,54 @@ class Stream(Iterable[T]):
     def min(self: "Stream[SLT]") -> SLT:
         """Return the smallest element of the stream."""
         return min(self)
+
+    if TYPE_CHECKING:
+
+        @overload
+        def nth(self: "Stream[T]", index: int) -> T:
+            ...
+
+        @overload
+        def nth(self: "Stream[T]", index: int, default: T) -> T:
+            ...
+
+        @overload
+        def nth(self: "Stream[T]", index: int, default: K) -> T | K:
+            ...
+
+    def nth(  # noqa: C901
+        self: "Stream[T]",
+        index: int,
+        default: K | _DefaultValueType = _DEFAULT_VALUE,
+    ) -> T | K:
+        """Return the nth item of the stream.
+
+        Raises StreamIndexError if no default value is given and the Stream
+        does not have an item at the given index.
+        """
+        self._check_finished()
+        real_index: int
+        value: T | _DefaultValueType = _DEFAULT_VALUE
+        if index < 0:
+            tail = self.tail(abs(index))
+            if len(tail) == abs(index):
+                value = tail[0]
+        else:  # value >= 0
+            try:
+                real_index, value = self.limit(index + 1).enumerate().last()
+            except StreamEmptyError:
+                value = _DEFAULT_VALUE
+            else:
+                if index != real_index:
+                    value = _DEFAULT_VALUE
+
+        if not isinstance(value, _DefaultValueType):
+            return value
+
+        if isinstance(default, _DefaultValueType):
+            raise StreamIndexError()
+
+        return default
 
     def peek(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.

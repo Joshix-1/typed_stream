@@ -1,16 +1,29 @@
 """The tests for the Stream."""
 import operator
 import pickle
+from collections.abc import Callable
 from operator import add
 from pathlib import Path
-from typing import TypeGuard
+from typing import Any, TypeGuard
 
 from typed_stream import BinaryFileStream, FileStream, Stream
+from typed_stream.exceptions import StreamEmptyError, StreamIndexError
 from typed_stream.iteration_utils import IndexValueTuple
 
 from .test_functions import noop
 
 # pylint: disable=unnecessary-lambda
+
+
+def assert_raises(exc: type[BaseException], fun: Callable[[], Any]) -> None:
+    """Assert that fun raises exc."""
+    try:
+        val = fun()
+    except exc:
+        return
+    raise AssertionError(
+        f"{fun} did not raise {exc} and instead returned {val}"
+    )
 
 
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
@@ -254,9 +267,29 @@ assert tuple(stream.limit(1000)) == ((0, 0, 0, 0, 0, 0, 0, 0, 0),) * 1000
 
 for i in range(100):
     assert Stream(range(10_000))[i] == i
+    assert Stream(range(10_000)).nth(i) == i
     if not i:
         continue
     assert Stream(range(10_000))[-i] == 10_000 - i
+    assert Stream(range(10_000)).nth(-i) == 10_000 - i
+
+assert_raises(StreamIndexError, lambda: Stream(range(10))[10])
+assert_raises(StreamIndexError, lambda: Stream(range(10))[-11])
+assert_raises(StreamIndexError, lambda: Stream(())[-1])
+assert_raises(StreamIndexError, lambda: Stream(())[0])
+assert_raises(StreamIndexError, lambda: Stream(())[1])
+assert_raises(StreamIndexError, lambda: Stream(()).nth(-1))
+assert_raises(StreamIndexError, lambda: Stream(()).nth(0))
+assert_raises(StreamIndexError, lambda: Stream(()).nth(1))
+
+assert_raises(StreamEmptyError, lambda: Stream(()).first())
+assert_raises(StreamEmptyError, lambda: Stream([]).first())
+assert_raises(StreamEmptyError, lambda: Stream(()).last())
+assert_raises(StreamEmptyError, lambda: Stream([]).last())
+
+
+assert Stream(range(100)).nth(1_000, default=None) is None
+assert Stream(range(100)).nth(-1_000, default=None) is None
 
 assert Stream(range(100))[:10] == tuple(range(10))
 assert Stream(range(100))[90:] == tuple(range(90, 100))

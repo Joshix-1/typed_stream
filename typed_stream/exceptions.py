@@ -1,6 +1,6 @@
 """Exception classes raised while handling Streams."""
 
-__all__ = ("StreamEmptyError", "StreamFinishedError")
+__all__ = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
 
 
 class _StreamErrorBase(Exception):
@@ -13,3 +13,7 @@ class StreamFinishedError(_StreamErrorBase):
 
 class StreamEmptyError(_StreamErrorBase):
     """The Stream is empty."""
+
+
+class StreamIndexError(_StreamErrorBase, IndexError):
+    """Stream index out of range."""
