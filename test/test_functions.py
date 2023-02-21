@@ -17,7 +17,16 @@ from typed_stream.functions import (
     one,
 )
 
-__all__ = ("noop", "is_none", "is_not_none")
+__all__ = (
+    "noop",
+    "is_none",
+    "is_not_none",
+    "is_int",
+    "is_str",
+    "is_complex",
+    "is_bool",
+    "is_float",
+)
 
 assert is_falsy == operator.not_
 assert is_truthy == operator.truth

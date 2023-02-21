@@ -4,13 +4,22 @@ import pickle
 from collections.abc import Callable
 from operator import add
 from pathlib import Path
-from typing import Any, TypeGuard
+from typing import Any
 
 from typed_stream import BinaryFileStream, FileStream, Stream
 from typed_stream.exceptions import StreamEmptyError, StreamIndexError
 from typed_stream.iteration_utils import IndexValueTuple
 
-from .test_functions import is_none, is_not_none, noop
+from .test_functions import (
+    is_bool,
+    is_complex,
+    is_float,
+    is_int,
+    is_none,
+    is_not_none,
+    is_str,
+    noop,
+)
 
 # pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
 # pylint: disable=unnecessary-lambda, unsubscriptable-object
@@ -146,11 +155,6 @@ assert Stream.counting().take_while((100).__gt__).count() == 100
 assert list(Stream.counting().take_while((5).__gt__)) == [0, 1, 2, 3, 4]
 assert list(Stream.range(10).drop_while((5).__gt__)) == [5, 6, 7, 8, 9]
 assert Stream.range(10).tail(5) == (5, 6, 7, 8, 9)
-
-
-def is_str(value: object) -> TypeGuard[str]:
-    """Type guard strings."""
-    return isinstance(value, str)
 
 
 str_stream: Stream[str] = Stream([None, "1", "2", "3", 4, 0, 23]).filter(is_str)
@@ -317,3 +321,19 @@ assert list(Stream.range(0, 20, 3)) == list(range(0, 20, 3))
 assert list(Stream.range(0, 20, step=3)) == list(range(0, 20, 3))
 assert list(Stream.range(0, stop=20, step=3)) == list(range(0, 20, 3))
 assert list(Stream.range(start=0, stop=20, step=3)) == list(range(0, 20, 3))
+
+
+source: list[str | int | float | complex | bool | None] = [
+    None,
+    True,
+    "2",
+    3,
+    4.2,
+    5j,
+]
+ints: list[int] = Stream(source).filter(is_int).collect(list)
+strs: list[str] = Stream(source).filter(is_str).collect(list)
+floats: list[float] = Stream(source).filter(is_float).collect(list)
+complexs: list[complex] = Stream(source).filter(is_complex).collect(list)
+bools: list[bool] = Stream(source).filter(is_bool).collect(list)
+nones: list[None] = Stream(source).filter(is_none).collect(list)

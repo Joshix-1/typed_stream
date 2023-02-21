@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Final, TypeVar, overload
 
 from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
-from .functions import NoneChecker, NotNoneChecker, noop, one
+from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
     Chunked,
     Enumerator,
@@ -429,15 +429,21 @@ class Stream(Iterable[T]):
         ...
 
     @overload
+    def filter(self: "Stream[Any]", fun: InstanceChecker[K]) -> "Stream[K]":
+        ...
+
+    @overload
+    def filter(
+        self: "Stream[Any]", fun: TypeGuardingCallable[K]
+    ) -> "Stream[K]":
+        ...
+
+    @overload
     def filter(self: "Stream[K | None]", fun: "NotNoneChecker") -> "Stream[K]":
         ...
 
     @overload
-    def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
-        ...
-
-    @overload
-    def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
+    def filter(self, fun: Callable[[T], Any]) -> "Stream[T]":
         ...
 
     def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":

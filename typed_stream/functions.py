@@ -14,7 +14,7 @@
 """Simple helper functions for easy Stream usage."""
 import operator
 from collections.abc import Callable
-from typing import Any, Literal, TypeGuard
+from typing import Any, Generic, Literal, TypeGuard, TypeVar
 
 __all__ = (
     "is_complex",
@@ -31,6 +31,7 @@ __all__ = (
     "one",
 )
 
+T = TypeVar("T", bound=object)
 
 is_truthy: Callable[[Any], bool] = operator.truth
 """Check whether a value is truthy."""
@@ -58,29 +59,31 @@ def is_odd(number: int) -> bool:
     return not not number % 2  # noqa: SIM208  # pylint: disable=unneeded-not
 
 
-def is_bool(value: Any) -> TypeGuard[bool]:
-    """Check whether a value is an instance of bool."""
-    return isinstance(value, bool)
+class InstanceChecker(Generic[T]):
+    """Checks whether a value has the correct type."""
+
+    type_: type[T]
+
+    __slots__ = ("type_",)
+
+    def __init__(self, type_: type[T]) -> None:
+        self.type_ = type_
+
+    def __call__(self, value: Any) -> TypeGuard[T]:
+        """Check whether a value has the correct type."""
+        return isinstance(value, self.type_)
 
 
-def is_complex(value: Any) -> TypeGuard[complex]:
-    """Check whether a value is an instance of complex."""
-    return isinstance(value, complex)
-
-
-def is_float(value: Any) -> TypeGuard[float]:
-    """Check whether a value is an instance of float."""
-    return isinstance(value, float)
-
-
-def is_int(value: Any) -> TypeGuard[int]:
-    """Check whether a value is an instance of int."""
-    return isinstance(value, int)
-
-
-def is_str(value: Any) -> TypeGuard[str]:
-    """Check whether a value is an instance of str."""
-    return isinstance(value, str)
+is_bool = InstanceChecker(bool)
+"""Check whether a value is an instance of bool."""
+is_complex = InstanceChecker(complex)
+"""Check whether a value is an instance of complex."""
+is_float = InstanceChecker(float)
+"""Check whether a value is an instance of float."""
+is_int = InstanceChecker(int)
+"""Check whether a value is an instance of int."""
+is_str = InstanceChecker(str)
+"""Check whether a value is an instance of str."""
 
 
 class NotNoneChecker:
