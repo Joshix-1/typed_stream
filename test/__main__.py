@@ -265,6 +265,10 @@ stream = Stream.from_value(0).chunk(9)
 assert pickle.loads(pickle.dumps(stream)).first() == (0, 0, 0, 0, 0, 0, 0, 0, 0)
 assert tuple(stream.limit(1000)) == ((0, 0, 0, 0, 0, 0, 0, 0, 0),) * 1000
 
+iterator = iter(Stream.from_value(1).limit(5))
+assert tuple(pickle.loads(pickle.dumps(iterator))) == (1, 1, 1, 1, 1)
+assert tuple(iterator) == (1, 1, 1, 1, 1)
+
 for i in range(100):
     assert Stream(range(10_000))[i] == i
     assert Stream(range(10_000)).nth(i) == i

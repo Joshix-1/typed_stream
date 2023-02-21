@@ -99,7 +99,7 @@ class LazyFileIterator(Iterator[AnyStr]):
         return self
 
     def __del__(self) -> None:
-        """Close v."""
+        """Run close."""
         self.close()
 
     if TYPE_CHECKING:

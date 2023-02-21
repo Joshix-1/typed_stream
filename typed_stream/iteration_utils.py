@@ -12,7 +12,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Utility classes used in streams."""
-
+import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
 from typing import Any, Generic, TypeVar
@@ -124,3 +124,60 @@ class Peeker(Generic[T]):
         """Call fun with value as argument and return value."""
         self.fun(value)
         return value
+
+
+class IterWithCleanUp(Iterator[T]):
+    """An Iterator that calls a clean-up function when finished.
+
+    The clean-up function is called once in one of the following conditions:
+    - iteration has been completed
+    - .close() gets called
+    - .__del__() gets called
+    - it's used in a context manager and .__exit__() gets called
+
+    What you shouldn't do (as calling the clean-up function is probably important):
+    - calling next(this) just once
+    - breaking in a for loop iterating over this without closing this
+    - partially iterating over this without closing
+    """
+
+    iterator: Iterator[T]
+    cleanup_fun: Callable[[], Any]
+
+    __slots__ = ("cleanup_fun", "iterator")
+
+    def __init__(
+        self, iterable: Iterable[T], cleanup_fun: Callable[[], Any]
+    ) -> None:
+        """Initialize this class."""
+        self.iterator = iter(iterable)
+        self.cleanup_fun = cleanup_fun
+
+    def __next__(self) -> T:
+        """Return the next element if available else run clean-up."""
+        try:
+            return next(self.iterator)
+        except BaseException:
+            with contextlib.suppress(Exception):
+                self.close()
+            raise
+
+    def close(self) -> None:
+        """Run clean-up if not run yet."""
+        if hasattr(self, "iterator"):
+            del self.iterator
+        if hasattr(self, "cleanup_fun"):
+            self.cleanup_fun()
+            del self.cleanup_fun
+
+    def __del__(self) -> None:
+        """Run close."""
+        self.close()
+
+    def __enter__(self) -> Iterator[T]:
+        """Return self."""
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        """Close self."""
+        self.close()

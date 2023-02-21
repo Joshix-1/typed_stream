@@ -14,6 +14,7 @@
 """Java-like typed Stream classes for easier handling of generators."""
 import collections
 import concurrent.futures
+import contextlib
 import functools
 import itertools
 from collections.abc import Callable, Iterable, Iterator
@@ -28,6 +29,7 @@ from .iteration_utils import (
     Chunked,
     Enumerator,
     IndexValueTuple,
+    IterWithCleanUp,
     Peeker,
     ValueIterator,
 )
@@ -90,11 +92,10 @@ class Stream(Iterable[T]):
         if not isinstance(data, EllipsisType):
             self._data = iter(data)
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self) -> IterWithCleanUp[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
         self._check_finished()
-        yield from self._data  # FIXME: do not use yield!
-        self._finish(None, close_source=True)
+        return IterWithCleanUp(self._data, self.close)
 
     def __repr__(self) -> str:
         """Convert this Stream to a str. This finishes the Stream."""
@@ -198,6 +199,11 @@ class Stream(Iterable[T]):
         """Split stream into chunks of the specified size."""
         self._check_finished()
         return self._finish(Chunked(self._data, size).stream())
+
+    def close(self) -> None:
+        """Close this stream cleanly."""
+        with contextlib.suppress(StreamFinishedError):
+            self._finish(None, close_source=True)
 
     if TYPE_CHECKING:  # noqa: C901
 
