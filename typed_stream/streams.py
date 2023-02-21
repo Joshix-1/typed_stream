@@ -156,7 +156,7 @@ class Stream(Iterable[T]):
         """Create an endless Stream of the same value."""
         return ValueIterator(value).stream()
 
-    if TYPE_CHECKING:  # noqa: C901
+    if TYPE_CHECKING:  # noqa: C901  # pylint: disable=too-complex
 
         @overload
         @staticmethod
@@ -166,6 +166,11 @@ class Stream(Iterable[T]):
         @overload
         @staticmethod
         def range(*, stop: int) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(*, start: int, stop: int) -> "Stream[int]":
             ...
 
         @overload
@@ -193,9 +198,15 @@ class Stream(Iterable[T]):
         def range(start: int, /, *, stop: int, step: int) -> "Stream[int]":
             ...
 
+        @overload
+        @staticmethod
+        def range(*, start: int, stop: int, step: int) -> "Stream[int]":
+            ...
+
     @staticmethod
     def range(  # noqa: C901
         *args: int,
+        start: int | _DefaultValueType = _DEFAULT_VALUE,
         stop: int | _DefaultValueType = _DEFAULT_VALUE,
         step: int | _DefaultValueType = _DEFAULT_VALUE,
     ) -> "Stream[int]":
@@ -206,7 +217,14 @@ class Stream(Iterable[T]):
         - Stream.range(start, stop[, step]) -> Stream[int]
         """
         # pylint: disable=confusing-consecutive-elif
-        if isinstance(stop, _DefaultValueType):
+        if not isinstance(start, _DefaultValueType):
+            if not args and not isinstance(stop, _DefaultValueType):
+                return Stream(
+                    range(start, stop)
+                    if isinstance(step, _DefaultValueType)
+                    else range(start, stop, step)
+                )
+        elif isinstance(stop, _DefaultValueType):
             if isinstance(step, _DefaultValueType):
                 return Stream(range(*args))  # no kwarg given
             if len(args) == 2:
