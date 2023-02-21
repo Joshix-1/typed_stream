@@ -156,6 +156,70 @@ class Stream(Iterable[T]):
         """Create an endless Stream of the same value."""
         return ValueIterator(value).stream()
 
+    if TYPE_CHECKING:  # noqa: C901
+
+        @overload
+        @staticmethod
+        def range(stop: int, /) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(*, stop: int) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(start: int, stop: int, /) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(start: int, /, *, stop: int) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(start: int, stop: int, /, *, step: int) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(start: int, stop: int, step: int, /) -> "Stream[int]":
+            ...
+
+        @overload
+        @staticmethod
+        def range(start: int, /, *, stop: int, step: int) -> "Stream[int]":
+            ...
+
+    @staticmethod
+    def range(  # noqa: C901
+        *args: int,
+        stop: int | _DefaultValueType = _DEFAULT_VALUE,
+        step: int | _DefaultValueType = _DEFAULT_VALUE,
+    ) -> "Stream[int]":
+        """Create a Stream[int] from a range.
+
+        The arguments behave like to the built-in range function:
+        - Stream.range(stop) -> Stream[int]
+        - Stream.range(start, stop[, step]) -> Stream[int]
+        """
+        # pylint: disable=confusing-consecutive-elif
+        if isinstance(stop, _DefaultValueType):
+            if isinstance(step, _DefaultValueType):
+                return Stream(range(*args))  # no kwarg given
+            if len(args) == 2:
+                return Stream(range(args[0], args[1], step))
+        elif isinstance(step, _DefaultValueType):
+            if len(args) == 1:
+                return Stream(range(args[0], stop))
+            if not args:
+                return Stream(range(stop))
+        elif len(args) == 1:
+            return Stream(range(args[0], stop, step))
+        raise TypeError("Unexpected arguments to Stream.range()")
+
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
         if self._is_finished():

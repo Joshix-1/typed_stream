@@ -12,7 +12,8 @@ from typed_stream.iteration_utils import IndexValueTuple
 
 from .test_functions import noop
 
-# pylint: disable=unnecessary-lambda
+# pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
+# pylint: disable=unnecessary-lambda, unsubscriptable-object
 
 
 def assert_raises(exc: type[BaseException], fun: Callable[[], Any]) -> None:
@@ -51,7 +52,7 @@ assert isinstance(
     Stream,
 )
 
-assert Stream(range(5)).map(str).enumerate().collect(tuple) == (
+assert Stream.range(5).map(str).enumerate().collect(tuple) == (
     (0, "0"),
     (1, "1"),
     (2, "2"),
@@ -60,27 +61,25 @@ assert Stream(range(5)).map(str).enumerate().collect(tuple) == (
 )
 
 indices: list[int] = (
-    Stream(range(5)).map(str).enumerate().map(lambda x: x.idx).collect(list)
+    Stream.range(5).map(str).enumerate().map(lambda x: x.idx).collect(list)
 )
 assert indices == list(range(5))
 enumeration_stream: Stream[IndexValueTuple[str]] = (
-    Stream(range(5)).map(str).enumerate()
+    Stream.range(5).map(str).enumerate()
 )
 values: list[str] = enumeration_stream.map(lambda x: x.val).collect(list)
 assert values == list(map(str, range(5)))
-values = (
-    Stream(range(5)).map(str).enumerate().map(lambda x: x.val).collect(list)
-)
+values = Stream.range(5).map(str).enumerate().map(lambda x: x.val).collect(list)
 assert values == list(map(str, range(5)))
 key_value_dict: dict[int, str] = (
-    Stream(range(5)).map(str).enumerate().collect(dict)
+    Stream.range(5).map(str).enumerate().collect(dict)
 )
 assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
 
 def create_int_stream() -> Stream[int]:
     """Create an int stream."""
-    return Stream(range(10_000)).map(operator.pow, 2)
+    return Stream.range(10_000).map(operator.pow, 2)
 
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
@@ -122,7 +121,7 @@ assert Stream([]).empty()
 assert not Stream([1]).empty()
 
 assert Stream([1, 2, 3]).chain([4, 5, 6]).collect(tuple) == (1, 2, 3, 4, 5, 6)
-assert Stream(range(25)).chunk(5).map(lambda x: list(x)).collect(tuple) == (
+assert Stream.range(25).chunk(5).map(lambda x: list(x)).collect(tuple) == (
     [0, 1, 2, 3, 4],
     [5, 6, 7, 8, 9],
     [10, 11, 12, 13, 14],
@@ -135,13 +134,13 @@ assert int_list == [1, 2, 3, 4, 23]
 
 assert len(Stream.from_value("x").limit(1000).tail(10)) == 10
 
-assert Stream(range(10_000)).chunk(100).count() == 100
-assert list(Stream(range(10_000)).chunk(100).map(len).distinct()) == [100]
+assert Stream.range(10_000).chunk(100).count() == 100
+assert list(Stream.range(10_000).chunk(100).map(len).distinct()) == [100]
 
 assert Stream.counting().take_while((100).__gt__).count() == 100
 assert list(Stream.counting().take_while((5).__gt__)) == [0, 1, 2, 3, 4]
-assert list(Stream(range(10)).drop_while((5).__gt__)) == [5, 6, 7, 8, 9]
-assert Stream(range(10)).tail(5) == (5, 6, 7, 8, 9)
+assert list(Stream.range(10).drop_while((5).__gt__)) == [5, 6, 7, 8, 9]
+assert Stream.range(10).tail(5) == (5, 6, 7, 8, 9)
 
 
 def is_str(value: object) -> TypeGuard[str]:
@@ -224,7 +223,7 @@ assert not hasattr(fs, "_file_iterator")
 int_list_begin: list[int] = []
 int_list_end: list[int] = []
 int_stream: Stream[int] = (
-    Stream(range(10_000))
+    Stream.range(10_000)
     .peek(int_list_begin.append)
     .limit(1000)
     .drop_while(lambda x: x < 500)
@@ -246,7 +245,7 @@ assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
 ).collect(tuple) == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 stream = (
-    Stream(range(1000000000000000000000000000000000000000000000000000000000000))
+    Stream.range(10000000000000000000000000000000000000000000000000000000000000)
     .peek(noop)
     .map(str)
     .flat_map(str.encode, "ASCII")
@@ -270,15 +269,15 @@ assert tuple(pickle.loads(pickle.dumps(iterator))) == (1, 1, 1, 1, 1)
 assert tuple(iterator) == (1, 1, 1, 1, 1)
 
 for i in range(100):
-    assert Stream(range(10_000))[i] == i
-    assert Stream(range(10_000)).nth(i) == i
+    assert Stream.range(10_000)[i] == i
+    assert Stream.range(10_000).nth(i) == i
     if not i:
         continue
-    assert Stream(range(10_000))[-i] == 10_000 - i
-    assert Stream(range(10_000)).nth(-i) == 10_000 - i
+    assert Stream.range(10_000)[-i] == 10_000 - i
+    assert Stream.range(10_000).nth(-i) == 10_000 - i
 
-assert_raises(StreamIndexError, lambda: Stream(range(10))[10])
-assert_raises(StreamIndexError, lambda: Stream(range(10))[-11])
+assert_raises(StreamIndexError, lambda: Stream.range(10)[10])
+assert_raises(StreamIndexError, lambda: Stream.range(10)[-11])
 assert_raises(StreamIndexError, lambda: Stream(())[-1])
 assert_raises(StreamIndexError, lambda: Stream(())[0])
 assert_raises(StreamIndexError, lambda: Stream(())[1])
@@ -292,12 +291,20 @@ assert_raises(StreamEmptyError, lambda: Stream(()).last())
 assert_raises(StreamEmptyError, lambda: Stream([]).last())
 
 
-assert Stream(range(100)).nth(1_000, default=None) is None
-assert Stream(range(100)).nth(-1_000, default=None) is None
+assert Stream.range(100).nth(1_000, default=None) is None
+assert Stream.range(100).nth(-1_000, default=None) is None
+assert Stream(()).nth(1, default=None) is None
+assert Stream(()).nth(-1, default=None) is None
 
-assert Stream(range(100))[:10] == tuple(range(10))
-assert Stream(range(100))[90:] == tuple(range(90, 100))
-assert Stream(range(1000))[90:100] == tuple(range(90, 100))
-assert Stream(range(1000))[90:100:2] == tuple(range(90, 100, 2))
+assert Stream.range(100)[:10] == tuple(range(10))
+assert Stream.range(100)[90:] == tuple(range(90, 100))
+assert Stream.range(1000)[90:100] == tuple(range(90, 100))
+assert Stream.range(1000)[90:100:2] == tuple(range(90, 100, 2))
 
-assert Stream(range(1000))[20:44:5] == tuple(range(20, 44, 5))
+assert Stream.range(1000)[20:44:5] == tuple(range(20, 44, 5))
+
+assert list(Stream.range(10)) == list(range(10))
+assert list(Stream.range(stop=10)) == list(range(10))
+assert list(Stream.range(0, 20, 3)) == list(range(0, 20, 3))
+assert list(Stream.range(0, 20, step=3)) == list(range(0, 20, 3))
+assert list(Stream.range(0, stop=20, step=3)) == list(range(0, 20, 3))
