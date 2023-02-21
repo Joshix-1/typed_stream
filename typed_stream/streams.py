@@ -257,6 +257,19 @@ class Stream(Iterable[T]):
         self._check_finished()
         return self._finish(fun(self._data), close_source=True)
 
+    def concurrent_map(
+        self, fun: Callable[[T], K], max_workers: int | None = None
+    ) -> "Stream[K]":
+        """Map values concurrently.
+
+        See: https://docs.python.org/3/library/concurrent.futures.html
+        """
+        self._check_finished()
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=max_workers
+        ) as executor:
+            return self._finish(Stream(executor.map(fun, self._data)))
+
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream."""
         self._check_finished()
@@ -494,19 +507,6 @@ class Stream(Iterable[T]):
     def min(self: "Stream[SLT]") -> SLT:
         """Return the smallest element of the stream."""
         return min(self)
-
-    def concurrent_map(
-        self, fun: Callable[[T], K], max_workers: int | None = None
-    ) -> "Stream[K]":
-        """Map values concurrently.
-
-        See: https://docs.python.org/3/library/concurrent.futures.html
-        """
-        self._check_finished()
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=max_workers
-        ) as executor:
-            return self._finish(Stream(executor.map(fun, self._data)))
 
     def peek(self, fun: Callable[[T], Any]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
