@@ -10,7 +10,7 @@ from typed_stream import BinaryFileStream, FileStream, Stream
 from typed_stream.exceptions import StreamEmptyError, StreamIndexError
 from typed_stream.iteration_utils import IndexValueTuple
 
-from .test_functions import noop
+from .test_functions import is_none, is_not_none, noop
 
 # pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
 # pylint: disable=unnecessary-lambda, unsubscriptable-object
@@ -131,6 +131,11 @@ assert Stream.range(25).chunk(5).map(lambda x: list(x)).collect(tuple) == (
 
 int_list: list[int] = Stream([None, 1, 2, 3, 4, 0, 23]).filter().collect(list)
 assert int_list == [1, 2, 3, 4, 23]
+int_list = Stream([None, 1, 2, 3, None]).filter(is_not_none).collect(list)
+assert int_list == [1, 2, 3]
+int_list = Stream([None, 1, 2, 3, None]).exclude(is_none).collect(list)
+assert int_list == [1, 2, 3]
+
 
 assert len(Stream.from_value("x").limit(1000).tail(10)) == 10
 

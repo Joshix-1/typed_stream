@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Final, TypeVar, overload
 
 from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
-from .functions import noop, one
+from .functions import NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
     Chunked,
     Enumerator,
@@ -401,7 +401,17 @@ class Stream(Iterable[T]):
         """Map the values to a tuple of index and value."""
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
+    if TYPE_CHECKING:
+
+        @overload
+        def exclude(self: "Stream[None | K]", fun: NoneChecker) -> "Stream[K]":
+            ...
+
+        @overload
+        def exclude(self, fun: Callable[[T], Any]) -> "Stream[T]":
+            ...
+
+    def exclude(self, fun: Callable[[T], Any]) -> "Stream[Any]":
         """Exclude values if the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
@@ -410,23 +420,25 @@ class Stream(Iterable[T]):
         self._data = itertools.filterfalse(fun, self._data)
         return self
 
-    if TYPE_CHECKING:  # noqa: C901
+    @overload
+    def filter(self: "Stream[K | None]") -> "Stream[K]":
+        ...
 
-        @overload
-        def filter(self: "Stream[K | None]") -> "Stream[K]":
-            ...
+    @overload
+    def filter(self: "Stream[T]") -> "Stream[T]":
+        ...
 
-        @overload
-        def filter(self) -> "Stream[T]":
-            ...
+    @overload
+    def filter(self: "Stream[K | None]", fun: "NotNoneChecker") -> "Stream[K]":
+        ...
 
-        @overload
-        def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
-            ...
+    @overload
+    def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
+        ...
 
-        @overload
-        def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
-            ...
+    @overload
+    def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
+        ...
 
     def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":
         """Use built-in filter to filter values."""
