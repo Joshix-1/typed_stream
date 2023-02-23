@@ -28,7 +28,7 @@ from .test_functions import (
 # pylint: disable=unnecessary-lambda, unsubscriptable-object
 
 
-def assert_raises(exc: type[BaseException], fun: Callable[[], Any]) -> None:
+def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     """Assert that fun raises exc."""
     try:
         val = fun()

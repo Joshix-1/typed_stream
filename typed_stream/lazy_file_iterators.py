@@ -38,7 +38,7 @@ LFI = TypeVar("LFI", "LazyFileIterator[str]", "LazyFileIterator[bytes]")
 
 
 def _is_bytes(
-    lfi: "LazyFileIterator[AnyStr]",
+    lfi: "LazyFileIterator[AnyStr] | LazyFileIterator[bytes] | LazyFileIterator[str]",
 ) -> "TypeGuard[LazyFileIterator[bytes]]":
     """Return True if the lfi is LazyFileIterator[bytes]."""
     return lfi.encoding is None
@@ -125,13 +125,13 @@ class LazyFileIterator(Iterator[AnyStr]):
         def _open_file(self: "LazyFileIterator[str]") -> TextIO:
             ...
 
-    def _open_file(self) -> IO[Any]:
+    def _open_file(self: "LazyFileIterator[str] | LazyFileIterator[bytes]") -> IO[str] | IO[bytes]:
         """Open the underlying file."""
         if _is_bytes(self):
             return open(self.path, mode="rb")  # noqa: SIM115
         return open(self.path, encoding=self.encoding)  # noqa: SIM115
 
-    def __next__(self) -> AnyStr:
+    def __next__(self: "LazyFileIterator[AnyStr]") -> AnyStr:
         """Get the next line."""
         if self._iterator is None:
             self._file_object = self._open_file()

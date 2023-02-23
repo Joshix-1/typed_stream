@@ -15,7 +15,7 @@
 import operator
 from collections.abc import Callable
 from numbers import Number, Real
-from typing import Generic, Literal, TypeGuard, TypeVar
+from typing import Generic, Literal, TypeGuard, TypeVar, final
 
 __all__ = (
     "is_bool",
@@ -75,6 +75,7 @@ def is_negative(number: int | float) -> bool:
     return number < 0
 
 
+@final
 class InstanceChecker(Generic[T]):
     """Checks whether a value is an instance of a type."""
 
@@ -112,6 +113,7 @@ is_real_number: InstanceChecker[Real] = (
 # fmt: on
 
 
+@final
 class NotNoneChecker:
     """Check whether a value is not None."""
 
@@ -122,10 +124,10 @@ class NotNoneChecker:
         return value is not None
 
 
-is_not_none = NotNoneChecker()
+is_not_none: NotNoneChecker = NotNoneChecker()
 """Check whether a value is not None."""
 
-
+@final
 class NoneChecker:
     """Check whether a value is None."""
 
@@ -136,5 +138,5 @@ class NoneChecker:
         return value is None
 
 
-is_none = NoneChecker()
+is_none: NoneChecker = NoneChecker()
 """Check whether a value is None."""

@@ -12,27 +12,31 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Helpful types."""
+from abc import abstractmethod
 from os import PathLike
-from typing import Protocol, TypeGuard, TypeVar
+from typing import Protocol, TypeAlias, TypeGuard, TypeVar
 
 __all__ = (
     "PathLikeType",
     "StarCallable",
     "SupportsAdd",
+    "SupportsComparison",
+    "SupportsGreaterThan",
     "SupportsLessThan",
     "TypeGuardingCallable",
 )
 
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 
-# pylint: disable=invalid-name
-TGC_CHECKED_co = TypeVar("TGC_CHECKED_co", covariant=True, bound=object)
+
+T_co = TypeVar("T_co", covariant=True)
 
 
-class TypeGuardingCallable(Protocol[TGC_CHECKED_co]):
+class TypeGuardingCallable(Protocol[T_co]):
     """A class representing a function that type guards."""
 
-    def __call__(self, value: object) -> TypeGuard[TGC_CHECKED_co]:
+    @abstractmethod
+    def __call__(self, value: object) -> TypeGuard[T_co]:
         """Return True if value isinstance of TGC_CHECKED."""
 
 
@@ -45,6 +49,7 @@ SC_OUT_co = TypeVar("SC_OUT_co", covariant=True)
 class StarCallable(Protocol[SC_IN_contra, SC_OUT_co]):
     """A class representing a function, that takes many arguments."""
 
+    @abstractmethod
     def __call__(self, *args: SC_IN_contra) -> SC_OUT_co:
         """Handle the arguments."""
 
@@ -55,8 +60,23 @@ SLT = TypeVar("SLT", bound="SupportsLessThan")
 class SupportsLessThan(Protocol):
     """A class that supports comparison with less than."""
 
+    @abstractmethod
     def __lt__(self: SLT, other: SLT) -> bool:
         """Compare to another instance of the same type."""
+
+
+SGT = TypeVar("SGT", bound="SupportsGreaterThan")
+
+
+class SupportsGreaterThan(Protocol):
+    """A class that supports comparison with less than."""
+
+    @abstractmethod
+    def __gt__(self: SGT, other: SGT) -> bool:
+        """Compare to another instance of the same type."""
+
+
+SupportsComparison: TypeAlias = SupportsGreaterThan | SupportsLessThan
 
 
 SA = TypeVar("SA", bound="SupportsAdd")
@@ -65,5 +85,6 @@ SA = TypeVar("SA", bound="SupportsAdd")
 class SupportsAdd(Protocol):
     """A class that supports addition."""
 
+    @abstractmethod
     def __add__(self: SA, other: SA) -> SA:
         """Add another instance of the same type to self."""

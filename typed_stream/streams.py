@@ -44,7 +44,7 @@ from .types import (
     PathLikeType,
     StarCallable,
     SupportsAdd,
-    SupportsLessThan,
+    SupportsComparison,
     TypeGuardingCallable,
 )
 
@@ -63,7 +63,7 @@ X = TypeVar("X")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 
 SA = TypeVar("SA", bound=SupportsAdd)
-SLT = TypeVar("SLT", bound=SupportsLessThan)
+SLT = TypeVar("SLT", bound=SupportsComparison)
 
 
 class _DefaultValueType:
