@@ -18,6 +18,7 @@ import contextlib
 import functools
 import itertools
 from collections.abc import Callable, Iterable, Iterator
+from numbers import Number, Real
 from operator import add
 from types import EllipsisType
 from typing import TYPE_CHECKING, Any, AnyStr, Final, TypeVar, overload
@@ -59,7 +60,7 @@ U = TypeVar("U")
 V = TypeVar("V")
 W = TypeVar("W")
 X = TypeVar("X")
-
+Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 
 SA = TypeVar("SA", bound=SupportsAdd)
 SLT = TypeVar("SLT", bound=SupportsLessThan)
@@ -83,9 +84,7 @@ class Stream(Iterable[T]):
     _close_source_callable: Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
-    def __init__(
-        self, data: "Iterable[T] | Iterator[T] | EllipsisType"
-    ) -> None:
+    def __init__(self, data: Iterable[T] | EllipsisType) -> None:
         """Create a new Stream.
 
         To create a finished Stream do Stream(...).
@@ -403,12 +402,26 @@ class Stream(Iterable[T]):
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
     @overload
-    def exclude(self: "Stream[K | U]", fun: InstanceChecker[U]) -> "Stream[K]":
+    def exclude(self: "Stream[K | None]", fun: NoneChecker) -> "Stream[K]":
         ...
 
-    @overload
-    def exclude(self: "Stream[None | K]", fun: NoneChecker) -> "Stream[K]":
-        ...
+    # @overload
+    # def exclude(
+    #     self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
+    # ) -> "Stream[K]":
+    #     ...
+
+    # @overload
+    # def exclude(
+    #     self: "Stream[K | U]", fun: InstanceChecker[U]
+    # ) -> "Stream[K]":
+    #     ...
+
+    # @overload
+    # def exclude(
+    #     self: "Stream[K | U]", fun: TypeGuardingCallable[U]
+    # ) -> "Stream[K]":
+    #     ...
 
     @overload
     def exclude(self: "Stream[Any]", fun: NotNoneChecker) -> "Stream[None]":
@@ -429,6 +442,10 @@ class Stream(Iterable[T]):
 
     @overload
     def filter(self: "Stream[K | None]", fun: NotNoneChecker) -> "Stream[K]":
+        ...
+
+    @overload
+    def filter(self: "Stream[Any]", fun: NoneChecker) -> "Stream[None]":
         ...
 
     @overload

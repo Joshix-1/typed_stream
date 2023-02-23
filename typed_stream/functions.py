@@ -14,17 +14,23 @@
 """Simple helper functions for easy Stream usage."""
 import operator
 from collections.abc import Callable
+from numbers import Number, Real
 from typing import Any, Generic, Literal, TypeGuard, TypeVar
 
 __all__ = (
+    "is_bool",
     "is_complex",
     "is_even",
     "is_falsy",
     "is_float",
     "is_int",
+    "is_negative",
     "is_none",
     "is_not_none",
+    "is_number",
     "is_odd",
+    "is_positive",
+    "is_real_number",
     "is_str",
     "is_truthy",
     "noop",
@@ -59,8 +65,18 @@ def is_odd(number: int) -> bool:
     return not not number % 2  # noqa: SIM208  # pylint: disable=unneeded-not
 
 
+def is_positive(number: int | float) -> bool:
+    """Check whether a number is positive."""
+    return number > 0
+
+
+def is_negative(number: int | float) -> bool:
+    """Check whether a number is negative."""
+    return number < 0
+
+
 class InstanceChecker(Generic[T]):
-    """Checks whether a value has the correct type."""
+    """Checks whether a value is an instance of a type."""
 
     type_: type[T]
 
@@ -74,6 +90,7 @@ class InstanceChecker(Generic[T]):
         return isinstance(value, self.type_)
 
 
+# fmt: off
 is_bool: InstanceChecker[bool] = InstanceChecker(bool)
 """Check whether a value is an instance of bool."""
 is_complex: InstanceChecker[complex] = InstanceChecker(complex)
@@ -84,6 +101,15 @@ is_int: InstanceChecker[int] = InstanceChecker(int)
 """Check whether a value is an instance of int."""
 is_str: InstanceChecker[str] = InstanceChecker(str)
 """Check whether a value is an instance of str."""
+is_number: InstanceChecker[Number] = (
+    InstanceChecker(Number)  # type: ignore[type-abstract]
+)
+"""Check whether a value is an instance of Number."""
+is_real_number: InstanceChecker[Real] = (
+    InstanceChecker(Real)  # type: ignore[type-abstract]
+)
+"""Check whether a value is an instance of Real."""
+# fmt: on
 
 
 class NotNoneChecker:

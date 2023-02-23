@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 __all__ = ("Streamable", "StreamableSequence")
 
-T = TypeVar("T", bound=object)
+T = TypeVar("T")
 
 
 class Streamable(Iterable[T], ABC):

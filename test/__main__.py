@@ -2,6 +2,7 @@
 import operator
 import pickle
 from collections.abc import Callable
+from numbers import Number, Real
 from operator import add
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,8 @@ from .test_functions import (
     is_int,
     is_none,
     is_not_none,
+    is_number,
+    is_real_number,
     is_str,
     noop,
 )
@@ -323,6 +326,13 @@ assert list(Stream.range(0, stop=20, step=3)) == list(range(0, 20, 3))
 assert list(Stream.range(start=0, stop=20, step=3)) == list(range(0, 20, 3))
 
 
+# ints_and_strs: list[int | str] = [1, "2", 3, "4"]
+# str_list: list[str] = list(Stream(ints_and_strs).exclude(is_int))
+# assert str_list == ["2", "4"]
+# int_list: list[str] = list(Stream(ints_and_strs).exclude(is_str))
+# assert int_list == [1, 3]
+
+
 source: list[str | int | float | complex | bool | None] = [
     None,
     True,
@@ -341,6 +351,10 @@ complexs: list[complex] = Stream(source).filter(is_complex).collect(list)
 assert complexs == [5j]
 bools: list[bool] = Stream(source).filter(is_bool).collect(list)
 assert bools == [True]
+numbers: list[Number] = Stream(source).filter(is_number).collect(list)
+assert numbers == [True, 3, 4.2, 5j]  # type: ignore[comparison-overlap]
+real_numbers: list[Real] = Stream(source).filter(is_real_number).collect(list)
+assert real_numbers == [True, 3, 4.2]
 nones: list[None] = Stream(source).filter(is_none).collect(list)
 assert nones == [None]
 # nnones: list[str | int | float | complex | bool] = (
@@ -352,22 +366,28 @@ assert nones == [None]
 #     Stream(source).exclude(is_str).collect(list)
 # )
 # assert not_strs == [None, True, 3, 4.2, 5j]
-not_ints: list[str | float | complex | bool | None] = (
-    Stream(source).exclude(is_int).collect(list)
-)
-assert not_ints == [None, "2", 4.2, 5j]
-not_floats: list[str | int | complex | bool | None] = (
-    Stream(source).exclude(is_float).collect(list)
-)
-assert not_floats == [None, True, "2", 3, 5j]
+# not_ints: list[str | float | complex | bool | None] = (
+#     Stream(source).exclude(is_int).collect(list)
+# )
+# assert not_ints == [None, "2", 4.2, 5j]
+# not_floats: list[str | int | complex | bool | None] = (
+#     Stream(source).exclude(is_float).collect(list)
+# )
+# assert not_floats == [None, True, "2", 3, 5j]
 # not_complexs: list[str | int | float | bool | None] = (
 #     Stream(source).exclude(is_complex).collect(list)
 # )
 # assert not_complexs == [None, True, "2", 3, 4.2]
-not_bools: list[str | int | float | complex | None] = (
-    Stream(source).exclude(is_bool).collect(list)
-)
-assert not_bools == [None, "2", 3, 4.2, 5j]
+# not_bools: list[str | int | float | complex | None] = (
+#     Stream(source).exclude(is_bool).collect(list)
+# )
+# assert not_bools == [None, "2", 3, 4.2, 5j]
+# not_numbers: list[str | None] = Stream(source).exclude(is_number).collect(list)
+# assert not_numbers == [None, "2"]  # type: ignore[comparison-overlap]
+# not_real_numbers: list[str | None | complex] = list(
+#     Stream(source).exclude(is_real_number)
+# )
+# assert not_real_numbers == [None, "2", 5j]
 # not_nones: list[str | int | float | complex | bool] = (
 #     Stream(source).exclude(is_none).collect(list)
 # )

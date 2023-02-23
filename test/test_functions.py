@@ -10,7 +10,9 @@ from typed_stream.functions import (
     is_int,
     is_none,
     is_not_none,
+    is_number,
     is_odd,
+    is_real_number,
     is_str,
     is_truthy,
     noop,
@@ -21,11 +23,13 @@ __all__ = (
     "noop",
     "is_none",
     "is_not_none",
+    "is_number",
     "is_int",
     "is_str",
     "is_complex",
     "is_bool",
     "is_float",
+    "is_real_number",
 )
 
 assert is_falsy == operator.not_
@@ -64,6 +68,13 @@ assert not is_str(1e2)
 
 assert is_complex(10 + 0j)
 assert not is_complex(0)
+
+assert is_number(10 + 0j)
+assert not is_number("0")
+
+assert is_real_number(0)
+assert not is_real_number(10 + 0j)
+assert not is_real_number("0")
 
 assert is_bool(True)
 assert is_bool(False)
