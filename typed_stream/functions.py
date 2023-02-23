@@ -15,7 +15,7 @@
 import operator
 from collections.abc import Callable
 from numbers import Number, Real
-from typing import Any, Generic, Literal, TypeGuard, TypeVar
+from typing import Generic, Literal, TypeGuard, TypeVar
 
 __all__ = (
     "is_bool",
@@ -39,18 +39,18 @@ __all__ = (
 
 T = TypeVar("T")
 
-is_truthy: Callable[[Any], bool] = operator.truth
+is_truthy: Callable[[object], bool] = operator.truth
 """Check whether a value is truthy."""
 
-is_falsy: Callable[[Any], bool] = operator.not_
+is_falsy: Callable[[object], bool] = operator.not_
 """Check whether a value is falsy."""
 
 
-def noop(*args: Any) -> None:  # pylint: disable=unused-argument
+def noop(*args: object) -> None:  # pylint: disable=unused-argument
     """Do nothing."""
 
 
-def one(*args: Any) -> Literal[1]:  # pylint: disable=unused-argument
+def one(*args: object) -> Literal[1]:  # pylint: disable=unused-argument
     """Return the smallest positive odd number."""
     return 1
 
@@ -85,7 +85,7 @@ class InstanceChecker(Generic[T]):
     def __init__(self, type_: type[T]) -> None:
         self.type_ = type_
 
-    def __call__(self, value: Any) -> TypeGuard[T]:
+    def __call__(self, value: object) -> TypeGuard[T]:
         """Check whether a value has the correct type."""
         return isinstance(value, self.type_)
 
@@ -117,7 +117,7 @@ class NotNoneChecker:
 
     __slots__ = ()
 
-    def __call__(self, value: Any) -> bool:
+    def __call__(self, value: object) -> bool:
         """Return True if the value is not None."""
         return value is not None
 
@@ -131,7 +131,7 @@ class NoneChecker:
 
     __slots__ = ()
 
-    def __call__(self, value: Any) -> TypeGuard[None]:
+    def __call__(self, value: object) -> TypeGuard[None]:
         """Return True if the value is None."""
         return value is None
 

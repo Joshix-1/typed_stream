@@ -13,7 +13,7 @@
 
 """Helpful types."""
 from os import PathLike
-from typing import Any, Protocol, TypeGuard, TypeVar
+from typing import Protocol, TypeGuard, TypeVar
 
 __all__ = (
     "PathLikeType",
@@ -32,7 +32,7 @@ TGC_CHECKED_co = TypeVar("TGC_CHECKED_co", covariant=True, bound=object)
 class TypeGuardingCallable(Protocol[TGC_CHECKED_co]):
     """A class representing a function that type guards."""
 
-    def __call__(self, value: Any) -> TypeGuard[TGC_CHECKED_co]:
+    def __call__(self, value: object) -> TypeGuard[TGC_CHECKED_co]:
         """Return True if value isinstance of TGC_CHECKED."""
 
 

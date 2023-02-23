@@ -34,8 +34,8 @@ if ! python3 -m black --check --diff --color .; then
   FAILED=$(( 4 | FAILED ))
 fi
 
-echo mypy:
-python3 -m mypy --pretty || FAILED=$(( 8 | FAILED ))
+echo type checks:
+./check_types.sh || FAILED=$(( 8 | FAILED ))
 
 echo Flake8:
 python3 -m flake8 --show-source || FAILED=$(( 16 | FAILED ))

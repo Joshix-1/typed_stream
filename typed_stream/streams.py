@@ -17,7 +17,7 @@ import concurrent.futures
 import contextlib
 import functools
 import itertools
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from operator import add
 from types import EllipsisType
@@ -291,47 +291,54 @@ class Stream(Iterable[T]):
 
         @overload
         def collect(
-            self: "Stream[T]", fun: type[StreamableSequence[T]]
+            self: "Stream[T]",
+            fun: Callable[[Iterable[T]], StreamableSequence[T]],
         ) -> StreamableSequence[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[T]", fun: type[tuple[Any, ...]]
+            self: "Stream[T]", fun: Callable[[Iterable[T]], tuple[T, ...]]
         ) -> tuple[T, ...]:
             ...
 
         @overload
-        def collect(self: "Stream[T]", fun: type[set[Any]]) -> set[T]:
-            ...
-
-        @overload
-        def collect(self: "Stream[T]", fun: type[list[Any]]) -> list[T]:
+        def collect(
+            self: "Stream[T]", fun: Callable[[Iterable[T]], set[T]]
+        ) -> set[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[T]", fun: type[frozenset[Any]]
+            self: "Stream[T]", fun: Callable[[Iterable[T]], list[T]]
+        ) -> list[T]:
+            ...
+
+        @overload
+        def collect(
+            self: "Stream[T]", fun: Callable[[Iterable[T]], frozenset[T]]
         ) -> frozenset[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[tuple[K, V]]", fun: type[dict[Any, Any]]
+            self: "Stream[tuple[K, V]]",
+            fun: Callable[[Iterable[tuple[K, V]]], dict[K, V]],
         ) -> dict[K, V]:
             ...
 
         @overload
         def collect(
-            self: "Stream[IndexValueTuple[V]]", fun: type[dict[Any, Any]]
-        ) -> dict[int, V]:
+            self: "Stream[tuple[K, V]]",
+            fun: Callable[[Iterable[tuple[K, V]]], Mapping[K, V]],
+        ) -> Mapping[K, V]:
             ...
 
         @overload
-        def collect(self: "Stream[T]", fun: Callable[[Iterator[T]], K]) -> K:
+        def collect(self: "Stream[T]", fun: Callable[[Iterable[T]], K]) -> K:
             ...
 
-    def collect(self, fun: Callable[[Iterator[T]], object]) -> object:
+    def collect(self: "Stream[U]", fun: Callable[[Iterable[U]], K]) -> K:
         """Collect the values of this Stream. This finishes the Stream.
 
         Examples:
@@ -378,7 +385,7 @@ class Stream(Iterable[T]):
 
         return self.exclude(encountered.__contains__).peek(peek_fun)
 
-    def drop_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
+    def drop_while(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Drop values as long the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
@@ -549,7 +556,7 @@ class Stream(Iterable[T]):
             )
         )
 
-    def for_each(self, fun: Callable[[T], Any] = noop) -> None:
+    def for_each(self, fun: Callable[[T], object] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
         self._check_finished()
         for value in self:
@@ -614,7 +621,7 @@ class Stream(Iterable[T]):
         ) -> "Stream[K]":
             ...
 
-    def map(self, fun: Callable[..., K], /, *args: Any) -> "Stream[K]":
+    def map(self, fun: Callable[..., K], /, *args: object) -> "Stream[K]":
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
@@ -684,7 +691,7 @@ class Stream(Iterable[T]):
 
         return default
 
-    def peek(self, fun: Callable[[T], Any]) -> "Stream[T]":
+    def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
 
         Example:
@@ -720,7 +727,7 @@ class Stream(Iterable[T]):
         self._check_finished()
         return StreamableSequence(collections.deque(self, maxlen=count))
 
-    def take_while(self, fun: Callable[[T], Any]) -> "Stream[T]":
+    def take_while(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
@@ -740,7 +747,7 @@ class FileStreamBase(Stream[AnyStr]):
         """Enter the matrix."""
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         """Exit the matrix."""
         self._close_source()
 

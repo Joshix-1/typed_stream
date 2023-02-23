@@ -15,7 +15,7 @@
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from .streamable import Streamable, StreamableSequence
 
@@ -30,7 +30,7 @@ __all__ = (
 T = TypeVar("T", bound=object)
 
 
-class ValueIterator(Iterator[T], Streamable[T]):
+class ValueIterator(Iterator[T], Streamable[T], Generic[T]):
     """An iterable that always yields the given value."""
 
     _value: T
@@ -46,7 +46,9 @@ class ValueIterator(Iterator[T], Streamable[T]):
 
 
 class Chunked(
-    Iterator[StreamableSequence[T]], Streamable[StreamableSequence[T]]
+    Iterator[StreamableSequence[T]],
+    Streamable[StreamableSequence[T]],
+    Generic[T],
 ):
     """Chunk data into Sequences of length size. The last chunk may be shorter.
 
@@ -89,7 +91,7 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
         return self[1]
 
 
-class Enumerator(Iterator[IndexValueTuple[T]]):
+class Enumerator(Iterator[IndexValueTuple[T]], Generic[T]):
     """Like enumerate() but yielding IndexValueTuples."""
 
     _iterator: Iterator[T]
@@ -112,11 +114,11 @@ class Enumerator(Iterator[IndexValueTuple[T]]):
 class Peeker(Generic[T]):
     """Peek values."""
 
-    fun: Callable[[T], Any]
+    fun: Callable[[T], object | None]
 
     __slots__ = ("fun",)
 
-    def __init__(self, fun: Callable[[T], Any]) -> None:
+    def __init__(self, fun: Callable[[T], object | None]) -> None:
         """Initialize this class."""
         self.fun = fun
 
@@ -142,12 +144,12 @@ class IterWithCleanUp(Iterator[T]):
     """
 
     iterator: Iterator[T]
-    cleanup_fun: Callable[[], Any]
+    cleanup_fun: Callable[[], object | None]
 
     __slots__ = ("cleanup_fun", "iterator")
 
     def __init__(
-        self, iterable: Iterable[T], cleanup_fun: Callable[[], Any]
+        self, iterable: Iterable[T], cleanup_fun: Callable[[], object | None]
     ) -> None:
         """Initialize this class."""
         self.iterator = iter(iterable)
@@ -178,6 +180,6 @@ class IterWithCleanUp(Iterator[T]):
         """Return self."""
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         """Close self."""
         self.close()

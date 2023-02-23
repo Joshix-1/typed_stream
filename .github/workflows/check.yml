@@ -61,6 +61,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - 3.11
+          - 3.12-dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install requirements
+        run: pip install -r requirements-dev.txt
+      - name: Run mypy
+        run: mypy --python-version  ${{ matrix.python-version }}
+
+  pytype:
+    name: pytype
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -70,8 +94,8 @@ jobs:
           python-version: "3.10"
       - name: Install requirements
         run: pip install -r requirements-dev.txt
-      - name: Run mypy
-        run: mypy
+      - name: Run pytype
+        run: pytype
 
   flake8:
     name: Flake8

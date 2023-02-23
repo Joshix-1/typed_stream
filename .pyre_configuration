@@ -1,0 +1,12 @@
+{
+  "source_directories": [
+    "examples",
+    "test",
+    "typed_stream"
+  ],
+  "search_path": [
+    "."
+  ],
+  "strict": true,
+  "site_package_search_strategy": "none"
+}
