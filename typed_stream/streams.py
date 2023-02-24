@@ -542,7 +542,14 @@ class Stream(Iterable[T]):
             ...
 
     def flat_map(
-        self, fun: Callable[..., Iterable[K]], /, *args: object
+        self,
+        fun: Callable[[T], Iterable[K]]
+        | Callable[[T, U], Iterable[K]]
+        | Callable[[T, U, V], Iterable[K]]
+        | Callable[[T, U, V, W], Iterable[K]]
+        | Callable[[T, U, V, W, X], Iterable[K]],
+        /,
+        *args: object,
     ) -> "Stream[K]":
         """Map each value to another.
 
@@ -624,7 +631,16 @@ class Stream(Iterable[T]):
         ) -> "Stream[K]":
             ...
 
-    def map(self, fun: Callable[..., K], /, *args: object) -> "Stream[K]":
+    def map(
+        self,
+        fun: Callable[[T], K]
+        | Callable[[T, U], K]
+        | Callable[[T, U, V], K]
+        | Callable[[T, U, V, W], K]
+        | Callable[[T, U, V, W, X], K],
+        /,
+        *args: object,
+    ) -> "Stream[K]":
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
