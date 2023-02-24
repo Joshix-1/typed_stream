@@ -23,6 +23,13 @@ from numbers import Number, Real
 from types import EllipsisType
 from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
 
+from .common_types import (
+    PathLikeType,
+    StarCallable,
+    SupportsAdd,
+    SupportsComparison,
+    TypeGuardingCallable,
+)
 from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
@@ -40,13 +47,6 @@ from .lazy_file_iterators import (
     LazyFileIteratorRemovingEndsStr,
 )
 from .streamable import StreamableSequence
-from .types import (
-    PathLikeType,
-    StarCallable,
-    SupportsAdd,
-    SupportsComparison,
-    TypeGuardingCallable,
-)
 
 __all__ = (
     "BinaryFileStream",

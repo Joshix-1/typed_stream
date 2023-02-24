@@ -25,7 +25,7 @@ from typing import (
     overload,
 )
 
-from .types import PathLikeType
+from .common_types import PathLikeType
 
 __all__ = (
     "LazyFileIterator",
