@@ -15,7 +15,7 @@
 import operator
 from collections.abc import Callable
 from numbers import Number, Real
-from typing import Generic, Literal, TypeGuard, TypeVar, final
+from typing import Generic, Literal, TypeGuard, TypeVar, final, overload
 
 __all__ = (
     "is_bool",
@@ -119,7 +119,15 @@ class NotNoneChecker:
 
     __slots__ = ()
 
+    @overload
+    def __call__(self, value: None) -> Literal[False]:
+        ...
+
+    @overload
     def __call__(self, value: object) -> bool:
+        ...
+
+    def __call__(self, value: object | None) -> bool:
         """Return True if the value is not None."""
         return value is not None
 
@@ -127,13 +135,22 @@ class NotNoneChecker:
 is_not_none: NotNoneChecker = NotNoneChecker()
 """Check whether a value is not None."""
 
+
 @final
 class NoneChecker:
     """Check whether a value is None."""
 
     __slots__ = ()
 
-    def __call__(self, value: object) -> TypeGuard[None]:
+    @overload
+    def __call__(self, value: None) -> Literal[True]:
+        ...
+
+    @overload
+    def __call__(self, value: object | None) -> TypeGuard[None]:
+        ...
+
+    def __call__(self, value: object | None) -> bool:
         """Return True if the value is None."""
         return value is None
 

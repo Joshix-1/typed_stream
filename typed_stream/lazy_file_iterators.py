@@ -18,7 +18,6 @@ from io import BytesIO
 from typing import (
     IO,
     TYPE_CHECKING,
-    Any,
     AnyStr,
     TextIO,
     TypeGuard,
@@ -125,7 +124,9 @@ class LazyFileIterator(Iterator[AnyStr]):
         def _open_file(self: "LazyFileIterator[str]") -> TextIO:
             ...
 
-    def _open_file(self: "LazyFileIterator[str] | LazyFileIterator[bytes]") -> IO[str] | IO[bytes]:
+    def _open_file(
+        self: "LazyFileIterator[str] | LazyFileIterator[bytes]",
+    ) -> IO[str] | IO[bytes]:
         """Open the underlying file."""
         if _is_bytes(self):
             return open(self.path, mode="rb")  # noqa: SIM115

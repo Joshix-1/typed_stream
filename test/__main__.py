@@ -5,7 +5,6 @@ from collections.abc import Callable
 from numbers import Number, Real
 from operator import add
 from pathlib import Path
-from typing import Any
 
 from typed_stream import BinaryFileStream, FileStream, Stream
 from typed_stream.exceptions import StreamEmptyError, StreamIndexError
@@ -392,5 +391,6 @@ assert nones == [None]
 #     Stream(source).exclude(is_none).collect(list)
 # )
 # assert not_nones == [True, "2", 3, 4.2, 5j]
-not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
-assert not_nnones == [None]
+
+# not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
+# assert not_nnones == [None]

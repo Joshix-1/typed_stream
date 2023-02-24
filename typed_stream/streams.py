@@ -21,7 +21,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from operator import add
 from types import EllipsisType
-from typing import TYPE_CHECKING, Any, AnyStr, Final, TypeVar, overload
+from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
 
 from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
@@ -408,10 +408,6 @@ class Stream(Iterable[T]):
         """Map the values to a tuple of index and value."""
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    @overload
-    def exclude(self: "Stream[K | None]", fun: NoneChecker) -> "Stream[K]":
-        ...
-
     # @overload
     # def exclude(
     #     self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
@@ -430,15 +426,22 @@ class Stream(Iterable[T]):
     # ) -> "Stream[K]":
     #     ...
 
-    @overload
-    def exclude(self: "Stream[Any]", fun: NotNoneChecker) -> "Stream[None]":
-        ...
+    if TYPE_CHECKING:
+        # @overload
+        # def exclude(self, fun: NotNoneChecker) -> "Stream[None]":
+        #     ...
 
-    @overload
-    def exclude(self: "Stream[T]", fun: Callable[[T], Any]) -> "Stream[T]":
-        ...
+        @overload
+        def exclude(self: "Stream[K | None]", fun: NoneChecker) -> "Stream[K]":
+            ...
 
-    def exclude(self, fun: Callable[[T], Any]) -> "Stream[Any]":
+        @overload
+        def exclude(
+            self: "Stream[T]", fun: Callable[[T], object]
+        ) -> "Stream[T]":
+            ...
+
+    def exclude(self: "Stream[T]", fun: Callable[[T], object]) -> "object":
         """Exclude values if the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
@@ -451,9 +454,11 @@ class Stream(Iterable[T]):
     def filter(self: "Stream[K | None]", fun: NotNoneChecker) -> "Stream[K]":
         ...
 
-    @overload
-    def filter(self: "Stream[Any]", fun: NoneChecker) -> "Stream[None]":
-        ...
+    # @overload
+    # def filter(
+    #     self: "Stream[object | None]", fun: NoneChecker
+    # ) -> "Stream[None]":
+    #     ...
 
     @overload
     def filter(self: "Stream[K | None]") -> "Stream[K]":
@@ -464,20 +469,18 @@ class Stream(Iterable[T]):
         ...
 
     @overload
-    def filter(self: "Stream[Any]", fun: InstanceChecker[K]) -> "Stream[K]":
+    def filter(self, fun: InstanceChecker[K]) -> "Stream[K]":
         ...
 
     @overload
-    def filter(
-        self: "Stream[Any]", fun: TypeGuardingCallable[K]
-    ) -> "Stream[K]":
+    def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
         ...
 
     @overload
-    def filter(self, fun: Callable[[T], Any]) -> "Stream[T]":
+    def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
         ...
 
-    def filter(self, fun: Callable[[T], Any] | None = None) -> "Stream[Any]":
+    def filter(self, fun: Callable[[T], object] | None = None) -> object:
         """Use built-in filter to filter values."""
         self._check_finished()
         self._data = filter(fun, self._data)
@@ -539,7 +542,7 @@ class Stream(Iterable[T]):
             ...
 
     def flat_map(
-        self, fun: Callable[..., Iterable[K]], /, *args: Any
+        self, fun: Callable[..., Iterable[K]], /, *args: object
     ) -> "Stream[K]":
         """Map each value to another.
 
@@ -717,6 +720,18 @@ class Stream(Iterable[T]):
         """Collect the values of this Stream. This finishes the Stream."""
         self._check_finished()
         return fun(*self)
+
+    @overload
+    def sum(self: "Stream[int]") -> int:
+        ...
+
+    @overload
+    def sum(self: "Stream[str]") -> str:
+        ...
+
+    @overload
+    def sum(self: "Stream[SA]") -> SA:
+        ...
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
