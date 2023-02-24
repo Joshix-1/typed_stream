@@ -17,9 +17,9 @@ import concurrent.futures
 import contextlib
 import functools
 import itertools
+import operator
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
-from operator import add
 from types import EllipsisType
 from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
 
@@ -64,6 +64,9 @@ Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 
 SA = TypeVar("SA", bound=SupportsAdd)
 SLT = TypeVar("SLT", bound=SupportsComparison)
+
+
+add: Callable[[SA, SA], SA] = operator.add
 
 
 class _DefaultValueType:
@@ -736,18 +739,6 @@ class Stream(Iterable[T]):
         """Collect the values of this Stream. This finishes the Stream."""
         self._check_finished()
         return fun(*self)
-
-    @overload
-    def sum(self: "Stream[int]") -> int:
-        ...
-
-    @overload
-    def sum(self: "Stream[str]") -> str:
-        ...
-
-    @overload
-    def sum(self: "Stream[SA]") -> SA:
-        ...
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
