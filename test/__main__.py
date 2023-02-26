@@ -6,7 +6,12 @@ from numbers import Number, Real
 from operator import add
 from pathlib import Path
 
-from typed_stream import BinaryFileStream, FileStream, Stream
+from typed_stream import (
+    BinaryFileStream,
+    FileStream,
+    Stream,
+    StreamableSequence,
+)
 from typed_stream.exceptions import StreamEmptyError, StreamIndexError
 from typed_stream.iteration_utils import IndexValueTuple
 
@@ -411,3 +416,16 @@ assert Stream("abc")[-1:-3:-1] == ("c", "b") == tuple("abc")[-1:-3:-1]
 assert Stream("abc")[-1:] == ("c",) == tuple("abc")[-1:]
 assert Stream("abc")[-2:] == ("b", "c") == tuple("abc")[-2:]
 assert Stream("abc")[-3:] == ("a", "b", "c") == tuple("abc")[-3:]
+
+assert isinstance(StreamableSequence() * 4, StreamableSequence)
+assert isinstance(4 * StreamableSequence(), StreamableSequence)
+assert isinstance(() + StreamableSequence(), tuple)
+assert isinstance(StreamableSequence() + (), StreamableSequence)
+assert isinstance(
+    StreamableSequence() + StreamableSequence(), StreamableSequence
+)
+assert isinstance(StreamableSequence()[::], StreamableSequence)
+assert StreamableSequence("a")[0] == "a"
+
+assert StreamableSequence("ab") + ("c", "d") == ("a", "b", "c", "d")
+assert ("c", "d") + StreamableSequence("ab") == ("c", "d", "a", "b")

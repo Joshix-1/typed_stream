@@ -55,7 +55,11 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         self, other: tuple[T | V, ...], /  # noqa: W504
     ) -> "StreamableSequence[T | V]":
         """Add another StreamableSequence to this."""
-        return StreamableSequence(super().__add__(other))
+        if (result := super().__add__(other)) is NotImplemented:
+            return NotImplemented
+        if isinstance(result, StreamableSequence):
+            return result
+        return StreamableSequence(result)
 
     def __mul__(self, other: SupportsIndex, /) -> "StreamableSequence[T]":
         """Repeat self."""
