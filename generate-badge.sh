@@ -11,9 +11,9 @@ total=$(jq ".totals.percent_covered" github-pages/coverage.json)
 total=$(echo "${total}" | awk '{ printf("%3.2f\n", $1) }')
 inttotal=$(echo "${total}" | cut -d "." -f1)
 
-if [ "${inttotal}" -ge "90"  ]; then
+if [ "${inttotal}" -ge "95"  ]; then
   COLOR="#008000"  # green
-elif [ "${inttotal}" -ge "80" ]; then
+elif [ "${inttotal}" -ge "90" ]; then
   COLOR="#ffa500"  # orange
 else
   COLOR="#ff0000"  # red

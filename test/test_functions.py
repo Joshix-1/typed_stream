@@ -8,10 +8,12 @@ from typed_stream.functions import (
     is_falsy,
     is_float,
     is_int,
+    is_negative,
     is_none,
     is_not_none,
     is_number,
     is_odd,
+    is_positive,
     is_real_number,
     is_str,
     is_truthy,
@@ -57,6 +59,15 @@ assert not is_even(101)
 assert not is_even(21)
 assert not is_even(11)
 assert not is_even(1)
+
+assert is_positive(1)
+assert not is_positive(0)
+assert not is_positive(-1)
+
+assert is_negative(-1)
+assert not is_negative(0)
+assert not is_negative(1)
+
 
 assert is_int(10)
 assert not is_int(1.1)

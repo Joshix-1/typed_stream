@@ -153,11 +153,13 @@ class Stream(Iterable[T]):
                 ),
                 close_source=True,
             )
-        if start is not None:
-            if start < 0 and step in {None, 1} and stop is None:
-                return self.tail(abs(start))
-            if stop is step is None:
-                return self.drop(start).collect()
+        if (
+            start is not None
+            and start < 0
+            and step in {None, 1}
+            and stop is None
+        ):
+            return self.tail(abs(start))
         # pylint: disable=unsubscriptable-object
         return self.collect()[start:stop:step]
 
@@ -483,27 +485,35 @@ class Stream(Iterable[T]):
         return self
 
     @overload
-    def filter(self: "Stream[K | None]", fun: NotNoneChecker) -> "Stream[K]":
+    def filter(
+        self: "Stream[K | None]", fun: NotNoneChecker
+    ) -> "Stream[K]":  # pragma: no cover
         ...
 
     @overload
-    def filter(self: "Stream[K | None]") -> "Stream[K]":
+    def filter(self: "Stream[K | None]") -> "Stream[K]":  # pragma: no cover
         ...
 
     @overload
-    def filter(self: "Stream[T]") -> "Stream[T]":
+    def filter(self: "Stream[T]") -> "Stream[T]":  # pragma: no cover
         ...
 
     @overload
-    def filter(self, fun: InstanceChecker[K]) -> "Stream[K]":
+    def filter(
+        self, fun: InstanceChecker[K]
+    ) -> "Stream[K]":  # pragma: no cover
         ...
 
     @overload
-    def filter(self, fun: TypeGuardingCallable[K]) -> "Stream[K]":
+    def filter(
+        self, fun: TypeGuardingCallable[K]
+    ) -> "Stream[K]":  # pragma: no cover
         ...
 
     @overload
-    def filter(self, fun: Callable[[T], object]) -> "Stream[T]":
+    def filter(
+        self, fun: Callable[[T], object]
+    ) -> "Stream[T]":  # pragma: no cover
         ...
 
     def filter(self, fun: Callable[[T], object] | None = None) -> object:

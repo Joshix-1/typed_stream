@@ -15,7 +15,15 @@
 import operator
 from collections.abc import Callable
 from numbers import Number, Real
-from typing import Generic, Literal, TypeGuard, TypeVar, final, overload
+from typing import (
+    TYPE_CHECKING,
+    Generic,
+    Literal,
+    TypeGuard,
+    TypeVar,
+    final,
+    overload,
+)
 
 __all__ = (
     "is_bool",
@@ -119,13 +127,15 @@ class NotNoneChecker:
 
     __slots__ = ()
 
-    @overload
-    def __call__(self, value: None) -> Literal[False]:
-        ...
+    if TYPE_CHECKING:  # pragma: no cover
 
-    @overload
-    def __call__(self, value: object) -> bool:
-        ...
+        @overload
+        def __call__(self, value: None) -> Literal[False]:
+            ...
+
+        @overload
+        def __call__(self, value: object) -> bool:
+            ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is not None."""
@@ -142,13 +152,15 @@ class NoneChecker:
 
     __slots__ = ()
 
-    @overload
-    def __call__(self, value: None) -> Literal[True]:
-        ...
+    if TYPE_CHECKING:  # pragma: no cover
 
-    @overload
-    def __call__(self, value: object | None) -> TypeGuard[None]:
-        ...
+        @overload
+        def __call__(self, value: None) -> Literal[True]:
+            ...
+
+        @overload
+        def __call__(self, value: object | None) -> TypeGuard[None]:
+            ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is None."""

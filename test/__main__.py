@@ -46,6 +46,8 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     )
 
 
+assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
+
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
 assert tpl == (1, 2, 3)
 _set: set[int] = Stream([1, 2, 3]).collect(set)
@@ -70,6 +72,14 @@ assert isinstance(
     eval(repr(Stream.from_value(69))),  # pylint: disable=eval-used
     Stream,
 )
+
+assert str(Stream(...)) == "Stream(...)"
+assert repr(Stream(...)) == "Stream(...)"
+assert repr(Stream("abc")) == "Stream(('a', 'b', 'c'))"
+
+assert Stream(...)._is_finished()  # pylint: disable=protected-access
+assert BinaryFileStream(...)._is_finished()  # pylint: disable=protected-access
+assert FileStream(...)._is_finished()  # pylint: disable=protected-access
 
 assert Stream.range(5).map(str).enumerate().collect(tuple) == (
     (0, "0"),
@@ -149,6 +159,7 @@ assert Stream.range(25).chunk(5).map(lambda x: list(x)).collect(tuple) == (
     [15, 16, 17, 18, 19],
     [20, 21, 22, 23, 24],
 )
+assert_raises(ValueError, lambda: Stream(()).chunk(0))
 
 int_list: list[int] = Stream([None, 1, 2, 3, 4, 0, 23]).filter().collect(list)
 assert int_list == [1, 2, 3, 4, 23]
@@ -424,6 +435,8 @@ assert Stream("abc")[-1:-3:-1] == ("c", "b") == tuple("abc")[-1:-3:-1]
 assert Stream("abc")[-1:] == ("c",) == tuple("abc")[-1:]
 assert Stream("abc")[-2:] == ("b", "c") == tuple("abc")[-2:]
 assert Stream("abc")[-3:] == ("a", "b", "c") == tuple("abc")[-3:]
+assert Stream("abc")[-2:None:None] == ("b", "c") == tuple("abc")[-2:None:None]
+
 
 assert isinstance(StreamableSequence() * 4, StreamableSequence)
 assert isinstance(4 * StreamableSequence(), StreamableSequence)
