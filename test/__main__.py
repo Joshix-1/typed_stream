@@ -12,7 +12,11 @@ from typed_stream import (
     Stream,
     StreamableSequence,
 )
-from typed_stream.exceptions import StreamEmptyError, StreamIndexError
+from typed_stream.exceptions import (
+    StreamEmptyError,
+    StreamFinishedError,
+    StreamIndexError,
+)
 from typed_stream.iteration_utils import IndexValueTuple
 
 from .test_functions import (
@@ -28,7 +32,6 @@ from .test_functions import (
     noop,
 )
 
-# pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
 # pylint: disable=unnecessary-lambda, unsubscriptable-object
 
 
@@ -93,13 +96,15 @@ key_value_dict: dict[int, str] = (
 assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
 
+STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
+assert Stream(STRING).distinct().collect("".join) == "pjwa nsvoidfb,cmg"
+assert Stream(STRING).distinct(use_set=False).sum() == "pjwa nsvoidfb,cmg"
+
+
 def create_int_stream() -> Stream[int]:
     """Create an int stream."""
     return Stream.range(10_000).map(operator.pow, 2)
 
-
-STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
-assert Stream(STRING).distinct().sum() == "pjwa nsvoidfb,cmg"
 
 assert (
     333283335000
@@ -151,7 +156,9 @@ int_list = Stream([None, 1, 2, 3, None]).filter(is_not_none).collect(list)
 assert int_list == [1, 2, 3]
 int_list = Stream([None, 1, 2, 3, None]).exclude(is_none).collect(list)
 assert int_list == [1, 2, 3]
-
+int_list = []
+Stream([None, 1, 2, 3, None]).exclude(is_none).for_each(int_list.append)
+assert int_list == [1, 2, 3]
 
 assert len(Stream.from_value("x").limit(1000).tail(10)) == 10
 
@@ -319,6 +326,7 @@ assert Stream.range(1000)[90:100:2] == tuple(range(90, 100, 2))
 
 assert Stream.range(1000)[20:44:5] == tuple(range(20, 44, 5))
 
+# pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
 assert list(Stream.range(10)) == list(range(10))
 assert list(Stream.range(stop=10)) == list(range(10))
 assert list(Stream.range(0, 20)) == list(range(0, 20))
@@ -429,3 +437,9 @@ assert StreamableSequence("a")[0] == "a"
 
 assert StreamableSequence("ab") + ("c", "d") == ("a", "b", "c", "d")
 assert ("c", "d") + StreamableSequence("ab") == ("c", "d", "a", "b")
+
+str_stream = Stream("abc")
+assert str_stream.last() == "c"
+assert_raises(StreamFinishedError, str_stream.collect)
+str_stream = Stream(())
+assert_raises(StreamEmptyError, str_stream.first)

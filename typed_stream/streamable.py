@@ -17,7 +17,7 @@ from abc import ABC
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .streams import Stream
 
 __all__ = ("Streamable", "StreamableSequence")
@@ -39,7 +39,7 @@ class Streamable(Iterable[T], ABC):
 class StreamableSequence(tuple[T, ...], Streamable[T]):
     """A streamable immutable Sequence."""
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __add__(self, other: tuple[T, ...], /) -> "StreamableSequence[T]":
@@ -69,7 +69,7 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         """Repeat self."""
         return StreamableSequence(super().__rmul__(other))
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __getitem__(self, item: SupportsIndex, /) -> T:

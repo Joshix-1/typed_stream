@@ -53,8 +53,15 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Coverage.py
+        run: grep "^coverage" requirements-dev.txt | xargs pip install
       - name: Run tests
-        run: python3 -m test
+        run: coverage run -m test
+      - name: Upload coverage as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: .coverage
+          name: coverage
 
   mypy:
     name: mypy
@@ -146,3 +153,48 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Run Bandit
         run: bandit -c pyproject.toml -r typed_stream examples
+
+  github-pages:
+    name: GitHub Pages
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Download coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+      - name: Install Coverage.py
+        run: grep "^coverage" requirements-dev.txt | xargs pip install
+      - name: Create directory
+        run: mkdir github-pages
+      - name: Create coverage files
+        run: |
+          coverage report --precision=3 --sort=-miss --skip-covered
+          coverage html -d github-pages/coverage
+          coverage json -o github-pages/coverage.json
+          ./generate-badge.sh > github-pages/coverage/badge.svg
+          rm github-pages/coverage/.gitignore
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: github-pages
+      - name: Deploy GitHub Pages site
+        id: deployment
+        uses: actions/deploy-pages@v1

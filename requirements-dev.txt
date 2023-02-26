@@ -3,6 +3,9 @@ autoflake==2.*
 black==23.*
 isort==5.*
 
+# tests
+coverage==7.*
+
 # typechecking
 # pyre-check==0.9.*
 # pyright==1.*

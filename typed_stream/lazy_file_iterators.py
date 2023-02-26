@@ -60,7 +60,7 @@ class LazyFileIterator(Iterator[AnyStr]):
 
     __slots__ = ("path", "encoding", "_iterator", "_file_object")
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __init__(
@@ -114,7 +114,7 @@ class LazyFileIterator(Iterator[AnyStr]):
         """Run close."""
         self.close()
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
