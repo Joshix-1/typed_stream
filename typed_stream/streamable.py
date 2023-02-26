@@ -15,7 +15,7 @@
 
 from abc import ABC
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 
 if TYPE_CHECKING:
     from .streams import Stream
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 __all__ = ("Streamable", "StreamableSequence")
 
 T = TypeVar("T")
+V = TypeVar("V")
 
 
 class Streamable(Iterable[T], ABC):
@@ -38,5 +39,46 @@ class Streamable(Iterable[T], ABC):
 class StreamableSequence(tuple[T, ...], Streamable[T]):
     """A streamable immutable Sequence."""
 
-    # Consider overriding __getitem__ __add__ __mul__ __rmul__ ...to make sure
-    # they do not return a normal tuple, this could improve user experience
+    if TYPE_CHECKING:
+
+        @overload
+        def __add__(self, other: tuple[T, ...], /) -> "StreamableSequence[T]":
+            """Nobody inspects the spammish repetition."""
+
+        @overload
+        def __add__(
+            self, other: tuple[V, ...], /  # noqa: W504
+        ) -> "StreamableSequence[T | V]":
+            """Nobody inspects the spammish repetition."""
+
+    def __add__(
+        self, other: tuple[T | V, ...], /  # noqa: W504
+    ) -> "StreamableSequence[T | V]":
+        """Add another StreamableSequence to this."""
+        return StreamableSequence(super().__add__(other))
+
+    def __mul__(self, other: SupportsIndex, /) -> "StreamableSequence[T]":
+        """Repeat self."""
+        return StreamableSequence(super().__mul__(other))
+
+    def __rmul__(self, other: SupportsIndex, /) -> "StreamableSequence[T]":
+        """Repeat self."""
+        return StreamableSequence(super().__rmul__(other))
+
+    if TYPE_CHECKING:
+
+        @overload
+        def __getitem__(self, item: SupportsIndex, /) -> T:
+            """Nobody inspects the spammish repetition."""
+
+        @overload
+        def __getitem__(self, item: slice, /) -> "StreamableSequence[T]":
+            """Nobody inspects the spammish repetition."""
+
+    def __getitem__(
+        self, item: slice | SupportsIndex, /  # noqa: W504
+    ) -> "StreamableSequence[T] | T":
+        """Finish the stream by collecting."""
+        if isinstance(item, slice):
+            return StreamableSequence(super().__getitem__(item))
+        return super().__getitem__(item)

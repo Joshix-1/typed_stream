@@ -81,12 +81,12 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
     """A tuple to hold index and value."""
 
     @property
-    def idx(self) -> int:
+    def idx(self: tuple[int, object]) -> int:
         """The index."""
         return self[0]
 
     @property
-    def val(self) -> T:
+    def val(self: tuple[int, T]) -> T:
         """The value."""
         return self[1]
 

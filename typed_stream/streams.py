@@ -118,36 +118,48 @@ class Stream(Iterable[T]):
     if TYPE_CHECKING:
 
         @overload
-        def __getitem__(self, item: int) -> T:  # noqa: D105
-            ...
+        def __getitem__(self, item: int, /) -> T:
+            """Nobody inspects the spammish repetition."""
 
         @overload
-        def __getitem__(  # noqa: D105
-            self, item: slice
-        ) -> StreamableSequence[T]:
-            ...
+        def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
+            """Nobody inspects the spammish repetition."""
 
-    def __getitem__(self, item: slice | int) -> StreamableSequence[T] | T:
+    def __getitem__(self, item: slice | int, /) -> StreamableSequence[T] | T:
         """Finish the stream by collecting."""
         self._check_finished()
         if isinstance(item, int):
             return self.nth(item)
-        if not isinstance(item, slice):
-            raise TypeError("Argument to __getitem__ should be int or slice.")
+        return self._get_slice(start=item.start, stop=item.stop, step=item.step)
+
+    def _get_slice(  # noqa: C901
+        self,
+        *,
+        start: int | None = None,
+        stop: int | None = None,
+        step: int | None = None,
+    ) -> StreamableSequence[T]:
+        """Implement __getitem__ with slices."""
+        if start is stop is step is None:
+            return self.collect()
         if (  # pylint: disable=too-many-boolean-expressions
-            (item.start is None or item.start >= 0)
-            and (item.step is None or item.step >= 0)
-            and (item.stop is None or item.stop >= 0)
+            (start is None or start >= 0)
+            and (step is None or step >= 0)
+            and (stop is None or stop >= 0)
         ):
             return self._finish(
                 StreamableSequence(
-                    itertools.islice(
-                        self._data, item.start, item.stop, item.step
-                    )
+                    itertools.islice(self._data, start, stop, step)
                 ),
                 close_source=True,
             )
-        raise ValueError("Values in slice should not be negative.")
+        if start is not None:
+            if start < 0 and step in {None, 1} and stop is None:
+                return self.tail(abs(start))
+            if stop is step is None:
+                return self.drop(start).collect()
+        # pylint: disable=unsubscriptable-object
+        return self.collect()[start:stop:step]
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> "Stream[int]":
@@ -290,7 +302,11 @@ class Stream(Iterable[T]):
         with contextlib.suppress(StreamFinishedError):
             self._finish(None, close_source=True)
 
-    if TYPE_CHECKING:  # noqa: C901
+    if TYPE_CHECKING:  # noqa: C901  # pylint: disable=too-complex
+
+        @overload
+        def collect(self: "Stream[T]") -> StreamableSequence[T]:
+            ...
 
         @overload
         def collect(
@@ -341,7 +357,10 @@ class Stream(Iterable[T]):
         def collect(self: "Stream[T]", fun: Callable[[Iterable[T]], K]) -> K:
             ...
 
-    def collect(self: "Stream[U]", fun: Callable[[Iterable[U]], K]) -> K:
+    def collect(
+        self: "Stream[U]",
+        fun: Callable[[Iterable[U]], object] = StreamableSequence,
+    ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
 
         Examples:
@@ -388,8 +407,14 @@ class Stream(Iterable[T]):
 
         return self.exclude(encountered.__contains__).peek(peek_fun)
 
+    def drop(self, count: int) -> "Stream[T]":
+        """Drop the first count values."""
+        self._check_finished()
+        self._data = itertools.islice(self._data, count, None)
+        return self
+
     def drop_while(self, fun: Callable[[T], object]) -> "Stream[T]":
-        """Drop values as long the function returns a truthy value.
+        """Drop values as long as the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
         """

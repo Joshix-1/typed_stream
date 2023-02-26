@@ -394,3 +394,20 @@ assert nones == [None]
 
 # not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
 # assert not_nnones == [None]
+
+assert Stream(range(100)).drop(10).count() == 90
+assert Stream(range(100)).drop(10).collect() == tuple(range(10, 100))
+assert Stream("abc").drop(2).collect() == ("c",)
+assert Stream("abc")[::] == ("a", "b", "c") == tuple("abc")[::]
+assert Stream("abc")[-2::] == ("b", "c") == tuple("abc")[-2::]
+assert Stream("abc")[::-1] == ("c", "b", "a") == tuple("abc")[::-1]
+assert Stream("abc")[::2] == ("a", "c") == tuple("abc")[::2]
+assert Stream("abc")[:2:] == ("a", "b") == tuple("abc")[:2:]
+assert Stream("abc")[:-1:] == ("a", "b") == tuple("abc")[:-1:]
+assert Stream("abc")[-1:-1:-1] == () == tuple("abc")[-1:-1:-1]
+assert Stream("abc")[-2:-1:-1] == () == tuple("abc")[-2:-1:-1]
+assert Stream("abc")[-1:-2:-1] == ("c",) == tuple("abc")[-1:-2:-1]
+assert Stream("abc")[-1:-3:-1] == ("c", "b") == tuple("abc")[-1:-3:-1]
+assert Stream("abc")[-1:] == ("c",) == tuple("abc")[-1:]
+assert Stream("abc")[-2:] == ("b", "c") == tuple("abc")[-2:]
+assert Stream("abc")[-3:] == ("a", "b", "c") == tuple("abc")[-3:]
