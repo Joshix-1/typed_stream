@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-"""This script contains the version of this package.
+"""
+This script contains the version of this package.
 
 Update this to create a new release.
 To get the current version run this script.
