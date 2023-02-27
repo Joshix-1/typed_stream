@@ -20,6 +20,7 @@ __all__ = (
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 
 
+T = TypeVar("T")
 T_co = TypeVar("T_co", covariant=True)
 
 
@@ -45,37 +46,28 @@ class StarCallable(Protocol[SC_IN_contra, SC_OUT_co]):
         """Handle the arguments."""
 
 
-SLT = TypeVar("SLT", bound="SupportsLessThan")
-
-
 class SupportsLessThan(Protocol):
     """A class that supports comparison with less than."""
 
     @abstractmethod
-    def __lt__(self: SLT, other: SLT) -> bool:
+    def __lt__(self: T, other: T) -> bool:
         """Compare to another instance of the same type."""
-
-
-SGT = TypeVar("SGT", bound="SupportsGreaterThan")
 
 
 class SupportsGreaterThan(Protocol):
     """A class that supports comparison with less than."""
 
     @abstractmethod
-    def __gt__(self: SGT, other: SGT) -> bool:
+    def __gt__(self: T, other: T) -> bool:
         """Compare to another instance of the same type."""
 
 
 SupportsComparison: TypeAlias = SupportsGreaterThan | SupportsLessThan
 
 
-SA = TypeVar("SA", bound="SupportsAdd")
-
-
 class SupportsAdd(Protocol):
     """A class that supports addition."""
 
     @abstractmethod
-    def __add__(self: SA, other: SA) -> SA:
+    def __add__(self: T, other: T) -> T:
         """Add another instance of the same type to self."""

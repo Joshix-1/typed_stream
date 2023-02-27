@@ -18,7 +18,8 @@ __all__ = (
     "ValueIterator",
 )
 
-T = TypeVar("T", bound=object)
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 class ValueIterator(Iterator[T], Streamable[T], Generic[T]):
@@ -148,6 +149,9 @@ class IterWithCleanUp(Iterator[T]):
 
     def __next__(self) -> T:
         """Return the next element if available else run clean-up."""
+        if not hasattr(self, "iterator"):
+            self.close()
+            raise StopIteration
         try:
             return next(self.iterator)
         except BaseException:
@@ -167,7 +171,7 @@ class IterWithCleanUp(Iterator[T]):
         """Run close."""
         self.close()
 
-    def __enter__(self) -> Iterator[T]:
+    def __enter__(self: V) -> V:
         """Return self."""
         return self
 

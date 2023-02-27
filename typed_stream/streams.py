@@ -54,7 +54,7 @@ X = TypeVar("X")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 
 SA = TypeVar("SA", bound=SupportsAdd)
-SLT = TypeVar("SLT", bound=SupportsComparison)
+SC = TypeVar("SC", bound=SupportsComparison)
 
 
 add: Callable[[SA, SA], SA] = operator.add
@@ -681,11 +681,11 @@ class Stream(Iterable[T]):
             Stream(map(fun, self._data, *(ValueIterator(arg) for arg in args)))
         )
 
-    def max(self: "Stream[SLT]") -> SLT:
+    def max(self: "Stream[SC]") -> SC:
         """Return the biggest element of the stream."""
         return max(self)
 
-    def min(self: "Stream[SLT]") -> SLT:
+    def min(self: "Stream[SC]") -> SC:
         """Return the smallest element of the stream."""
         return min(self)
 
@@ -789,7 +789,7 @@ class FileStreamBase(Stream[AnyStr]):
     _file_iterator: LazyFileIterator[AnyStr]
     __slots__ = ("_file_iterator",)
 
-    def __enter__(self) -> Stream[AnyStr]:
+    def __enter__(self: K) -> K:
         """Enter the matrix."""
         return self
 

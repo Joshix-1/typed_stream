@@ -31,7 +31,7 @@ Currently only mypy is fully supported, because I couldn't get the others to wor
 I'm too lazy. I don't know of anybody using this (except me) and I don't need to write changelogs for myself.
 If you need changelogs, please create an issue.
 
-### Why EUPLv1.2?
+### Why EUPL-1.2-or-later?
 
 - 🇪🇺
 - [Google EUPL Policy](https://opensource.google/documentation/reference/thirdparty/licenses#european_union_public_licence_eupl_not_allowed)

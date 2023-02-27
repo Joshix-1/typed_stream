@@ -21,7 +21,9 @@ from typed_stream.exceptions import (
     StreamFinishedError,
     StreamIndexError,
 )
-from typed_stream.iteration_utils import IndexValueTuple
+from typed_stream.functions import is_even, is_odd
+from typed_stream.iteration_utils import IndexValueTuple, IterWithCleanUp
+from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
 
 from .test_functions import (
     is_bool,
@@ -218,6 +220,10 @@ assert (
 )
 assert not hasattr(fs, "_file_iterator")
 
+with FileStream(INPUT_TXT) as fs:
+    assert isinstance(next(iter(fs)), str)
+assert not hasattr(fs, "_file_iterator")
+
 fs = FileStream(INPUT_TXT)
 assert fs.take_while(len).count() == 4
 assert not hasattr(fs, "_file_iterator")
@@ -251,6 +257,24 @@ bfs = BinaryFileStream(INPUT_TXT)
 assert bfs.take_while(len).count() == 4
 assert not hasattr(bfs, "_file_iterator")
 
+bfs = BinaryFileStream(INPUT_TXT)
+first = bfs.first()
+assert not hasattr(bfs, "_file_iterator")
+
+with BinaryFileStream(INPUT_TXT) as bfs:
+    assert first == next(iter(bfs))
+assert not hasattr(bfs, "_file_iterator")
+
+with LazyFileIteratorRemovingEndsBytes(INPUT_TXT) as lfireb:
+    assert first == next(lfireb)
+assert not lfireb._file_object  # pylint: disable=protected-access
+lfireb.close()
+assert not lfireb._file_object  # pylint: disable=protected-access
+lfireb = LazyFileIteratorRemovingEndsBytes(INPUT_TXT)
+assert next(lfireb) == first
+assert lfireb._file_object  # pylint: disable=protected-access
+lfireb.close()
+assert not lfireb._file_object  # pylint: disable=protected-access
 
 bfs = BinaryFileStream(INPUT_TXT)
 fs = FileStream(INPUT_TXT)
@@ -460,3 +484,49 @@ assert str_stream.last() == "c"
 assert_raises(StreamFinishedError, str_stream.collect)
 str_stream = Stream(())
 assert_raises(StreamEmptyError, str_stream.first)
+
+assert (
+    Stream("abc").map(str.upper).sum()
+    == Stream("abc").concurrent_map(str.upper).sum()
+    == "ABC"
+)
+int_list = []
+assert (
+    Stream.counting(-100)
+    .drop(100)
+    .drop_while((1000).__gt__)
+    .take_while((100_000).__gt__)
+    .filter(is_odd)
+    .map(operator.pow, 3)
+    .peek(int_list.append)
+    .enumerate()
+    .flat_map(operator.mul, 2)
+    .exclude(is_even)
+    .limit(10_000)
+    .distinct()
+    .chunk(30)
+    .concurrent_map(sum)
+    .sum()
+    == 432028881523605
+)
+assert sum(int_list) == 432028878744716
+assert len(int_list) - 1 == 3333
+
+assert Stream("abc").starcollect(lambda *args: args) == ("a", "b", "c")
+
+int_list = []
+it_w_cl: IterWithCleanUp[int] = IterWithCleanUp(
+    Stream.counting(1), lambda: int_list.append(1)
+)
+assert next(it_w_cl) == 1
+assert not int_list
+with it_w_cl as _it:
+    assert next(_it) == 2
+    assert not int_list
+assert int_list == [1]
+
+with it_w_cl as _it:
+    assert not next(_it, None)
+    assert int_list == [1]
+
+assert int_list == [1]
