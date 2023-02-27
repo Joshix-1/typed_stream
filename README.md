@@ -17,3 +17,25 @@ This library heavily uses itertools for great performance and simple code.
 
 ## Examples
 In [examples](./examples) are cool examples using Streams.
+
+## Not yet asked questions
+
+I'll try to answer questions that could occur.
+
+### Which type-checkers do you support?
+
+Currently only mypy is fully supported, because I couldn't get the others to work properly.
+
+### Why are there no changelogs?
+
+I'm too lazy. I don't know of anybody using this (except me) and I don't need to write changelogs for myself.
+If you need changelogs, please create an issue.
+
+### Why EUPLv1.2?
+
+- 🇪🇺
+- [Google EUPL Policy](https://opensource.google/documentation/reference/thirdparty/licenses#european_union_public_licence_eupl_not_allowed)
+
+### Is it production-ready?
+
+Yes. It's used by a [package](https://pypi.org/project/an-website/) with around 20k monthly downloads.

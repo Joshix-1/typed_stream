@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# Licensed under the EUPL-1.2 or later.
+# You may obtain a copy of the licence in all the official languages of the
+# European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
 """A simple head program."""
 import sys
 
