@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from .common_types import PathLikeType
+from .common_types import Closeable, PathLikeType
 
 __all__ = (
     "LazyFileIterator",
@@ -34,7 +34,7 @@ def _is_bytes(
     return lfi.encoding is None
 
 
-class LazyFileIterator(Iterator[AnyStr]):
+class LazyFileIterator(Iterator[AnyStr], Closeable):
     """Iterate over a file line by line. Only open it when necessary.
 
     If you only partially iterate the file you have to call .close or use a
@@ -101,10 +101,6 @@ class LazyFileIterator(Iterator[AnyStr]):
         """Return self."""
         return self
 
-    def __del__(self) -> None:
-        """Run close."""
-        self.close()
-
     if TYPE_CHECKING:  # pragma: no cover
 
         @overload
@@ -135,14 +131,6 @@ class LazyFileIterator(Iterator[AnyStr]):
             with contextlib.suppress(Exception):
                 self.close()
             raise
-
-    def __enter__(self: LFI) -> LFI:
-        """Return self."""
-        return self
-
-    def __exit__(self, *args: object) -> None:
-        """Close self."""
-        self.close()
 
 
 class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):

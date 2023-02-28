@@ -3,11 +3,13 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Helpful types."""
+import abc
 from abc import abstractmethod
 from os import PathLike
 from typing import Protocol, TypeAlias, TypeGuard, TypeVar
 
 __all__ = (
+    "Closeable",
     "PathLikeType",
     "StarCallable",
     "SupportsAdd",
@@ -71,3 +73,23 @@ class SupportsAdd(Protocol):
     @abstractmethod
     def __add__(self: T, other: T) -> T:
         """Add another instance of the same type to self."""
+
+
+class Closeable(abc.ABC):
+    """Class that can be closed."""
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        """Run clean-up if not run yet."""
+
+    def __del__(self) -> None:
+        """Run close."""
+        self.close()
+
+    def __enter__(self: T) -> T:
+        """Return self."""
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        """Run close."""
+        self.close()

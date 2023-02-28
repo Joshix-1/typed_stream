@@ -8,6 +8,7 @@ import itertools
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, TypeVar
 
+from .common_types import Closeable
 from .streamable import Streamable, StreamableSequence
 
 __all__ = (
@@ -120,7 +121,7 @@ class Peeker(Generic[T]):
         return value
 
 
-class IterWithCleanUp(Iterator[T]):
+class IterWithCleanUp(Iterator[T], Closeable):
     """An Iterator that calls a clean-up function when finished.
 
     The clean-up function is called once in one of the following conditions:
@@ -166,15 +167,3 @@ class IterWithCleanUp(Iterator[T]):
         if hasattr(self, "cleanup_fun"):
             self.cleanup_fun()
             del self.cleanup_fun
-
-    def __del__(self) -> None:
-        """Run close."""
-        self.close()
-
-    def __enter__(self: V) -> V:
-        """Return self."""
-        return self
-
-    def __exit__(self, *args: object) -> None:
-        """Close self."""
-        self.close()

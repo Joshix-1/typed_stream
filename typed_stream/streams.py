@@ -15,6 +15,7 @@ from types import EllipsisType
 from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
 
 from .common_types import (
+    Closeable,
     PathLikeType,
     StarCallable,
     SupportsAdd,
@@ -67,7 +68,7 @@ class _DefaultValueType:
 _DEFAULT_VALUE: Final = _DefaultValueType()
 
 
-class Stream(Iterable[T]):
+class Stream(Iterable[T], Closeable):
     """Stream class providing an interface similar to Stream in Java.
 
     It is not recommended to store Stream instances in variables,
@@ -788,14 +789,6 @@ class FileStreamBase(Stream[AnyStr]):
 
     _file_iterator: LazyFileIterator[AnyStr]
     __slots__ = ("_file_iterator",)
-
-    def __enter__(self: K) -> K:
-        """Enter the matrix."""
-        return self
-
-    def __exit__(self, *args: object) -> None:
-        """Exit the matrix."""
-        self._close_source()
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
