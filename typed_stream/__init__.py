@@ -5,6 +5,7 @@
 """Java-like typed Stream class for easier handling of generators."""
 
 from .exceptions import StreamEmptyError, StreamFinishedError
+from .stream_abc import StreamABC
 from .streamable import Streamable, StreamableSequence
 from .streams import BinaryFileStream, FileStream, Stream
 from .version import VERSION
@@ -14,6 +15,7 @@ __all__ = (
     "BinaryFileStream",
     "FileStream",
     "Stream",
+    "StreamABC",
     "StreamEmptyError",
     "StreamFinishedError",
     "Streamable",

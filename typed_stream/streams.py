@@ -5,7 +5,6 @@
 """Java-like typed Stream classes for easier handling of generators."""
 import collections
 import concurrent.futures
-import contextlib
 import functools
 import itertools
 import operator
@@ -15,7 +14,6 @@ from types import EllipsisType
 from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
 
 from .common_types import (
-    Closeable,
     PathLikeType,
     StarCallable,
     SupportsAdd,
@@ -23,7 +21,7 @@ from .common_types import (
     TypeGuardingCallable,
 )
 from .constants import MAX_PRINT_COUNT
-from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
+from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
     Chunked,
@@ -38,6 +36,7 @@ from .lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
+from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
 __all__ = (
@@ -68,7 +67,7 @@ class _DefaultValueType:
 _DEFAULT_VALUE: Final = _DefaultValueType()
 
 
-class Stream(Iterable[T], Closeable):
+class Stream(StreamABC[T], Iterable[T]):
     """Stream class providing an interface similar to Stream in Java.
 
     It is not recommended to store Stream instances in variables,
@@ -76,16 +75,20 @@ class Stream(Iterable[T], Closeable):
     """
 
     _data: Iterator[T]
-    _close_source_callable: Callable[[], None]
-    __slots__ = ("_data", "_close_source_callable")
 
-    def __init__(self, data: Iterable[T] | EllipsisType) -> None:
+    def __init__(
+        self,
+        data: Iterable[T] | EllipsisType,
+        close_source_callable: Callable[[], None] | None = None,
+    ) -> None:
         """Create a new Stream.
 
         To create a finished Stream do Stream(...).
         """
-        if not isinstance(data, EllipsisType):
-            self._data = iter(data)
+        super().__init__(
+            ... if isinstance(data, EllipsisType) else iter(data),
+            close_source_callable,
+        )
 
     def __iter__(self) -> IterWithCleanUp[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
@@ -152,7 +155,6 @@ class Stream(Iterable[T], Closeable):
             and stop is None
         ):
             return self.tail(abs(start))
-        # pylint: disable=unsubscriptable-object
         return self.collect()[start:stop:step]
 
     @staticmethod
@@ -249,34 +251,6 @@ class Stream(Iterable[T], Closeable):
             return Stream(range(args[0], stop, step))
         raise TypeError("Unexpected arguments to Stream.range()")
 
-    def _check_finished(self) -> None:
-        """Raise a StreamFinishedError if the stream is finished."""
-        if self._is_finished():
-            raise StreamFinishedError()
-
-    def _close_source(self) -> None:
-        """Close the source of the Stream. Used in FileStream."""
-        if hasattr(self, "_close_source_callable"):
-            self._close_source_callable()
-            del self._close_source_callable
-
-    def _finish(self, ret: K, close_source: bool = False) -> K:
-        """Mark this Stream as finished."""
-        self._check_finished()
-        if close_source:
-            self._close_source()
-        elif hasattr(self, "_close_source_callable") and isinstance(
-            ret, Stream
-        ):
-            # pylint: disable=protected-access
-            ret._close_source_callable = self._close_source_callable
-        del self._data
-        return ret
-
-    def _is_finished(self) -> bool:
-        """Return whether this Stream is finished."""
-        return not hasattr(self, "_data")
-
     def all(self) -> bool:
         """Check whether all values are Truthy. This finishes the Stream."""
         self._check_finished()
@@ -292,11 +266,6 @@ class Stream(Iterable[T], Closeable):
         """Split stream into chunks of the specified size."""
         self._check_finished()
         return self._finish(Chunked(self._data, size).stream())
-
-    def close(self) -> None:
-        """Close this stream cleanly."""
-        with contextlib.suppress(StreamFinishedError):
-            self._finish(None, close_source=True)
 
     if (  # noqa: C901  # pylint: disable=too-complex
         TYPE_CHECKING
@@ -388,25 +357,6 @@ class Stream(Iterable[T], Closeable):
             return self.map(one).sum()
         except StreamEmptyError:
             return 0
-
-    def distinct(self, use_set: bool = True) -> "Stream[T]":
-        """Remove duplicate values.
-
-        Example:
-            - Stream([1, 2, 2, 2, 3]).distinct()
-        """
-        self._check_finished()
-
-        encountered: set[T] | list[T]
-        peek_fun: Callable[[T], None]
-        if use_set:
-            encountered = set()
-            peek_fun = encountered.add
-        else:
-            encountered = []
-            peek_fun = encountered.append
-
-        return self.exclude(encountered.__contains__).peek(peek_fun)
 
     def drop(self, count: int) -> "Stream[T]":
         """Drop the first count values."""
@@ -827,8 +777,7 @@ class FileStream(FileStreamBase[str]):
             if keep_line_ends
             else LazyFileIteratorRemovingEndsStr(data, encoding=encoding)
         )
-        self._close_source_callable = self._close_source
-        super().__init__(self._file_iterator)
+        super().__init__(self._file_iterator, self._close_source)
 
 
 class BinaryFileStream(FileStreamBase[bytes]):
@@ -852,5 +801,4 @@ class BinaryFileStream(FileStreamBase[bytes]):
             if keep_line_ends
             else LazyFileIteratorRemovingEndsBytes(data)
         )
-        self._close_source_callable = self._close_source
-        super().__init__(self._file_iterator)
+        super().__init__(self._file_iterator, self._close_source)
