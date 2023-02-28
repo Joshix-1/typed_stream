@@ -384,7 +384,10 @@ class Stream(Iterable[T], Closeable):
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream."""
         self._check_finished()
-        return self.map(one).sum()
+        try:
+            return self.map(one).sum()
+        except StreamEmptyError:
+            return 0
 
     def distinct(self, use_set: bool = True) -> "Stream[T]":
         """Remove duplicate values.
@@ -756,9 +759,13 @@ class Stream(Iterable[T], Closeable):
             - Stream([1, 2, 3]).accumulate(operator.mul)
         """
         self._check_finished()
-        return self._finish(
-            functools.reduce(fun, self._data), close_source=True
-        )
+        try:
+            return_value = functools.reduce(fun, self._data)
+        except TypeError as exc:
+            raise StreamEmptyError from exc
+        finally:
+            self._finish(None, close_source=True)
+        return return_value
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""

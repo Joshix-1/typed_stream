@@ -38,7 +38,7 @@ from .test_functions import (
     noop,
 )
 
-# pylint: disable=unnecessary-lambda, unsubscriptable-object
+# pylint: disable=unnecessary-lambda
 
 
 def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
@@ -447,6 +447,7 @@ assert nones == [None]
 # not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
 # assert not_nnones == [None]
 
+assert not Stream(()).count()
 assert Stream(range(100)).drop(10).count() == 90
 assert Stream(range(100)).drop(10).collect() == tuple(range(10, 100))
 assert Stream("abc").drop(2).collect() == ("c",)
@@ -490,6 +491,8 @@ assert (
     == Stream("abc").concurrent_map(str.upper).sum()
     == "ABC"
 )
+assert_raises(StreamEmptyError, lambda: Stream(()).sum())
+
 int_list = []
 assert (
     Stream.counting(-100)
