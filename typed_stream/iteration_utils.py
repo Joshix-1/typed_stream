@@ -148,6 +148,9 @@ class IterWithCleanUp(Iterator[T], Closeable):
         self.iterator = iter(iterable)
         self.cleanup_fun = cleanup_fun
 
+    def __iter__(self: V) -> V:
+        return self
+
     def __next__(self) -> T:
         """Return the next element if available else run clean-up."""
         if not hasattr(self, "iterator"):
