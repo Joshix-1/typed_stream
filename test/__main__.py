@@ -54,6 +54,16 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
 
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 
+assert 0 in Stream.range(100)
+assert 1 in Stream([1])
+assert 2 not in Stream.counting(1, 2)
+assert 3 not in Stream.range(3)
+
+assert "0" in Stream.range(100).map(str)
+assert "1" in Stream([1]).map(str)
+assert "2" not in Stream.counting(1, 2).map(str)
+assert "3" not in Stream.range(3).map(str)
+
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
 assert tpl == (1, 2, 3)
 _set: set[int] = Stream([1, 2, 3]).collect(set)
