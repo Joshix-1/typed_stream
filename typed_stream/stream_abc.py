@@ -99,7 +99,7 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
         else:
             encountered = []
             peek_fun = encountered.append
-
+        # pytype: disable=attribute-error
         return self.exclude(encountered.__contains__).peek(peek_fun)
 
     @abc.abstractmethod
