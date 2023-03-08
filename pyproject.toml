@@ -62,7 +62,7 @@ implicit_reexport = false
 
 [tool.pytype]
 inputs = ["typed_stream", "test", "examples"]
-disable = []
+disable = ["not-supported-yet"]
 python_version = "3.10"
 
 [tool.pyright]
