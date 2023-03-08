@@ -165,8 +165,6 @@ class IterWithCleanUp(Iterator[T], Closeable):
 
     def close(self) -> None:
         """Run clean-up if not run yet."""
+        super().close()
         if hasattr(self, "iterator"):
             del self.iterator
-        if hasattr(self, "cleanup_fun"):
-            self.cleanup_fun()
-            del self.cleanup_fun

@@ -1,3 +1,4 @@
+#!/bin/sh
 FAILED=""
 
 echo mypy:
