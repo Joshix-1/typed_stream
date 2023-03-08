@@ -29,8 +29,8 @@ else:
 class StreamABC(Generic[T], Closeable, abc.ABC):
     """ABC for Streams."""
 
-    _data: AsyncIterator[T] | Iterator[T]
-    _close_source_callable: Callable[[], None]
+    _data: None | AsyncIterator[T] | Iterator[T]
+    _close_source_callable: None | Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
     def __init__(
@@ -39,15 +39,13 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
         close_source_callable: Callable[[], None] | None = None,
     ) -> None:
         """Initialize self."""
-        if not isinstance(data, EllipsisType):
-            self._data = data
-        if close_source_callable is not None:
-            self._close_source_callable = close_source_callable
+        self._data = None if isinstance(data, EllipsisType) else data
+        self._close_source_callable = close_source_callable
 
     def __repr__(self) -> str:
         """Return a string representation of self."""
-        data: object = self._data if hasattr(self, "_data") else "..."
-        fun: object = getattr(self, "_close_source_callable", None)
+        data: object = "..." if self._data is None else self._data
+        fun: object = self._close_source_callable
         return f"{self.__class__.__name__}({data!r}, {fun!r})"
 
     def _check_finished(self) -> None:
@@ -57,26 +55,24 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
-        if hasattr(self, "_close_source_callable"):
+        if self._close_source_callable:
             self._close_source_callable()
-            del self._close_source_callable
+            self._close_source_callable = None
 
     def _finish(self, ret: V, close_source: bool = False) -> V:
         """Mark this Stream as finished."""
         self._check_finished()
         if close_source:
             self._close_source()
-        elif hasattr(self, "_close_source_callable") and isinstance(
-            ret, StreamABC
-        ):
+        elif self._close_source_callable and isinstance(ret, StreamABC):
             # pylint: disable=protected-access
             ret._close_source_callable = self._close_source_callable
-        del self._data
+        self._data = None
         return ret
 
     def _is_finished(self) -> bool:
         """Return whether this Stream is finished."""
-        return not hasattr(self, "_data")
+        return self._data is None
 
     def close(self) -> None:
         """Close this stream cleanly."""

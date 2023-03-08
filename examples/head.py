@@ -5,6 +5,7 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """A simple head program."""
+import contextlib
 import sys
 
 from typed_stream import BinaryFileStream, Stream
@@ -35,4 +36,5 @@ def head(*args: str) -> None | str:
 
 
 if __name__ == "__main__":
-    sys.exit(head(*sys.argv[1:]))
+    with contextlib.suppress(BrokenPipeError):
+        sys.exit(head(*sys.argv[1:]))

@@ -121,7 +121,25 @@ class Peeker(Generic[T]):
         return value
 
 
-class IterWithCleanUp(Iterator[T], Closeable):
+class ClassWithCleanUp(Closeable):
+    """A class that has a cleanup_fun and a close method."""
+
+    cleanup_fun: Callable[[], object | None] | None
+
+    # __slots__ = ("cleanup_fun",)
+
+    def __init__(self, cleanup_fun: Callable[[], object | None]) -> None:
+        """Initialize this class."""
+        self.cleanup_fun = cleanup_fun
+
+    def close(self) -> None:
+        """Run clean-up if not run yet."""
+        if self.cleanup_fun:
+            self.cleanup_fun()
+            self.cleanup_fun = None
+
+
+class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
     """An Iterator that calls a clean-up function when finished.
 
     The clean-up function is called once in one of the following conditions:
@@ -137,23 +155,22 @@ class IterWithCleanUp(Iterator[T], Closeable):
     """
 
     iterator: Iterator[T]
-    cleanup_fun: Callable[[], object | None]
 
-    __slots__ = ("cleanup_fun", "iterator")
+    __slots__ = ("iterator",)
 
     def __init__(
         self, iterable: Iterable[T], cleanup_fun: Callable[[], object | None]
     ) -> None:
         """Initialize this class."""
+        super().__init__(cleanup_fun)
         self.iterator = iter(iterable)
-        self.cleanup_fun = cleanup_fun
 
     def __iter__(self: V) -> V:
         return self
 
     def __next__(self) -> T:
-        """Return the next element if available else run clean-up."""
-        if not hasattr(self, "iterator"):
+        """Return the next element if available else run close."""
+        if self.iterator is None:
             self.close()
             raise StopIteration
         try:
@@ -166,5 +183,5 @@ class IterWithCleanUp(Iterator[T], Closeable):
     def close(self) -> None:
         """Run clean-up if not run yet."""
         super().close()
-        if hasattr(self, "iterator"):
-            del self.iterator
+        if self.iterator is not None:
+            self.iterator = None

@@ -676,20 +676,15 @@ class Stream(StreamABC[T], Iterable[T]):
         does not have an item at the given index.
         """
         self._check_finished()
-        real_index: int
-        value: T | _DefaultValueType = _DEFAULT_VALUE
+        value: T | _DefaultValueType
         if index < 0:
             tail = self.tail(abs(index))
-            if len(tail) == abs(index):
-                value = tail[0]
+            value = tail[0] if len(tail) == abs(index) else _DEFAULT_VALUE
         else:  # value >= 0
             try:
-                real_index, value = self.limit(index + 1).enumerate().last()
+                value = self.drop(index - 1).first()
             except StreamEmptyError:
                 value = _DEFAULT_VALUE
-            else:
-                if index != real_index:
-                    value = _DEFAULT_VALUE
 
         if not isinstance(value, _DefaultValueType):
             return value
@@ -752,15 +747,15 @@ class Stream(StreamABC[T], Iterable[T]):
 class FileStreamBase(Stream[AnyStr]):
     """ABC for file streams."""
 
-    _file_iterator: LazyFileIterator[AnyStr]
+    _file_iterator: None | LazyFileIterator[AnyStr]
     __slots__ = ("_file_iterator",)
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
-        if not hasattr(self, "_file_iterator"):
+        if self._file_iterator:
             return
         self._file_iterator.close()
-        del self._file_iterator
+        self._file_iterator = None
 
 
 class FileStream(FileStreamBase[str]):

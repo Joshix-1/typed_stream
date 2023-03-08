@@ -218,26 +218,26 @@ assert FileStream(INPUT_TXT, keep_line_ends=True).map(
 
 fs = FileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
-assert not hasattr(fs, "_file_iterator")
+assert fs._file_iterator is None
 
 fs = FileStream(INPUT_TXT)
 assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
-assert not hasattr(fs, "_file_iterator")
+assert fs._file_iterator is None
 
 fs = FileStream(INPUT_TXT)
 assert (
     fs.limit(10).map(repr).map(len).peek(lambda _: ...).map((1).__add__).count()
     == 10
 )
-assert not hasattr(fs, "_file_iterator")
+assert fs._file_iterator is None
 
 with FileStream(INPUT_TXT) as fs:
     assert isinstance(next(iter(fs)), str)
-assert not hasattr(fs, "_file_iterator")
+assert fs._file_iterator is None
 
 fs = FileStream(INPUT_TXT)
 assert fs.take_while(len).count() == 4
-assert not hasattr(fs, "_file_iterator")
+assert fs._file_iterator is None
 
 
 assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
@@ -246,11 +246,11 @@ assert BinaryFileStream(INPUT_TXT, keep_line_ends=True).map(
 
 bfs: BinaryFileStream = BinaryFileStream(INPUT_TXT)
 assert bfs.chain([b" "]).last() == b" "
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert list(bfs.map(lambda _: ...).limit(1)) == [...]
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert (
@@ -262,19 +262,19 @@ assert (
     .count()
     == 10
 )
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 bfs = BinaryFileStream(INPUT_TXT)
 assert bfs.take_while(len).count() == 4
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 bfs = BinaryFileStream(INPUT_TXT)
 first = bfs.first()
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 with BinaryFileStream(INPUT_TXT) as bfs:
     assert first == next(iter(bfs))
-assert not hasattr(bfs, "_file_iterator")
+assert bfs._file_iterator is None
 
 with LazyFileIteratorRemovingEndsBytes(INPUT_TXT) as lfireb:
     assert first == next(lfireb)
@@ -290,8 +290,8 @@ assert not lfireb._file_object  # pylint: disable=protected-access
 bfs = BinaryFileStream(INPUT_TXT)
 fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
-assert not hasattr(bfs, "_file_iterator")
-assert not hasattr(fs, "_file_iterator")
+assert bfs._file_iterator is None
+assert fs._file_iterator is None
 
 int_list_begin: list[int] = []
 int_list_end: list[int] = []
