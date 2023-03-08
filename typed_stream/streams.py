@@ -93,8 +93,6 @@ class Stream(StreamABC[T], Iterable[T]):
     def __contains__(self, value: T, /) -> bool:
         """Check whether this stream contains the given value."""
         self._check_finished()
-        if hasattr(self._data, "__contains__"):
-            return self._finish(value in self._data, close_source=True)
         for element in self._data:
             if element == value:
                 return self._finish(True, close_source=True)
