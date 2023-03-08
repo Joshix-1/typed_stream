@@ -752,7 +752,7 @@ class FileStreamBase(Stream[AnyStr]):
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
-        if self._file_iterator:
+        if not self._file_iterator:
             return
         self._file_iterator.close()
         self._file_iterator = None
