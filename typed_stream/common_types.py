@@ -21,8 +21,8 @@ __all__ = (
 
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 
-
 T = TypeVar("T")
+# pytype: disable=not-supported-yet
 T_co = TypeVar("T_co", covariant=True)
 
 
@@ -38,6 +38,7 @@ class TypeGuardingCallable(Protocol[T_co]):
 SC_IN_contra = TypeVar("SC_IN_contra", contravariant=True)
 SC_OUT_co = TypeVar("SC_OUT_co", covariant=True)
 # pylint: enable=invalid-name
+# pytype: enable=not-supported-yet
 
 
 class StarCallable(Protocol[SC_IN_contra, SC_OUT_co]):
