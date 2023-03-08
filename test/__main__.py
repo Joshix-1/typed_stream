@@ -54,6 +54,7 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
 
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 
+# pylint: disable=unsupported-membership-test
 assert 0 in Stream.range(100)
 assert 1 in Stream([1])
 assert 2 not in Stream.counting(1, 2)
