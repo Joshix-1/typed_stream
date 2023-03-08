@@ -682,7 +682,7 @@ class Stream(StreamABC[T], Iterable[T]):
             value = tail[0] if len(tail) == abs(index) else _DEFAULT_VALUE
         else:  # value >= 0
             try:
-                value = self.drop(index - 1).first()
+                value = (self.drop(index - 1) if index else self).first()
             except StreamEmptyError:
                 value = _DEFAULT_VALUE
 
