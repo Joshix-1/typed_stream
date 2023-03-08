@@ -154,7 +154,7 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
     - partially iterating over this without closing
     """
 
-    iterator: Iterator[T]
+    iterator: Iterator[T] | None
 
     __slots__ = ("iterator",)
 
