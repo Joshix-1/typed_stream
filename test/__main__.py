@@ -40,6 +40,7 @@ from .test_functions import (
 
 # pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
 
+
 def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     """Assert that fun raises exc."""
     try:
