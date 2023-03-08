@@ -89,6 +89,13 @@ class Stream(StreamABC[T], Iterable[T]):
             ... if isinstance(data, EllipsisType) else iter(data),
             close_source_callable,
         )
+    def __contains__(self, value: T, \) -> bool:
+        """Check whether this stream contains the given value."""
+        self._check_finished()
+        for element in self._data:
+            if element == value:
+                return self._finish(True, close_source=True)
+        return self._finish(False, close_source=True)
 
     def __iter__(self) -> IterWithCleanUp[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
