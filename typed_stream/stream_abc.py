@@ -19,11 +19,13 @@ T = TypeVar("T", bound=object)
 V = TypeVar("V")
 
 
+# pytype: disable=not-supported-yet
 if sys.version_info < (3, 11):
     if TYPE_CHECKING:
         from typing_extensions import Self
 else:
     from typing import Self
+# pytype: enable=not-supported-yet
 
 
 class StreamABC(Generic[T], Closeable, abc.ABC):
@@ -101,6 +103,7 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
             peek_fun = encountered.append
         # pytype: disable=attribute-error
         return self.exclude(encountered.__contains__).peek(peek_fun)
+        # pytype: enable=attribute-error
 
     @abc.abstractmethod
     def limit(self, count: int) -> "Self":
