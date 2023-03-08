@@ -8,6 +8,7 @@ jobs:
   fix_stupid_mistakes:
     name: Fix stupid mistakes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.ref_type == 'branch'
     permissions:
       contents: write
@@ -37,6 +38,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     strategy:
@@ -66,6 +68,7 @@ jobs:
   mypy:
     name: mypy
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     strategy:
@@ -89,6 +92,7 @@ jobs:
   pytype:
     name: pytype
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -106,6 +110,7 @@ jobs:
   flake8:
     name: Flake8
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -123,6 +128,7 @@ jobs:
   pylint:
     name: Pylint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -140,6 +146,7 @@ jobs:
   bandit:
     name: Bandit
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -157,6 +164,7 @@ jobs:
   github-pages:
     name: GitHub Pages
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs:
       - test
     permissions:
