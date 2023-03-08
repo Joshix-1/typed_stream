@@ -38,8 +38,7 @@ from .test_functions import (
     noop,
 )
 
-# pylint: disable=unnecessary-lambda, unsubscriptable-object
-
+# pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
 
 def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     """Assert that fun raises exc."""
@@ -94,9 +93,10 @@ assert str(Stream(...)) == "Stream(...)"
 assert repr(Stream(...)) == "Stream(...)"
 assert repr(Stream("abc")) == "Stream(('a', 'b', 'c'))"
 
-assert Stream(...)._is_finished()  # pylint: disable=protected-access
-assert BinaryFileStream(...)._is_finished()  # pylint: disable=protected-access
-assert FileStream(...)._is_finished()  # pylint: disable=protected-access
+assert Stream(...)._is_finished()
+assert BinaryFileStream(...)._is_finished()
+assert FileStream(...)._is_finished()
+
 
 assert Stream.range(5).map(str).enumerate().collect(tuple) == (
     (0, "0"),
@@ -278,14 +278,14 @@ assert bfs._file_iterator is None
 
 with LazyFileIteratorRemovingEndsBytes(INPUT_TXT) as lfireb:
     assert first == next(lfireb)
-assert not lfireb._file_object  # pylint: disable=protected-access
+assert not lfireb._file_object
 lfireb.close()
-assert not lfireb._file_object  # pylint: disable=protected-access
+assert not lfireb._file_object
 lfireb = LazyFileIteratorRemovingEndsBytes(INPUT_TXT)
 assert next(lfireb) == first
-assert lfireb._file_object  # pylint: disable=protected-access
+assert lfireb._file_object
 lfireb.close()
-assert not lfireb._file_object  # pylint: disable=protected-access
+assert not lfireb._file_object
 
 bfs = BinaryFileStream(INPUT_TXT)
 fs = FileStream(INPUT_TXT)
