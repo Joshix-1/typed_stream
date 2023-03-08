@@ -45,6 +45,7 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
             self._close_source_callable = close_source_callable
 
     def __repr__(self) -> str:
+        """Return a string representation of self."""
         data: object = self._data if hasattr(self, "_data") else "..."
         fun: object = getattr(self, "_close_source_callable", None)
         return f"{self.__class__.__name__}({data!r}, {fun!r})"
