@@ -118,7 +118,7 @@ class NotNoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __call__(self, value: None) -> Literal[False]:
@@ -143,7 +143,7 @@ class NoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __call__(self, value: None) -> Literal[True]:

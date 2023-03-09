@@ -118,7 +118,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return f"{list_} + (...,)"
         return str(list_)
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def __getitem__(self, item: int, /) -> T:
@@ -413,7 +413,7 @@ class Stream(StreamABC[T], Iterable[T]):
     # ) -> "Stream[K]":
     #     ...
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
+    if TYPE_CHECKING:  # pragma: no cover
         # @overload
         # def exclude(self, fun: NotNoneChecker) -> "Stream[None]":
         #     ...
@@ -485,7 +485,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._close_source()
         return first
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901, CCE002
+    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
@@ -581,7 +581,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.islice(self._data, count)
         return self
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901, CCE002
+    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
@@ -651,7 +651,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """Return the smallest element of the stream."""
         return min(self)
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
+    if TYPE_CHECKING:  # pragma: no cover
 
         @overload
         def nth(self: "Stream[T]", index: int) -> T:
