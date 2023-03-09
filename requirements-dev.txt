@@ -17,6 +17,7 @@ pytype==2023.*
 bandit[toml]==1.*
 pylint==2.16.*
 flake8==6.0.*
+flake8-builtins==2.1.*
 flake8-bugbear==23.2.13
 flake8-comprehensions==3.*
 flake8-docstrings==1.*
