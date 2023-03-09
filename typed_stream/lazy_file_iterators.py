@@ -107,15 +107,20 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
                 self.close()
             raise
 
-    if TYPE_CHECKING:  # pragma: no cover
+    def close(self) -> None:
+        """Close the underlying file."""
+        if self._file_object:
+            self._file_object.close()
+            self._file_object = None
+            self._iterator = None
 
-        @overload
-        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
-            ...
+    @overload
+    def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
+        ...
 
-        @overload
-        def _open_file(self: "LazyFileIterator[str]") -> TextIO:
-            ...
+    @overload
+    def _open_file(self: "LazyFileIterator[str]") -> TextIO:
+        ...
 
     def _open_file(
         self: "LazyFileIterator[str] | LazyFileIterator[bytes]",
@@ -124,13 +129,6 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
         if _is_bytes(self):
             return open(self.path, mode="rb")  # noqa: SIM115
         return open(self.path, encoding=self.encoding)  # noqa: SIM115
-
-    def close(self) -> None:
-        """Close the underlying file."""
-        if self._file_object:
-            self._file_object.close()
-            self._file_object = None
-            self._iterator = None
 
 
 class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
