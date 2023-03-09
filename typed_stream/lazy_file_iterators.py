@@ -90,16 +90,22 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
         self._iterator = None
         self._file_object = None
 
-    def close(self) -> None:
-        """Close the underlying file."""
-        if self._file_object:
-            self._file_object.close()
-            self._file_object = None
-            self._iterator = None
-
     def __iter__(self) -> Iterator[AnyStr]:
         """Return self."""
         return self
+
+    def __next__(self: "LazyFileIterator[AnyStr]") -> AnyStr:
+        """Get the next line."""
+        if self._iterator is None:
+            self._file_object = self._open_file()
+            self._iterator = iter(self._file_object)
+
+        try:
+            return next(self._iterator)
+        except BaseException:
+            with contextlib.suppress(Exception):
+                self.close()
+            raise
 
     if TYPE_CHECKING:  # pragma: no cover
 
@@ -119,18 +125,12 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
             return open(self.path, mode="rb")  # noqa: SIM115
         return open(self.path, encoding=self.encoding)  # noqa: SIM115
 
-    def __next__(self: "LazyFileIterator[AnyStr]") -> AnyStr:
-        """Get the next line."""
-        if self._iterator is None:
-            self._file_object = self._open_file()
-            self._iterator = iter(self._file_object)
-
-        try:
-            return next(self._iterator)
-        except BaseException:
-            with contextlib.suppress(Exception):
-                self.close()
-            raise
+    def close(self) -> None:
+        """Close the underlying file."""
+        if self._file_object:
+            self._file_object.close()
+            self._file_object = None
+            self._iterator = None
 
 
 class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
