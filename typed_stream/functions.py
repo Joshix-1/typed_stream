@@ -82,7 +82,6 @@ class InstanceChecker(Generic[T]):
 
     __slots__ = ("type_",)
 
-
     def __init__(self, type_: type[T]) -> None:
         self.type_ = type_
 
