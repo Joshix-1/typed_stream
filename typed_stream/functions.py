@@ -82,12 +82,12 @@ class InstanceChecker(Generic[T]):
 
     __slots__ = ("type_",)
 
-    def __init__(self, type_: type[T]) -> None:
-        self.type_ = type_
-
     def __call__(self, value: object) -> TypeGuard[T]:
         """Check whether a value has the correct type."""
         return isinstance(value, self.type_)
+
+    def __init__(self, type_: type[T]) -> None:
+        self.type_ = type_
 
 
 # fmt: off
@@ -118,7 +118,7 @@ class NotNoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover
+    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
 
         @overload
         def __call__(self, value: None) -> Literal[False]:
@@ -143,7 +143,7 @@ class NoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover
+    if TYPE_CHECKING:  # pragma: no cover  # noqa: CCE002
 
         @overload
         def __call__(self, value: None) -> Literal[True]:
