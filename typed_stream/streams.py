@@ -674,6 +674,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
         Raises StreamIndexError if no default value is given and the Stream
         does not have an item at the given index.
+
+        Stream(...).nth(0) gets the first element of the stream.
         """
         self._check_finished()
         value: T | _DefaultValueType

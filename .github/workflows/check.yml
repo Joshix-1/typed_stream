@@ -58,7 +58,9 @@ jobs:
       - name: Install Coverage.py
         run: grep "^coverage" requirements-dev.txt | xargs pip install
       - name: Run tests
-        run: coverage run -m test
+        run: |
+          python3 -m test
+          python3 -m examples.test
       - name: Upload coverage as artifact
         uses: actions/upload-artifact@v3
         with:

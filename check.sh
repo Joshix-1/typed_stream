@@ -47,6 +47,7 @@ echo Bandit:
 python3 -m bandit -q -c pyproject.toml -r typed_stream examples || FAILED=$(( 64 | FAILED ))
 
 echo Tests:
+python3 -m examples.test
 coverage run -m test || FAILED=$(( 128 | FAILED ))
 
 exit "${FAILED}"
