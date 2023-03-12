@@ -5,6 +5,7 @@
 """The tests for the Stream."""
 import operator
 import pickle
+import sys
 from collections.abc import Callable
 from functools import partial
 from numbers import Number, Real
@@ -49,6 +50,9 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
         val = fun()
     except exc:
         return
+    except BaseException:
+        print(f"{fun} did not raise {exc}", file=sys.stderr)
+        raise
     raise AssertionError(
         f"{fun} did not raise {exc} and instead returned {val}"
     )
@@ -357,7 +361,7 @@ for i in range(100):
 
 
 for name in dir(Stream(...)):
-    if name.startswith("__") or name in {
+    if name in {
         "_close_source",
         "_finish",
         "_is_finished",
@@ -365,13 +369,47 @@ for name in dir(Stream(...)):
         "counting",
         "from_value",
         "range",
+        "__init__",
+        "__new__",
+        "__del__",
+        "__exit__",
+        "__enter__",
+        "__class__",
+        "__class_getitem__",
+        "__delattr__",
+        "__dir__",
+        "__eq__",
+        "__format__",
+        "__ge__",
+        "__getattribute__",
+        "__gt__",
+        "__hash__",
+        "__init_subclass__",
+        "__le__",
+        "__lt__",
+        "__ne__",
+        "__reduce__",
+        "__reduce_ex__",
+        "__repr__",
+        "__str__",
+        "__setattr__",
+        "__sizeof__",
+        "__subclasshook__",
     }:
         continue
     if isinstance(method := getattr(Stream(...), name), Callable):
         args: tuple[Any, ...]
         if name == "chain":
             args = ([],)
-        elif name in {"chunk", "drop", "limit", "nth", "tail"}:
+        elif name in {
+            "chunk",
+            "drop",
+            "limit",
+            "nth",
+            "tail",
+            "__contains__",
+            "__getitem__",
+        }:
             args = (2,)
         elif name in {
             "concurrent_map",
