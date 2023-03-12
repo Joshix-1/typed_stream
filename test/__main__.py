@@ -397,8 +397,10 @@ for name in dir(Stream(...)):
         "__subclasshook__",
     }:
         continue
-    if isinstance(method := getattr(Stream(...), name), Callable):
-        args: tuple[Any, ...]
+    if isinstance(
+        method := getattr(Stream(...), name), Callable  # type: ignore[arg-type]
+    ):
+        args: tuple[Any, ...]  # type: ignore[misc]
         if name == "chain":
             args = ([],)
         elif name in {
