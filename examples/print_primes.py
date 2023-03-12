@@ -8,7 +8,7 @@ from typed_stream import Stream
 
 def prime_stream() -> Stream[int]:
     """Create a stream of primes."""
-    primes = [2, 3, 5, 7]
+    primes = [3, 5, 7]
 
     def _is_primey(num: int) -> bool:
         """Return True if num isn't divisible by any prime in primes."""
@@ -20,8 +20,10 @@ def prime_stream() -> Stream[int]:
                 return True
         raise AssertionError()
 
-    return Stream(primes).chain(
-        Stream.counting(11, 2).filter(_is_primey).peek(primes.append)
+    return (
+        Stream((2,))
+        .chain(primes)
+        .chain(Stream.counting(11, 2).filter(_is_primey).peek(primes.append))
     )
 
 

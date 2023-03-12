@@ -20,6 +20,8 @@ V = TypeVar("V")
 class Streamable(Iterable[T], ABC):
     """Abstract base class defining a Streamable interface."""
 
+    __slots__ = ()
+
     def stream(self) -> "Stream[T]":
         """Return Stream(self)."""
         from .streams import Stream  # pylint: disable=import-outside-toplevel
@@ -29,6 +31,8 @@ class Streamable(Iterable[T], ABC):
 
 class StreamableSequence(tuple[T, ...], Streamable[T]):
     """A streamable immutable Sequence."""
+
+    __slots__ = ()
 
     if TYPE_CHECKING:  # pragma: no cover
 
