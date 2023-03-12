@@ -74,6 +74,8 @@ class Stream(StreamABC[T], Iterable[T]):
     instead use method chaining to handle the values and collect them when finished.
     """
 
+    __slots__ = ()
+
     _data: Iterator[T]
 
     def __init__(
@@ -142,7 +144,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         Equivalent to reversed(self.collect()).
         """
-        return reversed(self.collect())
+        return reversed(self.collect())  # pylint: disable=bad-reversed-sequence
 
     def _get_slice(  # noqa: C901
         self,
@@ -772,6 +774,8 @@ class FileStreamBase(Stream[AnyStr]):
 class FileStream(FileStreamBase[str]):
     """Lazily iterate over a file."""
 
+    __slots__ = ()
+
     def __init__(
         self,
         data: PathLikeType | EllipsisType,
@@ -796,6 +800,8 @@ class FileStream(FileStreamBase[str]):
 
 class BinaryFileStream(FileStreamBase[bytes]):
     """Lazily iterate over the lines of a file."""
+
+    __slots__ = ()
 
     def __init__(
         self,

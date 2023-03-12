@@ -10,14 +10,22 @@ __all__ = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
 class _StreamErrorBase(Exception):
     """Internal base class for StreamErrors."""
 
+    __slots__ = ()
+
 
 class StreamFinishedError(_StreamErrorBase):
     """You cannot perform operations on a finished Stream."""
+
+    __slots__ = ()
 
 
 class StreamEmptyError(_StreamErrorBase):
     """The Stream is empty."""
 
+    __slots__ = ()
+
 
 class StreamIndexError(_StreamErrorBase, IndexError):
     """Stream index out of range."""
+
+    __slots__ = ()

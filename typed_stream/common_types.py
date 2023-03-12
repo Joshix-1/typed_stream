@@ -77,6 +77,8 @@ class SupportsAdd(Protocol):
 class Closeable(abc.ABC):
     """Class that can be closed."""
 
+    __slots__ = ()
+
     @abc.abstractmethod
     def close(self) -> None:
         """Run clean-up if not run yet."""

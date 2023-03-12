@@ -136,6 +136,8 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
 class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
     """The same as LazyFileIterator[str] but it removes line-ends from lines."""
 
+    __slots__ = ()
+
     def __next__(self) -> str:
         r"""Return the next line without '\n' in the end."""
         return super().__next__().removesuffix("\n")
@@ -143,6 +145,8 @@ class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
 
 class LazyFileIteratorRemovingEndsBytes(LazyFileIterator[bytes]):
     """The same as LazyFileIterator[bytes] but it removes line-ends from lines."""
+
+    __slots__ = ()
 
     def __next__(self) -> bytes:
         r"""Return the next line without '\n' in the end."""

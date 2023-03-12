@@ -73,6 +73,8 @@ class Chunked(
 class IndexValueTuple(tuple[int, T], Generic[T]):
     """A tuple to hold index and value."""
 
+    __slots__ = ()
+
     @property
     def idx(self: tuple[int, object]) -> int:
         """The index."""
@@ -84,7 +86,7 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
         return self[1]
 
 
-class Enumerator(Iterator[IndexValueTuple[T]], Generic[T]):
+class Enumerator(Iterator[IndexValueTuple[T]]):
     """Like enumerate() but yielding IndexValueTuples."""
 
     _iterator: Iterator[T]
@@ -126,7 +128,7 @@ class ClassWithCleanUp(Closeable):
 
     cleanup_fun: Callable[[], object | None] | None
 
-    # __slots__ = ("cleanup_fun",)
+    __slots__ = ("cleanup_fun",)
 
     def __init__(self, cleanup_fun: Callable[[], object | None]) -> None:
         """Initialize this class."""
