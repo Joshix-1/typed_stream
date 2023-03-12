@@ -17,7 +17,6 @@ from typed_stream import (
     BinaryFileStream,
     FileStream,
     Stream,
-    StreamABC,
     StreamableSequence,
 )
 from typed_stream.exceptions import (
@@ -62,7 +61,6 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
-assert_raises(TypeError, lambda: hash(StreamABC(...)))
 
 # pylint: disable=unsupported-membership-test
 assert 0 in Stream.counting()
