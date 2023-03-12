@@ -78,6 +78,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
     _data: Iterator[T]
 
+    __hash__ = None
+
     def __init__(
         self,
         data: Iterable[T] | EllipsisType,

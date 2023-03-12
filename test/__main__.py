@@ -383,7 +383,6 @@ for name in dir(Stream(...)):  # noqa: C901
         "__ge__",
         "__getattribute__",
         "__gt__",
-        "__hash__",
         "__init_subclass__",
         "__le__",
         "__lt__",
