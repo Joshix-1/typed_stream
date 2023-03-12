@@ -65,6 +65,9 @@ assert "1" in Stream([1]).map(str)
 assert "2" not in Stream.range(1, 100, 2).map(str)
 assert "3" not in Stream.range(3).map(str)
 
+assert "".join(reversed(Stream("abc"))) == "cba"
+assert tuple(reversed(Stream([1, 2, 3, 4]))) == (4, 3, 2, 1)
+
 tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
 assert tpl == (1, 2, 3)
 _set: set[int] = Stream([1, 2, 3]).collect(set)

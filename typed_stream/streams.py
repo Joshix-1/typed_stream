@@ -98,26 +98,6 @@ class Stream(StreamABC[T], Iterable[T]):
                 return self._finish(True, close_source=True)
         return self._finish(False, close_source=True)
 
-    def __iter__(self) -> IterWithCleanUp[T]:
-        """Iterate over the values of this Stream. This finishes the Stream."""
-        self._check_finished()
-        return IterWithCleanUp(self._data, self.close)
-
-    def __repr__(self) -> str:
-        """Convert this Stream to a str. This finishes the Stream."""
-        if self._is_finished():
-            return "Stream(...)"
-        return f"Stream({self})"
-
-    def __str__(self) -> str:
-        """Convert this Stream to a str. This finishes the Stream."""
-        if self._is_finished():
-            return "Stream(...)"
-        list_ = tuple(self.limit(MAX_PRINT_COUNT))
-        if len(list_) >= MAX_PRINT_COUNT:
-            return f"{list_} + (...,)"
-        return str(list_)
-
     if TYPE_CHECKING:  # pragma: no cover
 
         @overload
@@ -134,6 +114,35 @@ class Stream(StreamABC[T], Iterable[T]):
         if isinstance(item, int):
             return self.nth(item)
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
+
+    def __iter__(self) -> IterWithCleanUp[T]:
+        """Iterate over the values of this Stream. This finishes the Stream."""
+        self._check_finished()
+        return IterWithCleanUp(self._data, self.close)
+
+    def __str__(self) -> str:
+        """Convert this Stream to a str. This finishes the Stream."""
+        if self._is_finished():
+            return "Stream(...)"
+        list_ = tuple(self.limit(MAX_PRINT_COUNT))
+        if len(list_) >= MAX_PRINT_COUNT:
+            return f"{list_} + (...,)"
+        return str(list_)
+
+    def __repr__(self) -> str:
+        """Convert this Stream to a str. This finishes the Stream."""
+        if self._is_finished():
+            return "Stream(...)"
+        return f"Stream({self})"
+
+    def __reversed__(self) -> Iterator[T]:
+        """Return the items of this Stream in reversed order.
+
+        This finishes the Stream and collects all the element.
+
+        Equivalent to reversed(self.collect()).
+        """
+        return reversed(self.collect())
 
     def _get_slice(  # noqa: C901
         self,
