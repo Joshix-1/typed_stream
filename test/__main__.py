@@ -6,9 +6,11 @@
 import operator
 import pickle
 from collections.abc import Callable
+from functools import partial
 from numbers import Number, Real
 from operator import add
 from pathlib import Path
+from typing import Any
 
 from typed_stream import (
     BinaryFileStream,
@@ -352,6 +354,40 @@ for i in range(100):
         continue
     assert Stream.range(10_000)[-i] == 10_000 - i
     assert Stream.range(10_000).nth(-i) == 10_000 - i
+
+
+for name in dir(Stream(...)):
+    if name.startswith("__") or name in {
+        "_close_source",
+        "_finish",
+        "_is_finished",
+        "close",
+        "counting",
+        "from_value",
+        "range",
+    }:
+        continue
+    if isinstance(method := getattr(Stream(...), name), Callable):
+        args: tuple[Any, ...]
+        if name == "chain":
+            args = ([],)
+        elif name in {"chunk", "drop", "limit", "nth", "tail"}:
+            args = (2,)
+        elif name in {
+            "concurrent_map",
+            "drop_while",
+            "exclude",
+            "flat_map",
+            "map",
+            "peek",
+            "reduce",
+            "starcollect",
+            "take_while",
+        }:
+            args = (lambda: ...,)
+        else:
+            args = ()
+        assert_raises(StreamFinishedError, partial(method, *args))
 
 assert_raises(StreamIndexError, lambda: Stream.range(10)[10])
 assert_raises(StreamIndexError, lambda: Stream.range(10)[-11])

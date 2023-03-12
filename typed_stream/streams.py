@@ -403,6 +403,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self: "Stream[T]", start_index: int = 0
     ) -> "Stream[IndexValueTuple[T]]":
         """Map the values to a tuple of index and value."""
+        self._check_finished()
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
     # @overload
@@ -655,10 +656,12 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def max(self: "Stream[SC]") -> SC:
         """Return the biggest element of the stream."""
+        self._check_finished()
         return self._finish(max(self._data), close_source=True)
 
     def min(self: "Stream[SC]") -> SC:
         """Return the smallest element of the stream."""
+        self._check_finished()
         return self._finish(min(self._data), close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover
