@@ -86,7 +86,7 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
         return self[1]
 
 
-class Enumerator(Iterator[IndexValueTuple[T]]):
+class Enumerator(Iterator[IndexValueTuple[T]], Generic[T]):
     """Like enumerate() but yielding IndexValueTuples."""
 
     _iterator: Iterator[T]
