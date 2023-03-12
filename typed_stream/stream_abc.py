@@ -33,7 +33,7 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
     _close_source_callable: None | Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
-    __hash__ = None
+    __hash__ = None  # type: ignore[assignment]
 
     def __init__(
         self,
