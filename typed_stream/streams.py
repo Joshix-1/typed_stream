@@ -112,7 +112,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def __getitem__(self, item: slice | int, /) -> StreamableSequence[T] | T:
         """Finish the stream by collecting."""
-        self._check_finished()
         if isinstance(item, int):
             return self.nth(item)
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
@@ -161,6 +160,7 @@ class Stream(StreamABC[T], Iterable[T]):
             and (step is None or step >= 0)
             and (stop is None or stop >= 0)
         ):
+            self._check_finished()
             return self._finish(
                 StreamableSequence(
                     itertools.islice(self._data, start, stop, step)
@@ -273,7 +273,7 @@ class Stream(StreamABC[T], Iterable[T]):
     def all(self) -> bool:
         """Check whether all values are Truthy. This finishes the Stream."""
         self._check_finished()
-        return all(self)
+        return self._finish(all(self._data), close_source=True)
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":
         """Add another iterable to the end of the Stream."""
@@ -371,7 +371,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream."""
-        self._check_finished()
         try:
             return self.map(one).sum()
         except StreamEmptyError:
@@ -569,15 +568,15 @@ class Stream(StreamABC[T], Iterable[T]):
     def for_each(self, fun: Callable[[T], object] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
         self._check_finished()
-        for value in self:
+        for value in self._data:
             fun(value)
+        self._finish(None, close_source=True)
 
     def last(self) -> T:
         """Return the last element of the Stream. This finishes the Stream.
 
         raises StreamEmptyError if stream is empty.
         """
-        self._check_finished()
         if tail := self.tail(1):
             return tail[-1]
         raise StreamEmptyError()
@@ -656,11 +655,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def max(self: "Stream[SC]") -> SC:
         """Return the biggest element of the stream."""
-        return max(self)
+        return self._finish(max(self._data), close_source=True)
 
     def min(self: "Stream[SC]") -> SC:
         """Return the smallest element of the stream."""
-        return min(self)
+        return self._finish(min(self._data), close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover
 
@@ -688,7 +687,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
         Stream(...).nth(0) gets the first element of the stream.
         """
-        self._check_finished()
         value: T | _DefaultValueType
         if index < 0:
             tail = self.tail(abs(index))
@@ -726,17 +724,15 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         self._check_finished()
         try:
-            return_value = functools.reduce(fun, self._data)
-        except TypeError as exc:
+            initial = next(self._data)
+        except StopIteration as exc:
             raise StreamEmptyError from exc
-        finally:
-            self._finish(None, close_source=True)
-        return return_value
+        return self._finish(functools.reduce(fun, self._data, initial), True)
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
         self._check_finished()
-        return fun(*self)
+        return self._finish(fun(*self._data), close_source=True)
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements."""
@@ -745,7 +741,10 @@ class Stream(StreamABC[T], Iterable[T]):
     def tail(self, count: int) -> StreamableSequence[T]:
         """Return a Sequence with the last count items."""
         self._check_finished()
-        return StreamableSequence(collections.deque(self, maxlen=count))
+        return self._finish(
+            StreamableSequence(collections.deque(self._data, maxlen=count)),
+            close_source=True,
+        )
 
     def take_while(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Take values as long the function returns a truthy value.
