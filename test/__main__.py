@@ -360,7 +360,7 @@ for i in range(100):
     assert Stream.range(10_000).nth(-i) == 10_000 - i
 
 
-for name in dir(Stream(...)):
+for name in dir(Stream(...)):  # noqa: C901
     if name in {
         "_close_source",
         "_finish",
@@ -395,6 +395,7 @@ for name in dir(Stream(...)):
         "__setattr__",
         "__sizeof__",
         "__subclasshook__",
+        "__getstate__",
     }:
         continue
     if isinstance(
