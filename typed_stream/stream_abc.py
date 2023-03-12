@@ -33,6 +33,8 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
     _close_source_callable: None | Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
+    __hash__ = None
+
     def __init__(
         self,
         data: AsyncIterator[T] | Iterator[T] | EllipsisType,
