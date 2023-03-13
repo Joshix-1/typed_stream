@@ -219,6 +219,7 @@ class Triplewise(
         super().__init__(itertools.pairwise(itertools.pairwise(iterable)))
 
     def __next__(self: "Triplewise[T]") -> tuple[T, T, T]:
+        # pylint: disable=invalid-name
         """Return the next element."""
         (a, _), (b, c) = next(self._iterator)
         return a, b, c
