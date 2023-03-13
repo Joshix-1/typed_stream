@@ -50,7 +50,7 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
         val = fun()
     except exc:
         return
-    except BaseException:
+    except BaseException:  # pragma: no-cover
         print(f"{fun} did not raise {exc}", file=sys.stderr)
         raise
     raise AssertionError(
