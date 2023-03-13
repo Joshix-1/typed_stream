@@ -232,6 +232,16 @@ fs = FileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
 assert fs._file_iterator is None
 
+fs = FileStream(INPUT_TXT, keep_line_ends=True)
+for line in fs:
+    assert line.endswith("\n")
+assert fs._file_iterator is None
+
+fs = FileStream(INPUT_TXT)
+for line in fs:
+    assert not line.endswith("\n")
+assert fs._file_iterator is None
+
 fs = FileStream(INPUT_TXT)
 assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
 assert fs._file_iterator is None
