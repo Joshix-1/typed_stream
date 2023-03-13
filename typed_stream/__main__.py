@@ -22,7 +22,7 @@ class Options:
     actions: tuple[str, ...]
 
 
-def run_program(options: Options) -> str | None:
+def run_program(options: Options) -> str | None:  # noqa: C901
     # pylint: disable=too-complex, too-many-branches, too-many-statements
     """Run the program with the options."""
     code: list[str]
@@ -42,7 +42,7 @@ def run_program(options: Options) -> str | None:
 
     method: None | Callable[[object], object] = None
     args: list[object] = []
-    for index, action in enumerate(options.actions, 1):
+    for index, action in Stream(options.actions).map(str.strip).enumerate(1):
         if action.startswith("_"):
             return f"{index}: {action!r} isn't allowed to start with '_'."
         if hasattr(stream, action):
@@ -66,8 +66,9 @@ def run_program(options: Options) -> str | None:
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
             else:
-                # pylint: disable=eval-used
-                args.append(eval(action, {}))  # nosec: B307
+                args.append(
+                    eval(action, {})  # nosec: B307  # pylint: disable=eval-used
+                )
                 full_action_qual = action
             code.extend((full_action_qual, ","))
     if method:
@@ -78,7 +79,9 @@ def run_program(options: Options) -> str | None:
         stream = method(*args)
 
     if isinstance(stream, Stream):
+        # pytype: disable=attribute-error
         stream.for_each(print)
+        # pytype: enable=attribute-error
         code.append(".for_each(print)")
     elif stream:
         print(stream)

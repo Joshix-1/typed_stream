@@ -204,7 +204,7 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
 
 
 class Triplewise(
-    IteratorProxy[tuple[T, T, T], tuple[tuple[T, T], tuple[T, T]]]
+    IteratorProxy[tuple[T, T, T], tuple[tuple[T, T], tuple[T, T]]], Generic[T]
 ):
     """Return overlapping triplets from an iterable.
 
@@ -218,7 +218,7 @@ class Triplewise(
         """Initialize self."""
         super().__init__(itertools.pairwise(itertools.pairwise(iterable)))
 
-    def __next__(self) -> tuple[T, T, T]:
+    def __next__(self: "Triplewise[T]") -> tuple[T, T, T]:
         """Return the next element."""
         (a, _), (b, c) = next(self._iterator)
         return a, b, c
