@@ -5,6 +5,7 @@
 """Easy interface for streamy handling of files."""
 import argparse
 import dataclasses
+import inspect
 import operator
 import sys
 from collections.abc import Callable
@@ -20,6 +21,21 @@ class Options:
     bytes: bool
     keep_ends: bool
     actions: tuple[str, ...]
+
+
+def count_required_positional_arguments(fun: Callable[[object], object]) -> int:
+    """Count the required positional arguments."""
+    parameters: list[inspect.Parameter] = [
+        param
+        for param in inspect.signature(fun).parameters.values()
+        if param.kind
+        in {
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        }
+        if param.default == inspect.Parameter.empty
+    ]
+    return len(parameters)
 
 
 def run_program(options: Options) -> str | None:  # noqa: C901
@@ -45,7 +61,12 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     for index, action in Stream(options.actions).map(str.strip).enumerate(1):
         if action.startswith("_"):
             return f"{index}: {action!r} isn't allowed to start with '_'."
-        if hasattr(stream, action):
+        args_left = (
+            count_required_positional_arguments(method) - len(args)
+            if method
+            else 0
+        )
+        if (not args_left or args_left < 0) and hasattr(stream, action):
             if method:
                 stream = method(*args)  # pylint: disable=not-callable
                 args.clear()
