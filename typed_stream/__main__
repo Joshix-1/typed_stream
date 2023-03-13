@@ -1,0 +1,24 @@
+# Licensed under the EUPL-1.2 or later.
+# You may obtain a copy of the licence in all the official languages of the
+# European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+"""Easy interface for streamy handling of files."""
+
+import sys
+
+from . import Stream
+from .functions import *
+
+args = sys.argv[1:]
+
+code = "".join(args)
+
+if code.startswith("."):
+  code = "Stream(sys.stdin)" + code
+
+result: object = eval(code)
+
+if isinstance(result, Stream):
+    result.for_each(print)
+else:
+    print(result)
