@@ -3,6 +3,7 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Utility classes used in streams."""
+import abc
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
@@ -38,8 +39,23 @@ class ValueIterator(Iterator[T], Streamable[T], Generic[T]):
         return self._value
 
 
+class IteratorProxy(Iterator[V], Generic[V, T], abc.ABC):
+    """Proxy an iterator."""
+
+    _iterator: Iterator[T]
+    __slots__ = ("_iterator",)
+
+    def __init__(self, iterable: Iterable[T]) -> None:
+        """Init self."""
+        self._iterator = iter(iterable)
+
+    @abc.abstractmethod
+    def __next__(self) -> V:
+        """Return the next element."""
+
+
 class Chunked(
-    Iterator[StreamableSequence[T]],
+    IteratorProxy[StreamableSequence[T], T],
     Streamable[StreamableSequence[T]],
     Generic[T],
 ):
@@ -49,16 +65,15 @@ class Chunked(
     https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
     """
 
-    _iterator: Iterator[T]
     chunk_size: int
 
-    __slots__ = "_iterator", "chunk_size"
+    __slots__ = ("chunk_size",)
 
     def __init__(self, iterable: Iterable[T], chunk_size: int) -> None:
         """Chunk data into Sequences of length chunk_size."""
         if chunk_size < 1:
             raise ValueError("size must be at least one")
-        self._iterator = iter(iterable)
+        super().__init__(iterable)
         self.chunk_size = chunk_size
 
     def __next__(self) -> StreamableSequence[T]:
@@ -86,17 +101,16 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
         return self[1]
 
 
-class Enumerator(Iterator[IndexValueTuple[T]], Generic[T]):
+class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
     """Like enumerate() but yielding IndexValueTuples."""
 
-    _iterator: Iterator[T]
     _curr_idx: int
 
-    __slots__ = ("_iterator", "_curr_idx")
+    __slots__ = ("_curr_idx",)
 
     def __init__(self, iterable: Iterable[T], start_index: int) -> None:
         """Like enumerate() but yielding IndexValueTuples."""
-        self._iterator = iter(iterable)
+        super().__init__(iterable)
         self._curr_idx = start_index
 
     def __next__(self: "Enumerator[T]") -> IndexValueTuple[T]:
@@ -187,3 +201,24 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
         super().close()
         if self.iterator is not None:
             self.iterator = None
+
+
+class Triplewise(
+    IteratorProxy[tuple[T, T, T], tuple[tuple[T, T], tuple[T, T]]]
+):
+    """Return overlapping triplets from an iterable.
+
+    Inspired by triplewise from:
+    https://docs.python.org/3/library/itertools.html#itertools-recipes
+    """
+
+    __slots__ = ()
+
+    def __init__(self, iterable: Iterable[T]) -> None:
+        """Initialize self."""
+        super().__init__(itertools.pairwise(itertools.pairwise(iterable)))
+
+    def __next__(self) -> tuple[T, T, T]:
+        """Return the next element."""
+        (a, _), (b, c) = next(self._iterator)
+        return a, b, c

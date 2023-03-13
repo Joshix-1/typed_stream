@@ -29,6 +29,7 @@ from .iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
+    Triplewise,
     ValueIterator,
 )
 from .lazy_file_iterators import (
@@ -769,6 +770,11 @@ class Stream(StreamABC[T], Iterable[T]):
         self._check_finished()
         self._data = itertools.takewhile(fun, self._data)
         return self
+
+    def triplewise(self) -> "Stream[tuple[T, T, T]]":
+        """Return a Stream of overlapping triplets."""
+        self._check_finished()
+        return self._finish(Stream(Triplewise(self._data)))
 
 
 class FileStreamBase(Stream[AnyStr]):
