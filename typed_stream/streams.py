@@ -708,6 +708,18 @@ class Stream(StreamABC[T], Iterable[T]):
 
         return default
 
+    def pairwise(self) -> "Stream[tuple[T, T]]":
+        """Return successive overlapping pairs taken from the input Stream.
+
+        The number of 2-tuples in the output Stream will be one fewer than the
+        number of inputs. It will be empty if the input iterable has fewer than
+        two values.
+
+        See: https://docs.python.org/3/library/itertools.html#itertools.pairwise
+        """
+        self._check_finished()
+        return self._finish(Stream(itertools.pairwise(self._data)))
+
     def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
 

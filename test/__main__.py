@@ -62,6 +62,19 @@ assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
 
+assert (
+    " ".join(Stream("ABCDEFG").pairwise().map("".join)) == "AB BC CD DE EF FG"
+)
+assert Stream("ABCDEFG").pairwise().collect() == (
+    ("A", "B"),
+    ("B", "C"),
+    ("C", "D"),
+    ("D", "E"),
+    ("E", "F"),
+    ("F", "G"),
+)
+
+
 # pylint: disable=unsupported-membership-test
 assert 0 in Stream.counting()
 assert 1 in Stream([1])

@@ -47,7 +47,7 @@ def run_program(options: Options) -> str | None:
             return f"{index}: {action!r} isn't allowed to start with '_'."
         if hasattr(stream, action):
             if method:
-                stream = method(*args)
+                stream = method(*args)  # pylint: disable=not-callable
                 args.clear()
                 if code and code[-1] == ",":
                     code[-1] = ")"
@@ -66,6 +66,7 @@ def run_program(options: Options) -> str | None:
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
             else:
+                # pylint: disable=eval-used
                 args.append(eval(action, {}))  # nosec: B307
                 full_action_qual = action
             code.extend((full_action_qual, ","))
