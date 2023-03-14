@@ -29,6 +29,7 @@ from .iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
+    SlidingWindow,
     Triplewise,
     ValueIterator,
 )
@@ -708,6 +709,11 @@ class Stream(StreamABC[T], Iterable[T]):
             raise StreamIndexError()
 
         return default
+
+    def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
+        """Return a Stream of overlapping nlets."""
+        self._check_finished()
+        return self._finish(Stream(SlidingWindow(self._data, size)))
 
     def pairwise(self) -> "Stream[tuple[T, T]]":
         """Return successive overlapping pairs taken from the input Stream.
