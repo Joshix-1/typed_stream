@@ -29,7 +29,6 @@ from .iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
-    Triplewise,
     ValueIterator,
     sliding_window,
 )
@@ -711,21 +710,9 @@ class Stream(StreamABC[T], Iterable[T]):
         return default
 
     def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
-        """Return a Stream of overlapping nlets."""
+        """Return a Stream of overlapping n-lets."""
         self._check_finished()
         return self._finish(Stream(sliding_window(self._data, size)))
-
-    def pairwise(self) -> "Stream[tuple[T, T]]":
-        """Return successive overlapping pairs taken from the input Stream.
-
-        The number of 2-tuples in the output Stream will be one fewer than the
-        number of inputs. It will be empty if the input iterable has fewer than
-        two values.
-
-        See: https://docs.python.org/3/library/itertools.html#itertools.pairwise
-        """
-        self._check_finished()
-        return self._finish(Stream(itertools.pairwise(self._data)))
 
     def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
@@ -777,10 +764,6 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.takewhile(fun, self._data)
         return self
 
-    def triplewise(self) -> "Stream[tuple[T, T, T]]":
-        """Return a Stream of overlapping triplets."""
-        self._check_finished()
-        return self._finish(Stream(Triplewise(self._data)))
 
 
 class FileStreamBase(Stream[AnyStr]):

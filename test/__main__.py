@@ -62,31 +62,6 @@ assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
 
-assert (
-    " ".join(Stream("ABCDEFG").pairwise().map("".join)) == "AB BC CD DE EF FG"
-)
-assert Stream("ABCDEFG").pairwise().collect() == (
-    ("A", "B"),
-    ("B", "C"),
-    ("C", "D"),
-    ("D", "E"),
-    ("E", "F"),
-    ("F", "G"),
-)
-assert Stream("A").pairwise().collect() == ()
-assert (
-    " ".join(Stream("ABCDEFG").triplewise().map("".join))
-    == "ABC BCD CDE DEF EFG"
-)
-assert Stream("ABCDEFG").triplewise().collect() == (
-    ("A", "B", "C"),
-    ("B", "C", "D"),
-    ("C", "D", "E"),
-    ("D", "E", "F"),
-    ("E", "F", "G"),
-)
-assert Stream("AB").triplewise().collect() == ()
-
 assert " ".join(Stream("ABCDEFG").nwise(1).map("".join)) == "A B C D E F G"
 assert Stream("ABCDEFG").nwise(1).collect() == (
     ("A",),

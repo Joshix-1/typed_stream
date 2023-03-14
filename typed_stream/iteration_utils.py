@@ -21,7 +21,6 @@ __all__ = (
     "Peeker",
     "ValueIterator",
     "sliding_window",
-    "Triplewise",
 )
 
 T = TypeVar("T")
@@ -247,34 +246,13 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         return cast(int, self._window.maxlen)
 
 
-class Triplewise(
-    IteratorProxy[tuple[T, T, T], tuple[tuple[T, T], tuple[T, T]]], Generic[T]
-):
-    """Return overlapping triplets from an iterable.
-
-    Inspired by triplewise from:
-    https://docs.python.org/3/library/itertools.html#itertools-recipes
-    """
-
-    __slots__ = ()
-
-    def __init__(self, iterable: Iterable[T]) -> None:
-        """Initialize self."""
-        super().__init__(itertools.pairwise(itertools.pairwise(iterable)))
-
-    def __next__(self: "Triplewise[T]") -> tuple[T, T, T]:
-        # pylint: disable=invalid-name
-        """Return the next 3 item tuple."""
-        (a, _), (b, c) = next(self._iterator)
-        return a, b, c
-
-
 def sliding_window(iterable: Iterable[T], size: int) -> Iterator[tuple[T, ...]]:
-    """Return the most optimized sliding window."""
+    """Return overlapping size-lets from an iterable.
+
+    If len(iterable) < size then an empty iterator is returned.
+    """
     if size == 1:
         return map(wrap_in_tuple, iterable)
     if size == 2:
         return itertools.pairwise(iterable)
-    if size == 3:
-        return Triplewise(iterable)
     return SlidingWindow(iterable, size)
