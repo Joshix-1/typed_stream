@@ -141,6 +141,10 @@ assert " ".join(Stream("ABCDEFG").nwise(7).map("".join)) == "ABCDEFG"
 assert Stream("ABCDEFG").nwise(7).collect() == (
     ("A", "B", "C", "D", "E", "F", "G"),
 )
+assert Stream("").nwise(1).collect() == ()
+assert Stream("A").nwise(2).collect() == ()
+assert Stream("AB").nwise(3).collect() == ()
+assert Stream("ABC").nwise(4).collect() == ()
 assert Stream("ABCDEFG").nwise(8).collect() == ()
 
 # pylint: disable=unsupported-membership-test
