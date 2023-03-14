@@ -84,9 +84,7 @@ assert Stream("ABCDEFG").triplewise().collect() == (
     ("D", "E", "F"),
     ("E", "F", "G"),
 )
-assert (
-    " ".join(Stream("ABCDEFG").nwise(2).map("".join)) == "AB BC CD DE EF FG"
-)
+assert " ".join(Stream("ABCDEFG").nwise(2).map("".join)) == "AB BC CD DE EF FG"
 assert Stream("ABCDEFG").nwise(2).collect() == (
     ("A", "B"),
     ("B", "C"),
@@ -96,8 +94,7 @@ assert Stream("ABCDEFG").nwise(2).collect() == (
     ("F", "G"),
 )
 assert (
-    " ".join(Stream("ABCDEFG").nwise(3).map("".join))
-    == "ABC BCD CDE DEF EFG"
+    " ".join(Stream("ABCDEFG").nwise(3).map("".join)) == "ABC BCD CDE DEF EFG"
 )
 assert Stream("ABCDEFG").nwise(3).collect() == (
     ("A", "B", "C"),

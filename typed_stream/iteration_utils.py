@@ -204,15 +204,13 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
             self.iterator = None
 
 
-class SlidingWindow(
-    IteratorProxy[tuple[T, ...], T], Generic[T]
-):
+class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
     """Return overlapping n-lets from an iterable.
 
     Inspired by sliding_window from:
     https://docs.python.org/3/library/itertools.html#itertools-recipes
     """
-    
+
     _window: None | collections.deque[T]
 
     __slots__ = ("_window",)
