@@ -264,9 +264,14 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
                 itertools.islice(self._iterator, window_space_left)
             )
             if len(self._window) < self.size:
+                self._window.clear()
                 raise StopIteration()
         else:
-            self._window.append(next(self._iterator))
+            try:
+                self._window.append(next(self._iterator))
+            except StopIteration:
+                self._window.clear()
+                raise
         return tuple(self._window)
 
     def _get_args(self) -> tuple[object, ...]:
