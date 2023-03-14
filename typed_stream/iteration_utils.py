@@ -227,11 +227,13 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
     def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
         """Return the next n item tuple."""
         if window_space_left := self.size - len(self._window):
-            self._window.extend(itertools.islice(self._iterator, window_space_left))
+            self._window.extend(
+                itertools.islice(self._iterator, window_space_left)
+            )
         else:
             self._window.append(next(self._iterator))
         return tuple(self._window)
-    
+
     @property
     def size(self) -> int:
         """Return the size of the sliding window."""
