@@ -4,6 +4,7 @@
 
 """Utility classes used in streams."""
 import abc
+import collections
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
@@ -201,6 +202,34 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
         super().close()
         if self.iterator is not None:
             self.iterator = None
+
+
+class SlidingWindow(
+    IteratorProxy[tuple[T, ...], T], Generic[T]
+):
+    """Return overlapping n-lets from an iterable.
+
+    Inspired by sliding_window from:
+    https://docs.python.org/3/library/itertools.html#itertools-recipes
+    """
+    
+    _window: None | collections.deque[T]
+
+    __slots__ = ("_window",)
+
+    def __init__(self, iterable: Iterable[T], size: int) -> None:
+        """Initialize self."""
+        if size < 2:
+            raise ValueError("size needs to be at least 2")
+        super().__init__(iterable)
+        self._window = collections.deque((), maxlen=size)
+
+    def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
+        """Return the next element."""
+        for _ in range(1, self._window.maxlen - len(self._window))
+            window.append(next(self._iterator))
+        window.append(next(self._iterator))
+        return tuple(window)
 
 
 class Triplewise(
