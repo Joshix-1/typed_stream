@@ -50,7 +50,7 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
         val = fun()
     except exc:
         return
-    except BaseException:  # pragma: no-cover
+    except BaseException:  # pragma: no cover
         print(f"{fun} did not raise {exc}", file=sys.stderr)
         raise
     raise AssertionError(
@@ -157,13 +157,15 @@ str_var = Stream(["1", "2", "3"]).min()
 assert str_var == "1"
 
 assert isinstance(
-    eval(repr(Stream.from_value(69))),  # pylint: disable=eval-used
+    eval(  # pylint: disable=eval-used
+        repr(Stream.from_value(69)),
+        {"typed_stream": __import__("typed_stream")},
+    ),
     Stream,
 )
 
-assert str(Stream(...)) == "Stream(...)"
-assert repr(Stream(...)) == "Stream(...)"
-assert repr(Stream("abc")) == "Stream(('a', 'b', 'c'))"
+assert str(Stream(...)) == "typed_stream.streams.Stream(Ellipsis)"
+assert repr(Stream(...)) == "typed_stream.streams.Stream(Ellipsis)"
 
 assert Stream(...)._is_finished()
 assert BinaryFileStream(...)._is_finished()
@@ -393,7 +395,7 @@ assert not int_list_end
 assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
-assert repr(int_stream) == "Stream(...)"
+assert repr(int_stream) == "typed_stream.streams.Stream(Ellipsis)"
 
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
@@ -434,39 +436,40 @@ for i in range(100):
 
 for name in dir(Stream(...)):  # noqa: C901
     if name in {
+        "__class__",
+        "__class_getitem__",
+        "__del__",
+        "__delattr__",
+        "__dir__",
+        "__enter__",
+        "__eq__",
+        "__exit__",
+        "__format__",
+        "__ge__",
+        "__getattribute__",
+        "__getstate__",
+        "__gt__",
+        "__init__",
+        "__init_subclass__",
+        "__le__",
+        "__lt__",
+        "__ne__",
+        "__new__",
+        "__reduce__",
+        "__reduce_ex__",
+        "__repr__",
+        "__setattr__",
+        "__sizeof__",
+        "__str__",
+        "__subclasshook__",
         "_close_source",
         "_finish",
+        "_get_args",
         "_is_finished",
         "close",
         "counting",
         "from_value",
         "range",
-        "__init__",
-        "__new__",
-        "__del__",
-        "__exit__",
-        "__enter__",
-        "__class__",
-        "__class_getitem__",
-        "__delattr__",
-        "__dir__",
-        "__eq__",
-        "__format__",
-        "__ge__",
-        "__getattribute__",
-        "__gt__",
-        "__init_subclass__",
-        "__le__",
-        "__lt__",
-        "__ne__",
-        "__reduce__",
-        "__reduce_ex__",
-        "__repr__",
-        "__str__",
-        "__setattr__",
-        "__sizeof__",
-        "__subclasshook__",
-        "__getstate__",
     }:
         continue
     if isinstance(

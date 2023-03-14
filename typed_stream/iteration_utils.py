@@ -214,6 +214,7 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
         self.iterator = iter(iterable)
 
     def __iter__(self: V) -> V:
+        """Return self."""
         return self
 
     def __next__(self) -> T:

@@ -112,4 +112,3 @@ class PrettyRepr(abc.ABC):
     @abc.abstractmethod
     def _get_args(self) -> tuple[object, ...]:  # pragma: no cover
         """Return the args used to initializing self."""
-        ...

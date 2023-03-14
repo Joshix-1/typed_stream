@@ -68,7 +68,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
-        data: object = "..." if self._data is None else self._data
+        data: object = ... if self._data is None else self._data
         if self._close_source_callable is None:
             return (data,)
         return data, self._close_source_callable
