@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator, Callable, Iterator
 from types import EllipsisType
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from .common_types import Closeable
+from .common_types import Closeable, PrettyRepr
 from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)
@@ -26,7 +26,7 @@ else:
     from typing import Self
 
 
-class StreamABC(Generic[T], Closeable, abc.ABC):
+class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     """ABC for Streams."""
 
     _data: None | AsyncIterator[T] | Iterator[T]
@@ -43,12 +43,6 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
         """Initialize self."""
         self._data = None if isinstance(data, EllipsisType) else data
         self._close_source_callable = close_source_callable
-
-    def __repr__(self) -> str:
-        """Return a string representation of self."""
-        data: object = "..." if self._data is None else self._data
-        fun: object = self._close_source_callable
-        return f"{self.__class__.__name__}({data!r}, {fun!r})"
 
     def _check_finished(self) -> None:
         """Raise a StreamFinishedError if the stream is finished."""
@@ -71,6 +65,13 @@ class StreamABC(Generic[T], Closeable, abc.ABC):
             ret._close_source_callable = self._close_source_callable
         self._data = None
         return ret
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        data: object = "..." if self._data is None else self._data
+        if self._close_source_callable is None:
+            return (data,)
+        return data, self._close_source_callable
 
     def _is_finished(self) -> bool:
         """Return whether this Stream is finished."""

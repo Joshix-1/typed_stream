@@ -10,7 +10,7 @@ import itertools
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, TypeVar, cast
 
-from .common_types import Closeable
+from .common_types import Closeable, PrettyRepr
 from .functions import wrap_in_tuple
 from .streamable import Streamable, StreamableSequence
 
@@ -18,6 +18,7 @@ __all__ = (
     "Chunked",
     "Enumerator",
     "IndexValueTuple",
+    "IterWithCleanUp",
     "Peeker",
     "ValueIterator",
     "sliding_window",
@@ -27,7 +28,7 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
-class ValueIterator(Iterator[T], Streamable[T], Generic[T]):
+class ValueIterator(Iterator[T], Streamable[T], PrettyRepr, Generic[T]):
     """An iterable that always yields the given value."""
 
     _value: T
@@ -41,8 +42,12 @@ class ValueIterator(Iterator[T], Streamable[T], Generic[T]):
         """Return the given value."""
         return self._value
 
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self._value,)
 
-class IteratorProxy(Iterator[V], Generic[V, T], abc.ABC):
+
+class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
     """Proxy an iterator."""
 
     _iterator: Iterator[T]
@@ -59,6 +64,10 @@ class IteratorProxy(Iterator[V], Generic[V, T], abc.ABC):
     @abc.abstractmethod
     def __next__(self) -> V:
         """Return the next element."""
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self._iterator,)
 
 
 class Chunked(
@@ -90,6 +99,10 @@ class Chunked(
         ):
             return chunk
         raise StopIteration()
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self.chunk_size
 
 
 class IndexValueTuple(tuple[int, T], Generic[T]):
@@ -126,8 +139,12 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
         self._curr_idx += 1
         return IndexValueTuple(tuple_)
 
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self._curr_idx
 
-class Peeker(Generic[T]):
+
+class Peeker(Generic[T], PrettyRepr):
     """Peek values."""
 
     fun: Callable[[T], object | None]
@@ -143,8 +160,12 @@ class Peeker(Generic[T]):
         self.fun(value)
         return value
 
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self.fun,)
 
-class ClassWithCleanUp(Closeable):
+
+class ClassWithCleanUp(Closeable, PrettyRepr):
     """A class that has a cleanup_fun and a close method."""
 
     cleanup_fun: Callable[[], object | None] | None
@@ -154,6 +175,10 @@ class ClassWithCleanUp(Closeable):
     def __init__(self, cleanup_fun: Callable[[], object | None]) -> None:
         """Initialize this class."""
         self.cleanup_fun = cleanup_fun
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self.cleanup_fun,)
 
     def close(self) -> None:
         """Run clean-up if not run yet."""
@@ -203,6 +228,10 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
                 self.close()
             raise
 
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self.iterator
+
     def close(self) -> None:
         """Run clean-up if not run yet."""
         super().close()
@@ -239,6 +268,10 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         else:
             self._window.append(next(self._iterator))
         return tuple(self._window)
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self._window
 
     @property
     def size(self) -> int:

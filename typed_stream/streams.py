@@ -20,7 +20,6 @@ from .common_types import (
     SupportsComparison,
     TypeGuardingCallable,
 )
-from .constants import MAX_PRINT_COUNT
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
@@ -121,21 +120,6 @@ class Stream(StreamABC[T], Iterable[T]):
         """Iterate over the values of this Stream. This finishes the Stream."""
         self._check_finished()
         return IterWithCleanUp(self._data, self.close)
-
-    def __str__(self) -> str:
-        """Convert this Stream to a str. This finishes the Stream."""
-        if self._is_finished():
-            return "Stream(...)"
-        list_ = tuple(self.limit(MAX_PRINT_COUNT))
-        if len(list_) >= MAX_PRINT_COUNT:
-            return f"{list_} + (...,)"
-        return str(list_)
-
-    def __repr__(self) -> str:
-        """Convert this Stream to a str. This finishes the Stream."""
-        if self._is_finished():
-            return "Stream(...)"
-        return f"Stream({self})"
 
     def __reversed__(self) -> Iterator[T]:
         """Return the items of this Stream in reversed order.

@@ -11,6 +11,7 @@ from typing import Protocol, TypeAlias, TypeGuard, TypeVar
 __all__ = (
     "Closeable",
     "PathLikeType",
+    "PrettyRepr",
     "StarCallable",
     "SupportsAdd",
     "SupportsComparison",
@@ -94,3 +95,21 @@ class Closeable(abc.ABC):
     def __exit__(self, *args: object) -> None:
         """Run close."""
         self.close()
+
+
+class PrettyRepr(abc.ABC):
+    """ABC to inherit from to get a better repr."""
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        """Return the string representation of self."""
+        args = ",".join(map(repr, self._get_args()))
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__qualname__}({args})"
+        )
+
+    @abc.abstractmethod
+    def _get_args(self) -> tuple[object, ...]:  # pragma: no cover
+        """Return the args used to initializing self."""
+        ...
