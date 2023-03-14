@@ -53,7 +53,7 @@ class IteratorProxy(Iterator[V], Generic[V, T], abc.ABC):
         """Init self."""
         self._iterator = iter(iterable)
 
-    def __iter__(self: T) -> T:
+    def __iter__(self) -> Iterator[V]:
         """Return self."""
         return self
 
