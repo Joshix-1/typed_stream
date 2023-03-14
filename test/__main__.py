@@ -73,6 +73,7 @@ assert Stream("ABCDEFG").pairwise().collect() == (
     ("E", "F"),
     ("F", "G"),
 )
+assert Stream("A").pairwise().collect() == ()
 assert (
     " ".join(Stream("ABCDEFG").triplewise().map("".join))
     == "ABC BCD CDE DEF EFG"
@@ -84,6 +85,7 @@ assert Stream("ABCDEFG").triplewise().collect() == (
     ("D", "E", "F"),
     ("E", "F", "G"),
 )
+assert Stream("AB").triplewise().collect() == ()
 
 assert " ".join(Stream("ABCDEFG").nwise(1).map("".join)) == "A B C D E F G"
 assert Stream("ABCDEFG").nwise(1).collect() == (
@@ -124,7 +126,28 @@ assert Stream("ABCDEFG").nwise(4).collect() == (
     ("C", "D", "E", "F"),
     ("D", "E", "F", "G"),
 )
-
+assert (
+    " ".join(Stream("ABCDEFG").nwise(5).map("".join)) == "ABCDE BCDEF CDEFG"
+)
+assert Stream("ABCDEFG").nwise(5).collect() == (
+    ("A", "B", "C", "D", "E"),
+    ("B", "C", "D", "E", "F"),
+    ("C", "D", "E", "F", "G"),
+)
+assert (
+    " ".join(Stream("ABCDEFG").nwise(6).map("".join)) == "ABCDEF BCDEFG"
+)
+assert Stream("ABCDEFG").nwise(6).collect() == (
+    ("A", "B", "C", "D", "E", "F"),
+    ("B", "C", "D", "E", "F", "G"),
+)
+assert (
+    " ".join(Stream("ABCDEFG").nwise(7).map("".join)) == "ABCDEFG"
+)
+assert Stream("ABCDEFG").nwise(7).collect() == (
+    ("A", "B", "C", "D", "E", "F", "G"),
+)
+assert Stream("ABCDEFG").nwise(8).collect() == ()
 
 # pylint: disable=unsupported-membership-test
 assert 0 in Stream.counting()
