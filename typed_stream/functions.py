@@ -164,4 +164,5 @@ is_none: NoneChecker = NoneChecker()
 
 
 def wrap_in_tuple(value: T, /) -> tuple[T]:
+    """Wrap the value in a single-element tuple."""
     return (value,)
