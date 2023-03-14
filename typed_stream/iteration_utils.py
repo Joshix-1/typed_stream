@@ -223,11 +223,11 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         self._window = collections.deque((), maxlen=size)
 
     def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
-        """Return the next element."""
+        """Return the next n item tuple."""
         for _ in range(1, self._window.maxlen - len(self._window)):
-            window.append(next(self._iterator))
-        window.append(next(self._iterator))
-        return tuple(window)
+            self._window.append(next(self._iterator))
+        self._window.append(next(self._iterator))
+        return tuple(self._window)
 
 
 class Triplewise(
@@ -247,6 +247,6 @@ class Triplewise(
 
     def __next__(self: "Triplewise[T]") -> tuple[T, T, T]:
         # pylint: disable=invalid-name
-        """Return the next element."""
+        """Return the next 3 item tuple."""
         (a, _), (b, c) = next(self._iterator)
         return a, b, c
