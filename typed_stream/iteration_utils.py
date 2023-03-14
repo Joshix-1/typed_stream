@@ -219,8 +219,8 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
 
     def __init__(self, iterable: Iterable[T], size: int) -> None:
         """Initialize self."""
-        if size < 2:
-            raise ValueError("size needs to be at least 2")
+        if size < 1:
+            raise ValueError("size needs to be a positive integer")
         super().__init__(iterable)
         self._window = collections.deque((), maxlen=size)
 
