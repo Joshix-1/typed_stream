@@ -749,7 +749,6 @@ class Stream(StreamABC[T], Iterable[T]):
         return self
 
 
-
 class FileStreamBase(Stream[AnyStr]):
     """ABC for file streams."""
 
