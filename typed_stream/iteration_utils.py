@@ -19,6 +19,8 @@ __all__ = (
     "IndexValueTuple",
     "Peeker",
     "ValueIterator",
+    "SlidingWindow",
+    "Triplewise",
 )
 
 T = TypeVar("T")
@@ -224,10 +226,16 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
 
     def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
         """Return the next n item tuple."""
-        for _ in range(1, cast(int, self._window.maxlen) - len(self._window)):
+        if (window_space_left := self.size - len(self._window))):
+            self._window.extend(itertools.islice(self._iterator, window_space_left))
+        else:
             self._window.append(next(self._iterator))
-        self._window.append(next(self._iterator))
         return tuple(self._window)
+    
+    @property
+    def size(self) -> int:
+        """Return the size of the sliding window."""
+        return cast(int, self._window.maxlen)
 
 
 class Triplewise(
