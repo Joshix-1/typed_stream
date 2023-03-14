@@ -226,7 +226,7 @@ class SlidingWindow(
 
     def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
         """Return the next element."""
-        for _ in range(1, self._window.maxlen - len(self._window))
+        for _ in range(1, self._window.maxlen - len(self._window)):
             window.append(next(self._iterator))
         window.append(next(self._iterator))
         return tuple(window)
