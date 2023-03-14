@@ -29,9 +29,9 @@ from .iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
-    sliding_window,
     Triplewise,
     ValueIterator,
+    sliding_window,
 )
 from .lazy_file_iterators import (
     LazyFileIterator,
