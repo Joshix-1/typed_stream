@@ -463,6 +463,7 @@ for name in dir(Stream(...)):  # noqa: C901
             "drop",
             "limit",
             "nth",
+            "nwise",
             "tail",
             "__contains__",
             "__getitem__",
