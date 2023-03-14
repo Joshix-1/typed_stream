@@ -11,6 +11,7 @@ from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, TypeVar, cast
 
 from .common_types import Closeable
+from .functions import wrap_in_tuple
 from .streamable import Streamable, StreamableSequence
 
 __all__ = (
@@ -19,7 +20,7 @@ __all__ = (
     "IndexValueTuple",
     "Peeker",
     "ValueIterator",
-    "SlidingWindow",
+    "sliding_window",
     "Triplewise",
 )
 
@@ -262,3 +263,14 @@ class Triplewise(
         """Return the next 3 item tuple."""
         (a, _), (b, c) = next(self._iterator)
         return a, b, c
+
+
+def sliding_window(iterable: Iterable[T], size: int) -> Iterator[tuple[T, ...]]:
+    """Return the most optimized sliding window."""
+    if size == 1:
+        return map(wrap_in_tuple, iterable)
+    if size == 2:
+        return itertools.pairwise(iterable)
+    if size == 3:
+        return Triplewise(iterable)
+    return SlidingWindow(iterable, size)
