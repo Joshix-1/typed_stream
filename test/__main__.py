@@ -126,24 +126,18 @@ assert Stream("ABCDEFG").nwise(4).collect() == (
     ("C", "D", "E", "F"),
     ("D", "E", "F", "G"),
 )
-assert (
-    " ".join(Stream("ABCDEFG").nwise(5).map("".join)) == "ABCDE BCDEF CDEFG"
-)
+assert " ".join(Stream("ABCDEFG").nwise(5).map("".join)) == "ABCDE BCDEF CDEFG"
 assert Stream("ABCDEFG").nwise(5).collect() == (
     ("A", "B", "C", "D", "E"),
     ("B", "C", "D", "E", "F"),
     ("C", "D", "E", "F", "G"),
 )
-assert (
-    " ".join(Stream("ABCDEFG").nwise(6).map("".join)) == "ABCDEF BCDEFG"
-)
+assert " ".join(Stream("ABCDEFG").nwise(6).map("".join)) == "ABCDEF BCDEFG"
 assert Stream("ABCDEFG").nwise(6).collect() == (
     ("A", "B", "C", "D", "E", "F"),
     ("B", "C", "D", "E", "F", "G"),
 )
-assert (
-    " ".join(Stream("ABCDEFG").nwise(7).map("".join)) == "ABCDEFG"
-)
+assert " ".join(Stream("ABCDEFG").nwise(7).map("".join)) == "ABCDEFG"
 assert Stream("ABCDEFG").nwise(7).collect() == (
     ("A", "B", "C", "D", "E", "F", "G"),
 )
