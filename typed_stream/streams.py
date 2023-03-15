@@ -770,6 +770,18 @@ class FileStreamBase(Stream[AnyStr]):
         self._file_iterator.close()
         self._file_iterator = None
 
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        if not self._file_iterator:
+            return (...,)
+
+        return (
+            self._file_iterator.path,
+            self._file_iterator.encoding,
+            # pylint: disable=unidiomatic-typecheck
+            type(self._file_iterator) == LazyFileIterator,
+        )
+
 
 class FileStream(FileStreamBase[str]):
     """Lazily iterate over a file."""

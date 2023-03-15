@@ -104,7 +104,9 @@ class PrettyRepr(abc.ABC):
 
     def __repr__(self) -> str:
         """Return the string representation of self."""
-        args = ",".join(map(repr, self._get_args()))
+        args = ",".join(
+            [("..." if arg is ... else repr(arg)) for arg in self._get_args()]
+        )
         return (
             f"{self.__class__.__module__}.{self.__class__.__qualname__}({args})"
         )

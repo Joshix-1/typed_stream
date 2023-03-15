@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from .common_types import Closeable, PathLikeType
+from .common_types import Closeable, PathLikeType, PrettyRepr
 
 __all__ = (
     "LazyFileIterator",
@@ -34,7 +34,7 @@ def _is_bytes(
     return lfi.encoding is None
 
 
-class LazyFileIterator(Iterator[AnyStr], Closeable):
+class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
     """Iterate over a file line by line. Only open it when necessary.
 
     If you only partially iterate the file you have to call .close or use a
@@ -57,7 +57,6 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
         def __init__(
             self: "LazyFileIterator[str]",
             path: PathLikeType,
-            *,
             encoding: str,
         ) -> None:
             """Nobody inspects the spammish repetition."""
@@ -73,7 +72,6 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
         def __init__(
             self: "LazyFileIterator[bytes]",
             path: PathLikeType,
-            *,
             encoding: None = None,
         ) -> None:
             """Nobody inspects the spammish repetition."""
@@ -81,7 +79,6 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
     def __init__(
         self,
         path: PathLikeType,
-        *,
         encoding: str | None = None,
     ) -> None:
         """Create a LazyFileIterator."""
@@ -106,6 +103,9 @@ class LazyFileIterator(Iterator[AnyStr], Closeable):
             with contextlib.suppress(Exception):
                 self.close()
             raise
+
+    def _get_args(self) -> tuple[object, ...]:
+        return self.path, self.encoding
 
     def close(self) -> None:
         """Close the underlying file."""

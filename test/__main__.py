@@ -164,8 +164,8 @@ assert isinstance(
     Stream,
 )
 
-assert str(Stream(...)) == "typed_stream.streams.Stream(Ellipsis)"
-assert repr(Stream(...)) == "typed_stream.streams.Stream(Ellipsis)"
+assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
+assert repr(Stream(...)) == "typed_stream.streams.Stream(...)"
 
 assert Stream(...)._is_finished()
 assert BinaryFileStream(...)._is_finished()
@@ -374,9 +374,9 @@ lfireb = LazyFileIteratorRemovingEndsBytes(INPUT_TXT)
 assert next(lfireb) == first
 assert lfireb._file_object
 lfireb.close()
-assert not lfireb._file_object
+assert lfireb._file_object is None
 
-bfs = BinaryFileStream(INPUT_TXT)
+bfs = BinaryFileStream(INPUT_TXT)  # type: ignore[unreachable]
 fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
 assert bfs._file_iterator is None
@@ -400,7 +400,7 @@ assert not int_list_end
 assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
-assert repr(int_stream) == "typed_stream.streams.Stream(Ellipsis)"
+assert repr(int_stream) == "typed_stream.streams.Stream(...)"
 
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
@@ -477,10 +477,8 @@ for name in dir(Stream(...)):  # noqa: C901
         "range",
     }:
         continue
-    if isinstance(
-        method := getattr(Stream(...), name), Callable  # type: ignore[arg-type]
-    ):
-        args: tuple[Any, ...]  # type: ignore[misc]
+    if isinstance(method := getattr(Stream(...), name), Callable):
+        args: tuple[Any, ...]
         if name == "chain":
             args = ([],)
         elif name in {
@@ -575,7 +573,7 @@ assert complexs == [5j]
 bools: list[bool] = Stream(source).filter(is_bool).collect(list)
 assert bools == [True]
 numbers: list[Number] = Stream(source).filter(is_number).collect(list)
-assert numbers == [True, 3, 4.2, 5j]  # type: ignore[comparison-overlap]
+assert numbers == [True, 3, 4.2, 5j]
 real_numbers: list[Real] = Stream(source).filter(is_real_number).collect(list)
 assert real_numbers == [True, 3, 4.2]
 nones: list[None] = Stream(source).filter(is_none).collect(list)

@@ -59,6 +59,15 @@ disallow_any_explicit = true
 # disallow_any_expr = true
 disallow_any_decorated = true
 implicit_reexport = false
+enable_error_code = [
+  "ignore-without-code",
+  "possibly-undefined",
+  "redundant-expr",
+  "redundant-self",
+  "truthy-bool",
+  "truthy-iterable",
+  "unused-awaitable",
+]
 
 [tool.pytype]
 inputs = ["typed_stream", "test", "examples"]
