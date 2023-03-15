@@ -13,4 +13,3 @@ updates:
     rebase-strategy: "auto"
     target-branch: "main"
     versioning-strategy: increase
-    assignee: "Joshix-1"
