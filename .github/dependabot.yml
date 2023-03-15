@@ -13,5 +13,4 @@ updates:
     rebase-strategy: "auto"
     target-branch: "main"
     versioning-strategy: increase
-    assigne: Joshix-1
-    commit-message: "bump dev requirements"
+    assignee: "Joshix-1"
