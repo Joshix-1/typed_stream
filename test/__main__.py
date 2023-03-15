@@ -223,8 +223,9 @@ assert max_ == 3
 min_: int = Stream([1, 2, -1, 3]).min()
 assert min_ == -1
 
-assert Stream(()).reduce(add, 1) == 1
-assert Stream(()).reduce(add, "x") == "x"
+assert Stream((1,)).drop(100).reduce(add, 1) == 1
+assert Stream("").reduce(add, "x") == "x"
+assert_raises(StreamEmptyError, Stream("").sum)
 
 assert tuple(Stream([1, 2, 2, 2, 3]).distinct()) == (1, 2, 3)
 assert tuple(Stream([1, 2, 1, 1, 2, 1, 2, 3, 3, 3, 2, 2, 1]).distinct()) == (
