@@ -708,18 +708,26 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = map(Peeker(fun), self._data)
         return self
 
-    def reduce(self, fun: Callable[[T, T], T]) -> T:
+    def reduce(
+        self,
+        fun: Callable[[T, T], T],
+        initial: T | _DefaultValueType = DEFAULT_VALUE,
+    ) -> T:
         """Reduce the values of this stream. This finishes the Stream.
+
+        If no initial value is provided a StreamEmptyError is raised if
+        the stream is empty.
 
         Examples:
             - Stream([1, 2, 3]).accumulate(operator.add)
             - Stream([1, 2, 3]).accumulate(operator.mul)
         """
         self._check_finished()
-        try:
-            initial = next(self._data)
-        except StopIteration as exc:
-            raise StreamEmptyError from exc
+        if isinstance(initial, _DefaultValueType):
+            try:
+                initial = next(self._data)
+            except StopIteration as exc:
+                raise StreamEmptyError from exc
         return self._finish(functools.reduce(fun, self._data, initial), True)
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
