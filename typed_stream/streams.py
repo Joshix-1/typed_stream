@@ -711,7 +711,7 @@ class Stream(StreamABC[T], Iterable[T]):
     def reduce(
         self,
         fun: Callable[[T, T], T],
-        initial: T | _DefaultValueType = DEFAULT_VALUE,
+        initial: T | _DefaultValueType = _DEFAULT_VALUE,
     ) -> T:
         """Reduce the values of this stream. This finishes the Stream.
 
