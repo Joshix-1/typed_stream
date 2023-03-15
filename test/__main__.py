@@ -578,44 +578,44 @@ real_numbers: list[Real] = Stream(source).filter(is_real_number).collect(list)
 assert real_numbers == [True, 3, 4.2]
 nones: list[None] = Stream(source).filter(is_none).collect(list)
 assert nones == [None]
-# nnones: list[str | int | float | complex | bool] = (
-#     Stream(source).filter(is_not_none).collect(list)
-# )
-# assert nnones == [True, "2", 3, 4.2, 5j]
+nnones: list[str | int | float | complex | bool] = (
+    Stream(source).filter(is_not_none).collect(list)
+)
+assert nnones == [True, "2", 3, 4.2, 5j]
 
-# not_strs: list[int | float | complex | bool | None] = (
-#     Stream(source).exclude(is_str).collect(list)
-# )
-# assert not_strs == [None, True, 3, 4.2, 5j]
-# not_ints: list[str | float | complex | bool | None] = (
-#     Stream(source).exclude(is_int).collect(list)
-# )
-# assert not_ints == [None, "2", 4.2, 5j]
-# not_floats: list[str | int | complex | bool | None] = (
-#     Stream(source).exclude(is_float).collect(list)
-# )
-# assert not_floats == [None, True, "2", 3, 5j]
-# not_complexs: list[str | int | float | bool | None] = (
-#     Stream(source).exclude(is_complex).collect(list)
-# )
-# assert not_complexs == [None, True, "2", 3, 4.2]
-# not_bools: list[str | int | float | complex | None] = (
-#     Stream(source).exclude(is_bool).collect(list)
-# )
-# assert not_bools == [None, "2", 3, 4.2, 5j]
-# not_numbers: list[str | None] = Stream(source).exclude(is_number).collect(list)
-# assert not_numbers == [None, "2"]  # type: ignore[comparison-overlap]
-# not_real_numbers: list[str | None | complex] = list(
-#     Stream(source).exclude(is_real_number)
-# )
-# assert not_real_numbers == [None, "2", 5j]
-# not_nones: list[str | int | float | complex | bool] = (
-#     Stream(source).exclude(is_none).collect(list)
-# )
-# assert not_nones == [True, "2", 3, 4.2, 5j]
+not_strs: list[int | float | complex | bool | None] = (
+    Stream(source).exclude(is_str).collect(list)
+)
+assert not_strs == [None, True, 3, 4.2, 5j]
+not_ints: list[str | float | complex | bool | None] = (
+    Stream(source).exclude(is_int).collect(list)
+)
+assert not_ints == [None, "2", 4.2, 5j]
+not_floats: list[str | int | complex | bool | None] = (
+    Stream(source).exclude(is_float).collect(list)
+)
+assert not_floats == [None, True, "2", 3, 5j]
+not_complexs: list[str | int | float | bool | None] = (
+    Stream(source).exclude(is_complex).collect(list)
+)
+assert not_complexs == [None, True, "2", 3, 4.2]
+not_bools: list[str | int | float | complex | None] = (
+    Stream(source).exclude(is_bool).collect(list)
+)
+assert not_bools == [None, "2", 3, 4.2, 5j]
+not_numbers: list[str | None] = Stream(source).exclude(is_number).collect(list)
+assert not_numbers == [None, "2"]
+not_real_numbers: list[str | None | complex] = list(
+    Stream(source).exclude(is_real_number)
+)
+assert not_real_numbers == [None, "2", 5j]
+not_nones: list[str | int | float | complex | bool] = (
+    Stream(source).exclude(is_none).collect(list)
+)
+assert not_nones == [True, "2", 3, 4.2, 5j]
 
-# not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
-# assert not_nnones == [None]
+not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
+assert not_nnones == [None]
 
 assert not Stream(()).count()
 assert Stream(range(100)).drop(10).count() == 90
