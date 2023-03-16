@@ -712,7 +712,12 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._finish(fun(*self._data), close_source=True)
 
     def sum(self: "Stream[SA]") -> SA:
-        """Calculate the sum of the elements."""
+        """Calculate the sum of the elements.
+        
+        This works for every type that supports addition.
+        For strings stream.collect("".join) could be faster.
+        For numbers sum(stream) could be faster.
+        """
         return self.reduce(add)
 
     def tail(self, count: int) -> StreamableSequence[T]:
