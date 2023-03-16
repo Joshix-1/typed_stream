@@ -29,7 +29,7 @@ else:
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     """ABC for Streams."""
 
-    __data: None | AsyncIterator[T] | Iterator[T]
+    __data: AsyncIterator[T] | Iterator[T]
     _close_source_callable: None | Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
@@ -41,22 +41,22 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         close_source_callable: Callable[[], None] | None = None,
     ) -> None:
         """Initialize self."""
-        self.__data = None if isinstance(data, EllipsisType) else data
+        if not isinstance(data, EllipsisType):
+            self.__data = data
         self._close_source_callable = close_source_callable
     
     @property
     def _data(self) -> AsyncIterator[T] | Iterator[T]:
         """Return the internal itertator."""
-        if self.__data is None:
-            raise StreamFinishedError()
-        return self.__data
+        try:
+            return self.__data
+        except AttributeError as exc:
+            raise StreamFinishedError() from exc
     
     @_data.setter
     def _set_data(self, value: AsyncIterator[T] | Iterator[T]):
         """Set the internal iterator."""
-        if self.__data is None:
-            raise SStreamFinishedError
-         self.__data = value
+        self.__data = value
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
@@ -71,7 +71,10 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         elif self._close_source_callable and isinstance(ret, StreamABC):
             # pylint: disable=protected-access
             ret._close_source_callable = self._close_source_callable
-        self._data = None
+        try:
+            del self.__data
+        except AttributeError as exc:
+            raise StreamFinishedError() from exc
         return ret
 
     def _get_args(self) -> tuple[object, ...]:
