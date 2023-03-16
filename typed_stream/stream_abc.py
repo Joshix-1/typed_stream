@@ -31,7 +31,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     __data: AsyncIterator[T] | Iterator[T]
     _close_source_callable: None | Callable[[], None]
-    __slots__ = ("_data", "_close_source_callable")
+    __slots__ = ("__data", "_close_source_callable")
 
     __hash__ = None  # type: ignore[assignment]
 
