@@ -51,8 +51,8 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         """Return the internal itertator."""
         try:
             return self.__data
-        except AttributeError as exc:
-            raise StreamFinishedError() from exc
+        except AttributeError:
+            raise StreamFinishedError() from None
 
     @_data.setter
     def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
@@ -74,8 +74,8 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             ret._close_source_callable = self._close_source_callable
         try:
             del self.__data
-        except AttributeError as exc:
-            raise StreamFinishedError() from exc
+        except AttributeError:
+            raise StreamFinishedError() from None
         return ret
 
     def _get_args(self) -> tuple[object, ...]:
