@@ -348,7 +348,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream.
-        
+
         Äquivalent to: Stream(...).map(lambda x: 1).sum()
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
@@ -703,7 +703,7 @@ class Stream(StreamABC[T], Iterable[T]):
         if isinstance(initial, _DefaultValueType):
             try:
                 initial = next(self._data)
-            except StopIteration as exc:
+            except StopIteration:
                 raise StreamEmptyError() from None
         return self._finish(functools.reduce(fun, self._data, initial), True)
 
