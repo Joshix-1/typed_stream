@@ -94,7 +94,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def __contains__(self, value: T, /) -> bool:
         """Check whether this stream contains the given value."""
-        self._check_finished()
         for element in self._data:
             if element == value:
                 return self._finish(True, close_source=True)
@@ -118,7 +117,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def __iter__(self) -> IterWithCleanUp[T]:
         """Iterate over the values of this Stream. This finishes the Stream."""
-        self._check_finished()
         return IterWithCleanUp(self._data, self.close)
 
     def __reversed__(self) -> Iterator[T]:
@@ -145,7 +143,6 @@ class Stream(StreamABC[T], Iterable[T]):
             and (step is None or step >= 0)
             and (stop is None or stop >= 0)
         ):
-            self._check_finished()
             return self._finish(
                 StreamableSequence(
                     itertools.islice(self._data, start, stop, step)
@@ -257,18 +254,15 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def all(self) -> bool:
         """Check whether all values are Truthy. This finishes the Stream."""
-        self._check_finished()
         return self._finish(all(self._data), close_source=True)
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":
         """Add another iterable to the end of the Stream."""
-        self._check_finished()
         self._data = itertools.chain(self._data, iterable)
         return self
 
     def chunk(self, size: int) -> "Stream[StreamableSequence[T]]":
         """Split stream into chunks of the specified size."""
-        self._check_finished()
         return self._finish(Chunked(self._data, size).stream())
 
     if (  # noqa: C901  # pylint: disable=too-complex
@@ -338,7 +332,6 @@ class Stream(StreamABC[T], Iterable[T]):
             - Stream([1, 2, 3]).collect(tuple)
             - Stream([1, 2, 3]).collect(sum)
         """
-        self._check_finished()
         return self._finish(fun(self._data), close_source=True)
 
     def concurrent_map(
@@ -348,7 +341,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
         See: https://docs.python.org/3/library/concurrent.futures.html
         """
-        self._check_finished()
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=max_workers
         ) as executor:
@@ -363,7 +355,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def drop(self, count: int) -> "Stream[T]":
         """Drop the first count values."""
-        self._check_finished()
         self._data = itertools.islice(self._data, count, None)
         return self
 
@@ -372,7 +363,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
         """
-        self._check_finished()
         self._data = itertools.dropwhile(fun, self._data)
         return self
 
@@ -388,7 +378,6 @@ class Stream(StreamABC[T], Iterable[T]):
         self: "Stream[T]", start_index: int = 0
     ) -> "Stream[IndexValueTuple[T]]":
         """Map the values to a tuple of index and value."""
-        self._check_finished()
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
     # @overload
@@ -429,7 +418,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
         """
-        self._check_finished()
         self._data = itertools.filterfalse(fun, self._data)
         return self
 
@@ -467,13 +455,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def filter(self, fun: Callable[[T], object] | None = None) -> object:
         """Use built-in filter to filter values."""
-        self._check_finished()
         self._data = filter(fun, self._data)
         return self
 
     def first(self) -> T:
         """Return the first element of the Stream. This finishes the Stream."""
-        self._check_finished()
         try:
             first = next(iter(self))
         except StopIteration as exc:
@@ -544,7 +530,6 @@ class Stream(StreamABC[T], Iterable[T]):
             - Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2])
             - Stream(["abc", "def"]).flat_map(str.encode, "ASCII")
         """
-        self._check_finished()
         return Stream(
             itertools.chain.from_iterable(
                 map(fun, self._data, *(ValueIterator(arg) for arg in args))
@@ -553,7 +538,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def for_each(self, fun: Callable[[T], object] = noop) -> None:
         """Consume all the values of the Stream with the callable."""
-        self._check_finished()
         for value in self._data:
             fun(value)
         self._finish(None, close_source=True)
@@ -573,7 +557,6 @@ class Stream(StreamABC[T], Iterable[T]):
         Example:
             - Stream([1, 2, 3, 4, 5]).limit(3)
         """
-        self._check_finished()
         self._data = itertools.islice(self._data, count)
         return self
 
@@ -634,19 +617,16 @@ class Stream(StreamABC[T], Iterable[T]):
             - Stream([1, 2, 3]).map(lambda x: x * 3)
             - Stream([1, 2, 3]).map(operator.mul, 3)
         """
-        self._check_finished()
         return self._finish(
             Stream(map(fun, self._data, *(ValueIterator(arg) for arg in args)))
         )
 
     def max(self: "Stream[SC]") -> SC:
         """Return the biggest element of the stream."""
-        self._check_finished()
         return self._finish(max(self._data), close_source=True)
 
     def min(self: "Stream[SC]") -> SC:
         """Return the smallest element of the stream."""
-        self._check_finished()
         return self._finish(min(self._data), close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover
@@ -695,7 +675,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
         """Return a Stream of overlapping n-lets."""
-        self._check_finished()
         return self._finish(Stream(sliding_window(self._data, size)))
 
     def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
@@ -704,7 +683,6 @@ class Stream(StreamABC[T], Iterable[T]):
         Example:
             - Stream([1, 2, 3]).peek(print)
         """
-        self._check_finished()
         self._data = map(Peeker(fun), self._data)
         return self
 
@@ -722,7 +700,6 @@ class Stream(StreamABC[T], Iterable[T]):
             - Stream([1, 2, 3]).accumulate(operator.add)
             - Stream([1, 2, 3]).accumulate(operator.mul)
         """
-        self._check_finished()
         if isinstance(initial, _DefaultValueType):
             try:
                 initial = next(self._data)
@@ -732,7 +709,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
-        self._check_finished()
         return self._finish(fun(*self._data), close_source=True)
 
     def sum(self: "Stream[SA]") -> SA:
@@ -741,7 +717,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def tail(self, count: int) -> StreamableSequence[T]:
         """Return a Sequence with the last count items."""
-        self._check_finished()
         return self._finish(
             StreamableSequence(collections.deque(self._data, maxlen=count)),
             close_source=True,
@@ -752,7 +727,6 @@ class Stream(StreamABC[T], Iterable[T]):
 
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
         """
-        self._check_finished()
         self._data = itertools.takewhile(fun, self._data)
         return self
 
