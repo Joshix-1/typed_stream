@@ -268,6 +268,7 @@ assert int_list == [1, 2, 3]
 
 assert len(Stream.from_value("x").limit(1000).tail(10)) == 10
 
+assert not Stream("").count()
 assert Stream.range(10_000).chunk(100).count() == 100
 assert list(Stream.range(10_000).chunk(100).map(len).distinct()) == [100]
 
