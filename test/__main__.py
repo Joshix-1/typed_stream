@@ -467,6 +467,7 @@ for name in dir(Stream(...)):  # noqa: C901
         "__str__",
         "__subclasshook__",
         "_close_source",
+        "_data",
         "_finish",
         "_get_args",
         "_StreamABC__data",
