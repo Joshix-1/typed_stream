@@ -29,7 +29,7 @@ else:
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     """ABC for Streams."""
 
-    __data: AsyncIterator[T] | Iterator[T]
+    __data: AsyncIterator[T] | Iterator[T] | None
     _close_source_callable: None | Callable[[], None]
 
     __slots__ = ("__data", "_close_source_callable")
@@ -42,17 +42,15 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         close_source_callable: Callable[[], None] | None = None,
     ) -> None:
         """Initialize self."""
-        if not isinstance(data, EllipsisType):
-            self.__data = data
+        self.__data = None if isinstance(data, EllipsisType) else data
         self._close_source_callable = close_source_callable
 
     @property
     def _data(self) -> AsyncIterator[T] | Iterator[T]:
-        """Return the internal itertator."""
-        try:
+        """Return the internal iterator."""
+        if self.__data:
             return self.__data
-        except AttributeError:
-            raise StreamFinishedError() from None
+        raise StreamFinishedError()
 
     @_data.setter
     def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
@@ -67,23 +65,19 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     def _finish(self, ret: V, close_source: bool = False) -> V:
         """Mark this Stream as finished."""
+        if not self.__data:
+            raise StreamFinishedError()
         if close_source:
             self._close_source()
         elif self._close_source_callable and isinstance(ret, StreamABC):
             # pylint: disable=protected-access
             ret._close_source_callable = self._close_source_callable
-        try:
-            del self.__data
-        except AttributeError:
-            raise StreamFinishedError() from None
+        self.__data = None
         return ret
 
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
-        try:
-            data: object = self.__data
-        except AttributeError:
-            data = ...
+        data: object = self.__data or ...
         if self._close_source_callable is None:
             return (data,)
         return data, self._close_source_callable
