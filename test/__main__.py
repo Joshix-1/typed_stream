@@ -469,6 +469,7 @@ for name in dir(Stream(...)):  # noqa: C901
         "_close_source",
         "_finish",
         "_get_args",
+        "_StreamABC__data",
         "close",
         "counting",
         "from_value",
