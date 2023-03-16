@@ -167,10 +167,9 @@ assert isinstance(
 assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
 assert repr(Stream(...)) == "typed_stream.streams.Stream(...)"
 
-assert Stream(...)._is_finished()
-assert BinaryFileStream(...)._is_finished()
-assert FileStream(...)._is_finished()
-
+assert_raises(StreamFinishedError, lambda: Stream(...)._data)
+assert_raises(StreamFinishedError, lambda: BinaryFileStream(...)._data)
+assert_raises(StreamFinishedError, lambda: FileStream(...)._data)
 
 assert Stream.range(5).map(str).enumerate().collect(tuple) == (
     (0, "0"),
@@ -470,7 +469,6 @@ for name in dir(Stream(...)):  # noqa: C901
         "_close_source",
         "_finish",
         "_get_args",
-        "_is_finished",
         "close",
         "counting",
         "from_value",
