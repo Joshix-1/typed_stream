@@ -44,7 +44,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         if not isinstance(data, EllipsisType):
             self.__data = data
         self._close_source_callable = close_source_callable
-    
+
     @property
     def _data(self) -> AsyncIterator[T] | Iterator[T]:
         """Return the internal itertator."""
@@ -52,7 +52,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             return self.__data
         except AttributeError as exc:
             raise StreamFinishedError() from exc
-    
+
     @_data.setter
     def _set_data(self, value: AsyncIterator[T] | Iterator[T]):
         """Set the internal iterator."""
