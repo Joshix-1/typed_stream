@@ -29,7 +29,7 @@ else:
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     """ABC for Streams."""
 
-    _data: None | AsyncIterator[T] | Iterator[T]
+    __data: None | AsyncIterator[T] | Iterator[T]
     _close_source_callable: None | Callable[[], None]
     __slots__ = ("_data", "_close_source_callable")
 
@@ -41,13 +41,22 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         close_source_callable: Callable[[], None] | None = None,
     ) -> None:
         """Initialize self."""
-        self._data = None if isinstance(data, EllipsisType) else data
+        self.__data = None if isinstance(data, EllipsisType) else data
         self._close_source_callable = close_source_callable
-
-    def _check_finished(self) -> None:
-        """Raise a StreamFinishedError if the stream is finished."""
-        if self._is_finished():
+    
+    @property
+    def _data(self) -> AsyncIterator[T] | Iterator[T]:
+        """Return the internal itertator."""
+        if self.__data is None:
             raise StreamFinishedError()
+        return self.__data
+    
+    @_data.setter
+    def _set_data(self, value: AsyncIterator[T] | Iterator[T]):
+        """Set the internal iterator."""
+        if self.__data is None:
+            raise SStreamFinishedError
+         self.__data = value
 
     def _close_source(self) -> None:
         """Close the source of the Stream. Used in FileStream."""
@@ -57,7 +66,6 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     def _finish(self, ret: V, close_source: bool = False) -> V:
         """Mark this Stream as finished."""
-        self._check_finished()
         if close_source:
             self._close_source()
         elif self._close_source_callable and isinstance(ret, StreamABC):
@@ -73,10 +81,6 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             return (data,)
         return data, self._close_source_callable
 
-    def _is_finished(self) -> bool:
-        """Return whether this Stream is finished."""
-        return self._data is None
-
     def close(self) -> None:
         """Close this stream cleanly."""
         with contextlib.suppress(StreamFinishedError):
@@ -88,8 +92,6 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         Example:
             - Stream([1, 2, 2, 2, 3]).distinct()
         """
-        self._check_finished()
-
         encountered: set[T] | list[T]
         peek_fun: Callable[[T], None]
         if use_set:
