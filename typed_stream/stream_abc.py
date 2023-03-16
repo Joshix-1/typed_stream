@@ -31,6 +31,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     __data: AsyncIterator[T] | Iterator[T]
     _close_source_callable: None | Callable[[], None]
+
     __slots__ = ("__data", "_close_source_callable")
 
     __hash__ = None  # type: ignore[assignment]
@@ -54,7 +55,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             raise StreamFinishedError() from exc
 
     @_data.setter
-    def _set_data(self, value: AsyncIterator[T] | Iterator[T]):
+    def _data(self, value: AsyncIterator[T] | Iterator[T]):
         """Set the internal iterator."""
         self.__data = value
 
