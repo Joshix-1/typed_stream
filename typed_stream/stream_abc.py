@@ -55,7 +55,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             raise StreamFinishedError() from exc
 
     @_data.setter
-    def _data(self, value: AsyncIterator[T] | Iterator[T]):
+    def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
         """Set the internal iterator."""
         self.__data = value
 
