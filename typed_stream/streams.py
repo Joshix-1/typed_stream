@@ -11,7 +11,7 @@ import operator
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
-from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, Union, overload
+from typing import TYPE_CHECKING, AnyStr, Final, Literal, TypeVar, Union, overload
 
 from .common_types import (
     PathLikeType,
