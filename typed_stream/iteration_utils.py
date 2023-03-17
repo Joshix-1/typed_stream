@@ -20,7 +20,6 @@ __all__ = (
     "IndexValueTuple",
     "IterWithCleanUp",
     "Peeker",
-    "ValueIterator",
     "sliding_window",
 )
 
