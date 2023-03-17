@@ -158,7 +158,7 @@ assert str_var == "1"
 
 assert isinstance(
     eval(  # pylint: disable=eval-used
-        repr(Stream.from_value(69)),
+        repr(Stream(...)),
         {"typed_stream": __import__("typed_stream")},
     ),
     Stream,
