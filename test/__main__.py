@@ -505,6 +505,7 @@ for name in dir(Stream(...)):  # noqa: C901
             "peek",
             "reduce",
             "starcollect",
+            "starmap",
             "take_while",
         }:
             args = (lambda: ...,)
