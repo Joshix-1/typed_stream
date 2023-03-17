@@ -8,7 +8,7 @@ import contextlib
 import sys
 from collections.abc import AsyncIterator, Callable, Iterator
 from types import EllipsisType
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, NoReturn, TypeVar
 
 from .common_types import Closeable, PrettyRepr
 from .exceptions import StreamFinishedError
@@ -24,6 +24,11 @@ if sys.version_info < (3, 11):
         from typing_extensions import Self
 else:
     from typing import Self
+
+
+def _raise_exception(exc: BaseException) -> NoReturn:
+    """Raise the exception."""
+    raise exc
 
 
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
@@ -48,9 +53,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     @property
     def _data(self) -> AsyncIterator[T] | Iterator[T]:
         """Return the internal iterator."""
-        if self.__data:
-            return self.__data
-        raise StreamFinishedError()
+        return self.__data or _raise_exception(StreamFinishedError())
 
     @_data.setter
     def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
