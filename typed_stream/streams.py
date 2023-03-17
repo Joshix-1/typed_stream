@@ -674,11 +674,11 @@ class Stream(StreamABC[T], Iterable[T]):
             raise StreamIndexError()
 
         return default
-    
+
     @overload
     def nwise(self, size: Literal[1], /) -> "Stream[tuple[T]]":
         ...
-    
+
     @overload
     def nwise(self, size: Literal[2], /) -> "Stream[tuple[T, T]]":
         ...
