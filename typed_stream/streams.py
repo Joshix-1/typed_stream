@@ -674,6 +674,22 @@ class Stream(StreamABC[T], Iterable[T]):
             raise StreamIndexError()
 
         return default
+    
+    @overload
+    def nwise(self, size: Literal[1], /) -> "Stream[tuple[T]]":
+        ...
+    
+    @overload
+    def nwise(self, size: Literal[2], /) -> "Stream[tuple[T, T]]":
+        ...
+
+    @overload
+    def nwise(self, size: Literal[3], /) -> "Stream[tuple[T, T, T]]":
+        ...
+
+    @overload
+    def nwise(self, size: Literal[4], /) -> "Stream[tuple[T, T, T, T]]":
+        ...
 
     def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
         """Return a Stream of overlapping n-lets."""
