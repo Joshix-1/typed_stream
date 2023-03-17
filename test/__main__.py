@@ -62,6 +62,8 @@ assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
 
+assert Stream.range(42).collect() == Stream.range(42).nwise(1).sum()
+
 assert " ".join(Stream("ABCDEFG").nwise(1).map("".join)) == "A B C D E F G"
 assert Stream("ABCDEFG").nwise(1).collect() == (
     ("A",),
@@ -198,6 +200,8 @@ assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 assert list(Stream.range(999).enumerate().starmap(operator.eq).distinct()) == [
     True
 ]
+assert Stream.range(10).nwise(1).starmap(str).sum() == "0123456789"
+assert Stream.range(6).nwise(2).starmap(operator.mul).sum() == 40
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
 assert Stream(STRING).distinct().collect("".join) == "pjwa nsvoidfb,cmg"
@@ -218,6 +222,7 @@ assert (
     == create_int_stream().reduce(add)
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
+    == create_int_stream().chunk(2).starmap(add).sum()
 )
 
 max_: int = Stream([1, 2, 3, -1]).max()
