@@ -762,7 +762,7 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
     def starmap(
-        self: Union[
+        self: Union[  # pylint: disable=consider-alternative-union-syntax
             "Stream[tuple[T, U, V, W, X]]",
             "Stream[tuple[T, U, V, W]]",
             "Stream[tuple[T, U, V]]",
