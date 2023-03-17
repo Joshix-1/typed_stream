@@ -28,7 +28,6 @@ from .iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
-    ValueIterator,
     sliding_window,
 )
 from .lazy_file_iterators import (
@@ -166,7 +165,7 @@ class Stream(StreamABC[T], Iterable[T]):
     @staticmethod
     def from_value(value: K) -> "Stream[K]":
         """Create an endless Stream of the same value."""
-        return ValueIterator(value).stream()
+        return Stream(itertools.repeat(value))
 
     if (  # pylint: disable=too-complex  # noqa: C901
         TYPE_CHECKING
@@ -533,7 +532,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return Stream(
             itertools.chain.from_iterable(
-                map(fun, self._data, *(ValueIterator(arg) for arg in args))
+                map(fun, self._data, *(itertools.repeat(arg) for arg in args))
             )
         )
 
