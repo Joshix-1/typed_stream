@@ -465,7 +465,7 @@ class Stream(StreamABC[T], Iterable[T]):
         except StopIteration:
             raise StreamEmptyError() from None
         finally:
-            self._finish(None)
+            self._finish(None, close_source=True)
         return first
 
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
