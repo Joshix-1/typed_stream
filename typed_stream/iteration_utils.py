@@ -8,7 +8,7 @@ import collections
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
-from typing import Generic, TypeVar, cast, overload
+from typing import Generic, Literal, TypeVar, cast, overload
 
 from .common_types import Closeable, PrettyRepr
 from .functions import wrap_in_tuple
