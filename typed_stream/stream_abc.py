@@ -60,21 +60,15 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         """Set the internal iterator."""
         self.__data = value
 
-    def _close_source(self) -> None:
-        """Close the source of the Stream. Used in FileStream."""
-        if self._close_source_callable:
-            self._close_source_callable()
-            self._close_source_callable = None
-
     def _finish(self, ret: V, close_source: bool = False) -> V:
         """Mark this Stream as finished."""
-        if not self.__data:
-            raise StreamFinishedError()
-        if close_source:
-            self._close_source()
-        elif self._close_source_callable and isinstance(ret, StreamABC):
-            # pylint: disable=protected-access
-            ret._close_source_callable = self._close_source_callable
+        if self._close_source_callable:
+            if close_source:
+                self._close_source_callable()
+                self._close_source_callable = None
+            elif isinstance(ret, StreamABC):
+                # pylint: disable=protected-access
+                ret._close_source_callable = self._close_source_callable
         self.__data = None
         return ret
 
