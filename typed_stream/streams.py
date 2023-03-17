@@ -723,13 +723,17 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def starmap(
-            self: "Stream[IndexValueTuple[U]]", fun: Callable[[int, U], K], /  # noqa: W504
+            self: "Stream[IndexValueTuple[U]]",
+            fun: Callable[[int, U], K],
+            /,  # noqa: W504
         ) -> "Stream[K]":
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U]]", fun: Callable[[T, U], K], /  # noqa: W504
+            self: "Stream[tuple[T, U]]",
+            fun: Callable[[T, U], K],
+            /,  # noqa: W504
         ) -> "Stream[K]":
             ...
 
