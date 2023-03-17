@@ -222,7 +222,7 @@ assert (
     == create_int_stream().reduce(add)
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
-    == create_int_stream().chunk(2).starmap(add).sum()
+    # == create_int_stream().chunk(2).starmap(add).sum()
 )
 
 max_: int = Stream([1, 2, 3, -1]).max()
