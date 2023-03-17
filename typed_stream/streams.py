@@ -461,10 +461,11 @@ class Stream(StreamABC[T], Iterable[T]):
     def first(self) -> T:
         """Return the first element of the Stream. This finishes the Stream."""
         try:
-            first = next(iter(self))
+            first = next(self._data)
         except StopIteration:
             raise StreamEmptyError() from None
-        self._close_source()
+        finally:
+            self._finish(None)
         return first
 
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
