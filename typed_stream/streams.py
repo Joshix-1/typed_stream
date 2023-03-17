@@ -387,31 +387,26 @@ class Stream(StreamABC[T], Iterable[T]):
         """Map the values to a tuple of index and value."""
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    # @overload
-    # def exclude(
-    #     self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
-    # ) -> "Stream[K]":
-    #     ...
-
-    # @overload
-    # def exclude(
-    #     self: "Stream[K | U]", fun: InstanceChecker[U]
-    # ) -> "Stream[K]":
-    #     ...
-
-    # @overload
-    # def exclude(
-    #     self: "Stream[K | U]", fun: TypeGuardingCallable[U]
-    # ) -> "Stream[K]":
-    #     ...
-
     if TYPE_CHECKING:  # pragma: no cover
-        # @overload
-        # def exclude(self, fun: NotNoneChecker) -> "Stream[None]":
-        #     ...
+        @overload
+        def exclude(
+            self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
+        ) -> "Stream[K]":
+            ...
+        @overload
+        def exclude(
+            self: "Stream[K | U]", fun: InstanceChecker[U]
+        ) -> "Stream[K]":
+            ...
 
         @overload
         def exclude(self: "Stream[K | None]", fun: NoneChecker) -> "Stream[K]":
+            ...
+
+        @overload
+        def exclude(
+            self: "Stream[K | U]", fun: TypeGuardingCallable[U]
+        ) -> "Stream[K]":
             ...
 
         @overload
