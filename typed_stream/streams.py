@@ -11,7 +11,7 @@ import operator
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
-from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, overload
+from typing import TYPE_CHECKING, AnyStr, Final, TypeVar, Union, overload
 
 from .common_types import (
     PathLikeType,
@@ -725,7 +725,7 @@ class Stream(StreamABC[T], Iterable[T]):
         def starmap(
             self: "Stream[IndexValueTuple[U]]",
             fun: Callable[[int, U], K],
-            /,  # noqa: W504
+            /,
         ) -> "Stream[K]":
             ...
 
@@ -733,7 +733,7 @@ class Stream(StreamABC[T], Iterable[T]):
         def starmap(
             self: "Stream[tuple[T, U]]",
             fun: Callable[[T, U], K],
-            /,  # noqa: W504
+            /,
         ) -> "Stream[K]":
             ...
 
@@ -762,11 +762,14 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
     def starmap(
-        self: """Stream[tuple[T, U, V, W, X]]
-        | Stream[tuple[T, U, V, W]]
-        | Stream[tuple[T, U, V]]
-        | Stream[tuple[T, U]]
-        | Stream[tuple[T]]]""",
+        self: Union[
+            "Stream[tuple[T, U, V, W, X]]",
+            "Stream[tuple[T, U, V, W]]",
+            "Stream[tuple[T, U, V]]",
+            "Stream[tuple[T, U]]",
+            "Stream[IndexValueTuple[U]]",
+            "Stream[tuple[T]]]"
+        ],
         fun: Callable[[T], K]
         | Callable[[T, U], K]
         | Callable[[T, U, V], K]
