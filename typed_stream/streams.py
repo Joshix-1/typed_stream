@@ -768,7 +768,7 @@ class Stream(StreamABC[T], Iterable[T]):
             "Stream[tuple[T, U, V]]",
             "Stream[tuple[T, U]]",
             "Stream[IndexValueTuple[U]]",
-            "Stream[tuple[T]]]"
+            "Stream[tuple[T]]]",
         ],
         fun: Callable[[T], K]
         | Callable[[T, U], K]
