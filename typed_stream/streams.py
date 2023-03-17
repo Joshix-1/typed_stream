@@ -717,13 +717,19 @@ class Stream(StreamABC[T], Iterable[T]):
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def starmap(
-            self: "Stream[tuple[T]]", fun: Callable[[T], K], /
+            self: "Stream[tuple[T]]", fun: Callable[[T], K], /  # noqa: W504
         ) -> "Stream[K]":
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U]]", fun: Callable[[T, U], K], /
+            self: "Stream[IndexValueTuple[U]]", fun: Callable[[int, U], K], /  # noqa: W504
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def starmap(
+            self: "Stream[tuple[T, U]]", fun: Callable[[T, U], K], /  # noqa: W504
         ) -> "Stream[K]":
             ...
 
