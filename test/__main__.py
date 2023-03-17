@@ -25,7 +25,7 @@ from typed_stream.exceptions import (
     StreamIndexError,
 )
 from typed_stream.functions import is_even, is_odd
-from typed_stream.iteration_utils import IndexValueTuple, IterWithCleanUp
+from typed_stream.iteration_utils import IndexValueTuple, IterWithCleanUp, sliding_window
 from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
 
 from .test_functions import (
@@ -58,6 +58,8 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     )
 
 
+assert_raises(ValueError, lambda: sliding_window(-1))
+assert_raises(ValueError, lambda: sliding_window(0))
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
