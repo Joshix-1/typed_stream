@@ -752,11 +752,11 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
     def starmap(
-        self: "Stream[tuple[T, U, V, W, X]]"
-        | "Stream[tuple[T, U, V, W]]"
-        | "Stream[tuple[T, U, V]]"
-        | "Stream[tuple[T, U]]"
-        | "Stream[tuple[T]]]",
+        self: """Stream[tuple[T, U, V, W, X]]
+        | Stream[tuple[T, U, V, W]]
+        | Stream[tuple[T, U, V]]
+        | Stream[tuple[T, U]]
+        | Stream[tuple[T]]]""",
         fun: Callable[[T], K]
         | Callable[[T, U], K]
         | Callable[[T, U, V], K]
