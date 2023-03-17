@@ -195,7 +195,9 @@ key_value_dict: dict[int, str] = (
 )
 assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
-assert list(Stream.range(999).enumerate().starmap(operator.eq).distinct()) == [True]
+assert list(Stream.range(999).enumerate().starmap(operator.eq).distinct()) == [
+    True
+]
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
 assert Stream(STRING).distinct().collect("".join) == "pjwa nsvoidfb,cmg"

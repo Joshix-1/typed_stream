@@ -712,15 +712,19 @@ class Stream(StreamABC[T], Iterable[T]):
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
         return self._finish(fun(*self._data), close_source=True)
-    
+
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
-        def starmap(self: "Stream[tuple[T]]", fun: Callable[[T], K], /) -> "Stream[K]":
+        def starmap(
+            self: "Stream[tuple[T]]", fun: Callable[[T], K], /
+        ) -> "Stream[K]":
             ...
 
         @overload
-        def starmap(self: "Stream[tuple[T, U]]", fun: Callable[[T, U], K], /) -> "Stream[K]":
+        def starmap(
+            self: "Stream[tuple[T, U]]", fun: Callable[[T, U], K], /
+        ) -> "Stream[K]":
             ...
 
         @overload
