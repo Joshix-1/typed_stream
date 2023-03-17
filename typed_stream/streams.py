@@ -618,7 +618,7 @@ class Stream(StreamABC[T], Iterable[T]):
             - Stream([1, 2, 3]).map(operator.mul, 3)
         """
         return self._finish(
-            Stream(map(fun, self._data, *(ValueIterator(arg) for arg in args)))
+            Stream(map(fun, self._data, *(itertools.repeat(arg) for arg in args)))
         )
 
     def max(self: "Stream[SC]") -> SC:
