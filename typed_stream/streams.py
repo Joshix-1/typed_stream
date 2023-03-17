@@ -692,10 +692,14 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     @overload
-    def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
+    def nwise(
+        self, size: int, /  # noqa: W504
+    ) -> "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]":
         ...
 
-    def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
+    def nwise(
+        self, size: int, /  # noqa: W504
+    ) -> "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]":
         """Return a Stream of overlapping n-lets."""
         return self._finish(Stream(sliding_window(self._data, size)))
 
