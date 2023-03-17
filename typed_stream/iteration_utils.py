@@ -285,6 +285,18 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         return cast(int, self._window.maxlen)
 
 
+@overload
+def sliding_window(iterable: Iterable[T], size: Literal[1]) -> "Iterator[tuple[T]]":
+    ...
+
+@overload
+def sliding_window(iterable: Iterable[T], size: Literal[2]) -> "Iterator[tuple[T, T]]":
+    ...
+
+@overload
+def sliding_window(iterable: Iterable[T], size: int) -> Iterator[tuple[T, ...]]:
+    ...
+
 def sliding_window(iterable: Iterable[T], size: int) -> Iterator[tuple[T, ...]]:
     """Return overlapping size-lets from an iterable.
 
