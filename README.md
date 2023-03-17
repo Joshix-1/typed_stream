@@ -35,8 +35,9 @@ If you need changelogs, please create an issue.
 ### Why EUPL-1.2-or-later?
 
 - 🇪🇺
+- AGPL3 is too long
 - [Google EUPL Policy](https://opensource.google/documentation/reference/thirdparty/licenses#european_union_public_licence_eupl_not_allowed)
 
 ### Is it production-ready?
 
-Yes. It's used by a [package](https://pypi.org/project/an-website/) with around 20k monthly downloads.
+Probably.
