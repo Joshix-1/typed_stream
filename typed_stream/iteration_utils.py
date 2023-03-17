@@ -8,7 +8,7 @@ import collections
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
-from typing import Generic, TypeVar, cast
+from typing import Generic, TypeVar, cast, overload
 
 from .common_types import Closeable, PrettyRepr
 from .functions import wrap_in_tuple
@@ -288,14 +288,14 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
 @overload
 def sliding_window(
     iterable: Iterable[T], size: Literal[1]
-) -> "Iterator[tuple[T]]":
+) -> Iterator[tuple[T]]:
     ...
 
 
 @overload
 def sliding_window(
     iterable: Iterable[T], size: Literal[2]
-) -> "Iterator[tuple[T, T]]":
+) -> Iterator[tuple[T, T]]:
     ...
 
 
