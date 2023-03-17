@@ -712,6 +712,62 @@ class Stream(StreamABC[T], Iterable[T]):
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream."""
         return self._finish(fun(*self._data), close_source=True)
+    
+    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
+        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
+        @overload
+        def starmap(self: "Stream[tuple[T]], fun: Callable[[T], K], /) -> "Stream[K]":
+            ...
+
+        @overload
+        def starmap(self: "Stream[tuple[T, U]], fun: Callable[[T, U], K], /) -> "Stream[K]":
+            ...
+
+        @overload
+        def starmap(
+            self: "Stream[tuple[T, U, V]],
+            fun: Callable[[T, U, V], K],
+            /,
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def starmap(
+            self: "Stream[tuple[T, U, V, W]],
+            fun: Callable[[T, U, V, W], K],
+            /,
+        ) -> "Stream[K]":
+            ...
+
+        @overload
+        def starmap(
+            self: "Stream[tuple[T, U, V, W, X]],
+            fun: Callable[[T, U, V, W, X], K],
+            /,
+        ) -> "Stream[K]":
+            ...
+
+    def starmap(
+        self: "Stream[tuple[T, U, V, W, X]]"
+        | "Stream[tuple[T, U, V, W]]"
+        | "Stream[tuple[T, U, V]]"
+        | "Stream[tuple[T, U]]"
+        | "Stream[tuple[T]]]",
+        fun: Callable[[T], K]
+        | Callable[[T, U], K]
+        | Callable[[T, U, V], K]
+        | Callable[[T, U, V, W], K]
+        | Callable[[T, U, V, W, X], K],
+        /,
+    ) -> "Stream[K]":
+        """Map each value to another.
+
+        This lazily finishes the current Stream and creates a new one.
+
+        Example:
+            - Stream([(1, 2), (3, 4)]).starmap(operator.mul)
+        """
+        return self._finish(Stream(itertools.starmap(fun, self._data)))
 
     def sum(self: "Stream[SA]") -> SA:
         """Calculate the sum of the elements.
