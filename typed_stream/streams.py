@@ -692,11 +692,7 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     @overload
-    def nwise(self, size: Literal[3], /) -> "Stream[tuple[T, T, T]]":
-        ...
-
-    @overload
-    def nwise(self, size: Literal[4], /) -> "Stream[tuple[T, T, T, T]]":
+    def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
         ...
 
     def nwise(self, size: int, /) -> "Stream[tuple[T, ...]]":
