@@ -62,11 +62,14 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     )
 
 
-assert_raises(ValueError, lambda: sliding_window(-1))
-assert_raises(ValueError, lambda: sliding_window(0))
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
+
+assert_raises(ValueError, lambda: sliding_window([], -1))
+assert_raises(ValueError, lambda: sliding_window((), 0))
+assert_raises(ValueError, lambda:Stream([]).nwise(0))
+assert_raises(ValueError, lambda:Stream(()).nwise(-1))
 
 assert Stream.range(42).collect() == Stream.range(42).nwise(1).sum()
 
