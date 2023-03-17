@@ -28,25 +28,6 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
-class ValueIterator(Iterator[T], Streamable[T], PrettyRepr, Generic[T]):
-    """An iterable that always yields the given value."""
-
-    _value: T
-    __slots__ = ("_value",)
-
-    def __init__(self, value: T) -> None:
-        """Create a ValueIterator."""
-        self._value = value
-
-    def __next__(self) -> T:
-        """Return the given value."""
-        return self._value
-
-    def _get_args(self) -> tuple[object, ...]:
-        """Return the args used to initializing self."""
-        return (self._value,)
-
-
 class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
     """Proxy an iterator."""
 
