@@ -387,7 +387,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """Map the values to a tuple of index and value."""
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    if TYPE_CHECKING:  # pragma: no cover
+    if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
 
         @overload
         def exclude(
@@ -681,13 +681,13 @@ class Stream(StreamABC[T], Iterable[T]):
         return default
 
     @overload
-    def nwise(
+    def nwise(  # type: ignore[misc]
         self, size: Literal[1], /  # noqa: W504
     ) -> "Stream[tuple[T]]":  # pragma: no cover
         ...
 
     @overload
-    def nwise(
+    def nwise(  # type: ignore[misc]
         self, size: Literal[2], /  # noqa: W504
     ) -> "Stream[tuple[T, T]]":  # pragma: no cover
         ...
@@ -695,15 +695,20 @@ class Stream(StreamABC[T], Iterable[T]):
     @overload
     def nwise(
         self, size: int, /  # noqa: W504
-    ) -> (
-        "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]"
-    ):  # pragma: no cover
+    ) -> "Stream[tuple[T, ...]]":  # pragma: no cover
         ...
 
     def nwise(
         self, size: int, /  # noqa: W504
     ) -> "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]":
-        """Return a Stream of overlapping n-lets."""
+        """Return a Stream of overlapping n-lets.
+
+        This is often called a sliding window.
+        For n=2 it behaves like pairwise from itertools.
+
+        The returned Stream will consist of tuples of length n.
+        If n is bigger than the count of values in self, it will be empty.
+        """
         return self._finish(Stream(sliding_window(self._data, size)))
 
     def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
