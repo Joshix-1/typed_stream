@@ -823,12 +823,15 @@ class Stream(StreamABC[T], Iterable[T]):
         """Calculate the sum of the elements.
 
         This works for every type that supports addition.
-        For strings stream.collect("".join) could be faster.
+
         For numbers sum(stream) could be faster.
+        For strings stream.collect("".join) could be faster.
+        For lists stream.flat_map(lambda _: _).collect(list) could be faster.
+        For tuples stream.flat_map(lambda _: _).collect(tuple) could be faster.
         """
         return self.reduce(add)
 
-    def tail(self, count: int) -> StreamableSequence[T]:
+    def tail(self, count: int, /) -> StreamableSequence[T]:
         """Return a Sequence with the last count items."""
         return self._finish(
             StreamableSequence(collections.deque(self._data, maxlen=count)),

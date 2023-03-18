@@ -6,7 +6,7 @@
 import operator
 import pickle
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from functools import partial
 from numbers import Number, Real
 from operator import add
@@ -71,7 +71,22 @@ assert_raises(ValueError, lambda: sliding_window((), 0))
 assert_raises(ValueError, lambda: Stream([]).nwise(0))
 assert_raises(ValueError, lambda: Stream(()).nwise(-1))
 
-assert Stream.range(42).collect() == Stream.range(42).nwise(1).sum()
+assert (
+    Stream.range(69).collect()
+    == Stream.range(69).nwise(1).sum()
+    == Stream.range(69).map(lambda x: (x,)).sum()
+    == Stream.range(69).nwise(1).flat_map(lambda x: x).collect(tuple)
+    == Stream.range(69).map(lambda x: (x,)).flat_map(lambda x: x).collect(tuple)
+)
+assert (
+    Stream.range(69).collect(list)
+    == Stream.range(69).map(lambda x: [x]).sum()
+    == Stream.range(69).map(lambda x: [x]).flat_map(lambda x: x).collect(list)
+)
+assert (
+    Stream.range(10).enumerate(-10).sum()
+    == Stream.range(10).enumerate(-10).flat_map(lambda x: x).collect(tuple)
+)
 
 assert " ".join(Stream("ABCDEFG").nwise(1).map("".join)) == "A B C D E F G"
 assert Stream("ABCDEFG").nwise(1).collect() == (
@@ -225,6 +240,7 @@ def create_int_stream() -> Stream[int]:
     return Stream.range(10_000).map(operator.pow, 2)
 
 
+_sum: Callable[[Iterable[int]], int] = sum
 assert (
     333283335000
     == sum(create_int_stream())
@@ -234,6 +250,7 @@ assert (
     == create_int_stream().reduce(add)
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
+    == create_int_stream().collect(_sum)
     # == create_int_stream().chunk(2).starmap(add).sum()
 )
 
