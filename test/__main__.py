@@ -83,10 +83,9 @@ assert (
     == Stream.range(69).map(lambda x: [x]).sum()
     == Stream.range(69).map(lambda x: [x]).flat_map(lambda x: x).collect(list)
 )
-assert (
-    Stream.range(10).enumerate(-10).sum()
-    == Stream.range(10).enumerate(-10).flat_map(lambda x: x).collect(tuple)
-)
+assert Stream.range(10).enumerate(-10).sum() == Stream.range(10).enumerate(
+    -10
+).flat_map(lambda x: x).collect(tuple)
 
 assert " ".join(Stream("ABCDEFG").nwise(1).map("".join)) == "A B C D E F G"
 assert Stream("ABCDEFG").nwise(1).collect() == (
