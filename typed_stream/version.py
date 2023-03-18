@@ -6,7 +6,7 @@ Update this to create a new release.
 To get the current version run this script.
 """
 
-VERSION = "0.32.0"
+VERSION = "0.32.1"
 
 if __name__ == "__main__":  # pragma: no cover
     print(VERSION)
