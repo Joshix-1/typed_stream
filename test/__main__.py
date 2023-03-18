@@ -28,6 +28,7 @@ from typed_stream.functions import is_even, is_odd
 from typed_stream.iteration_utils import (
     IndexValueTuple,
     IterWithCleanUp,
+    Peeker,
     sliding_window,
 )
 from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
@@ -183,7 +184,7 @@ assert str_var == "1"
 
 assert isinstance(
     eval(  # pylint: disable=eval-used
-        repr(Stream.from_value(69)),
+        repr(Stream.from_value(69).chunk(2).enumerate().nwise(3)),
         {
             "typed_stream": __import__("typed_stream"),
             "repeat": __import__("itertools").repeat,
@@ -191,9 +192,21 @@ assert isinstance(
     ),
     Stream,
 )
+assert (
+    repr(iter(Stream.from_value(69)))
+    == "typed_stream.iteration_utils.IterWithCleanUp"
+    + "(<bound method StreamABC.close of typed_stream.streams.Stream"
+    + "(repeat(69))>,repeat(69))"
+)
+assert (
+    repr(Peeker(print))
+    == "typed_stream.iteration_utils.Peeker(<built-in function print>)"
+)
+
 
 assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
 assert repr(Stream(...)) == "typed_stream.streams.Stream(...)"
+assert repr(FileStream(...)) == "typed_stream.streams.FileStream(...)"
 
 assert_raises(StreamFinishedError, lambda: Stream(...)._data)
 assert_raises(StreamFinishedError, lambda: BinaryFileStream(...)._data)

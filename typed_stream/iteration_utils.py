@@ -257,7 +257,7 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
 
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
-        return *super()._get_args(), self._window
+        return *super()._get_args(), self.size
 
     @property
     def size(self) -> int:
@@ -268,19 +268,21 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
 @overload
 def sliding_window(
     iterable: Iterable[T], size: Literal[1]
-) -> Iterator[tuple[T]]:
+) -> Iterator[tuple[T]]:  # pragma: no cover
     ...
 
 
 @overload
 def sliding_window(
     iterable: Iterable[T], size: Literal[2]
-) -> Iterator[tuple[T, T]]:
+) -> Iterator[tuple[T, T]]:  # pragma: no cover
     ...
 
 
 @overload
-def sliding_window(iterable: Iterable[T], size: int) -> Iterator[tuple[T, ...]]:
+def sliding_window(
+    iterable: Iterable[T], size: int
+) -> Iterator[tuple[T, ...]]:  # pragma: no cover
     ...
 
 

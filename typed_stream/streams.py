@@ -895,6 +895,7 @@ class FileStream(FileStreamBase[str]):
         To create a finished FileStream do FileStream(...).
         """
         if isinstance(data, EllipsisType):
+            self._file_iterator = None
             super().__init__(...)
             return
 
@@ -921,6 +922,7 @@ class BinaryFileStream(FileStreamBase[bytes]):
         To create a finished BinaryFileStream do BinaryFileStream(...).
         """
         if isinstance(data, EllipsisType):
+            self._file_iterator = None
             super().__init__(...)
             return
 

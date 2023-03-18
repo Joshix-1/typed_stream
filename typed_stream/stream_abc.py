@@ -19,10 +19,10 @@ T = TypeVar("T", bound=object)
 V = TypeVar("V")
 
 
-if sys.version_info < (3, 11):
+if sys.version_info < (3, 11):  # pragma: no cover
     if TYPE_CHECKING:
         from typing_extensions import Self
-else:
+else:  # pragma: no cover
     from typing import Self
 
 
