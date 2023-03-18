@@ -6,7 +6,7 @@
 import operator
 import pickle
 import sys
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from functools import partial
 from numbers import Number, Real
 from operator import add
@@ -240,7 +240,6 @@ def create_int_stream() -> Stream[int]:
     return Stream.range(10_000).map(operator.pow, 2)
 
 
-_sum: Callable[[Iterable[int]], int] = sum
 assert (
     333283335000
     == sum(create_int_stream())
@@ -250,7 +249,7 @@ assert (
     == create_int_stream().reduce(add)
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
-    == create_int_stream().collect(_sum)
+    == create_int_stream().collect(sum)
     # == create_int_stream().chunk(2).starmap(add).sum()
 )
 

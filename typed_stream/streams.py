@@ -282,6 +282,12 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def collect(
+            self: "Stream[SA]", fun: Callable[[Iterable[SA]], SA]
+        ) -> SA:
+            ...
+
+        @overload
+        def collect(
             self: "Stream[T]",
             fun: Callable[[Iterable[T]], StreamableSequence[T]],
         ) -> StreamableSequence[T]:
@@ -824,7 +830,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         This works for every type that supports addition.
 
-        For numbers sum(stream) could be faster.
+        For numbers stream.collect(sum) could be faster.
         For strings stream.collect("".join) could be faster.
         For lists stream.flat_map(lambda _: _).collect(list) could be faster.
         For tuples stream.flat_map(lambda _: _).collect(tuple) could be faster.
