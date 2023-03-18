@@ -356,7 +356,7 @@ class Stream(StreamABC[T], Iterable[T]):
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream.
 
-        Äquivalent to: Stream(...).map(lambda x: 1).sum()
+        Equivalent to: Stream(...).map(lambda x: 1).sum()
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
 
@@ -388,11 +388,13 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
     if TYPE_CHECKING:  # pragma: no cover
+
         @overload
         def exclude(
             self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
         ) -> "Stream[K]":
             ...
+
         @overload
         def exclude(
             self: "Stream[K | U]", fun: InstanceChecker[U]
@@ -679,17 +681,23 @@ class Stream(StreamABC[T], Iterable[T]):
         return default
 
     @overload
-    def nwise(self, size: Literal[1], /) -> "Stream[tuple[T]]":
+    def nwise(
+        self, size: Literal[1], /  # noqa: W504
+    ) -> "Stream[tuple[T]]":  # pragma: no cover
         ...
 
     @overload
-    def nwise(self, size: Literal[2], /) -> "Stream[tuple[T, T]]":
+    def nwise(
+        self, size: Literal[2], /  # noqa: W504
+    ) -> "Stream[tuple[T, T]]":  # pragma: no cover
         ...
 
     @overload
     def nwise(
         self, size: int, /  # noqa: W504
-    ) -> "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]":
+    ) -> (
+        "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]"
+    ):  # pragma: no cover
         ...
 
     def nwise(
