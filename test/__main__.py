@@ -84,13 +84,21 @@ assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
 def raise_exceptions(number: int) -> int:
     """Raise different exceptions."""
     if number == 1:
-        raise ValueError()
+        raise ValueError("1")
     if number == 3:
-        raise TypeError()
+        raise TypeError("3")
     if number == 5:
-        raise ZeroDivisionError()
+        raise ZeroDivisionError("5")
     return number
 
+
+assert Stream.range(6).map(raise_exceptions).catch(
+    ValueError, TypeError, ZeroDivisionError, default=lambda: -1
+).collect() == (0, -1, 2, -1, 4, -1)
+
+assert Stream.range(6).map(raise_exceptions).map(str).catch(
+    ValueError, TypeError, ZeroDivisionError, default=lambda _: f"E{_.args[0]}"
+).collect() == ("0", "E1", "2", "E3", "4", "E5")
 
 assert (
     Stream.range(20)
@@ -131,7 +139,7 @@ assert (
     .catch(
         ValueError,
         handler=errors.append,
-        default=lambda exc: len(exc.args) * 1000,
+        default=lambda _: len(_.args) * 1000,
     )
     .sum()
     == 8045
@@ -139,13 +147,13 @@ assert (
 value_error: ValueError
 try:
     int("x")
-except ValueError as exc:
-    value_error = exc
+except ValueError as _:
+    value_error = _
 else:
     raise AssertionError("x is int")
 assert Stream(errors).map(type).collect(list) == [ValueError] * 8
 assert (
-    Stream(errors).flat_map(lambda exc: exc.args).distinct().collect()
+    Stream(errors).flat_map(lambda _: _.args).distinct().collect()
     == value_error.args
 )
 
