@@ -270,7 +270,7 @@ class Stream(StreamABC[T], Iterable[T]):
         exception_class: type[Exc],
         handle_fun: Callable[[Exc], T] | None = None,
     ) -> Stream[T]:
-         """Catch exceptions."""
+        """Catch exceptions."""
         self._data = ExceptionMapper(self._data, exception_class, handle_fun)
         return self
 
