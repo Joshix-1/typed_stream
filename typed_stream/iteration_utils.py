@@ -145,7 +145,7 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         iterable: Iterable[T],
         exception_class: type[Exc],
         except_fun: Callable[[Exc], U] | None = None,
-        map_fun: Callable[[Exc], U] | None = None,
+        map_fun: Callable[[T], U] | None = None,
     ) -> None:
         """Handle errors in iterables."""
         super().__init__(iterable)
