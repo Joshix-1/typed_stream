@@ -155,7 +155,7 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         self._except_fun = except_fun
         self._map_fun = map_fun
 
-    def __next__(self: "ExceptionMapper[T, U]") -> T | U:
+    def __next__(self: "ExceptionMapper[T, U, Exc]") -> T | U:
         """Return the next value."""
         try:
             value: T = next(self._iterator)
