@@ -160,7 +160,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
         self._if_fun = if_
         self._else_fun = else_
 
-    def __next__(self: "Iterator[U | V]") -> U | V:
+    def __next__(self: "IfElseMap[T, U, V]") -> U | V:
         """Return the next value."""
         value: T = next(self._iterator)
         if self._condition(value):
