@@ -150,16 +150,16 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         """Handle Exceptions in iterables."""
         super().__init__(iterable)
         if (
-            (exception_class == StopIteration)
-            if isinstance(exception_class, BaseException)
-            else (StopIteration in exception_class)
+            (StopIteration in exception_class)
+            if isinstance(exception_class, tuple)
+            else (exception_class == StopIteration)
         ):
             raise ValueError("Cannot catch StopIteration")
         self._exception_class = exception_class
         self._default_fun = default_fun
         self._log_fun = log_fun
 
-    def __next__(self: "ExceptionHandler[T, U, Exc]") -> T | U:
+    def __next__(self: "ExceptionHandler[T, U, Exc]") -> T | U:  # noqa: C901
         """Return the next value."""
         while True:  # pylint: disable=while-used
             try:

@@ -60,7 +60,7 @@ V = TypeVar("V")
 W = TypeVar("W")
 X = TypeVar("X")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
-Exc = TypeVar("Prim", bound=BaseException)
+Exc = TypeVar("Exc", bound=BaseException)
 
 SA = TypeVar("SA", bound=SupportsAdd)
 SC = TypeVar("SC", bound=SupportsComparison)
@@ -268,7 +268,7 @@ class Stream(StreamABC[T], Iterable[T]):
     def catch(
         self: "Stream[T]",
         exception_class: type[Exc],
-        handle_fun: Callable[[Exc], T] | None = None,
+        handle_fun: Callable[[Exc], object] | None = None,
     ) -> "Stream[T]":
         """Catch exceptions."""
         self._data = ExceptionHandler(self._data, exception_class, handle_fun)
