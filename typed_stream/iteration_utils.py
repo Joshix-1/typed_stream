@@ -7,6 +7,7 @@ import abc
 import collections
 import contextlib
 import itertools
+import traceback
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
@@ -26,6 +27,8 @@ __all__ = (
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
+
+Exc = TypeVar("Exc", bound=BaseException)
 
 
 class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
@@ -123,6 +126,51 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self._curr_idx
+
+
+class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
+    """Map Exceptions to values."""
+
+    _exception_class: type[Exc]
+    _except_fun: Callable[[Exc], U] | None
+    _map_fun: Callable[[T], U] | None
+
+    __slots__ = ("_exception_class", "_except_fun",)
+
+    def __init__(
+        self,
+        iterable: Iterable[T],
+        exception_class: type[Exc],
+        except_fun: Callable[[Exc], U] | None = None,
+        map_fun: Callable[[Exc], U] | None = None,
+    ) -> None:
+        """Handle errors in iterables."""
+        super().__init__(iterable)
+        if exception_class == StopIteration:
+            raise ValueError("Cannot catch StopIteration")
+        self._exception_class = exception_class
+        self._except_fun = except_fun
+        self._map_fun = map_fun
+
+    def __next__(self: "ExceptionMapper[T, U]") -> T | U:
+        """Return the next value."""
+        try:
+            value: T = next(self._iterator)
+        except StopIteration:
+            raise
+        except self._exception_class as exc:
+            if self._except_fun:
+                return self._except_fun(exc)
+            # TODO: LOG WITH LOGGER
+            traceback.print_exception(exc)
+            return next(self)
+        if self._map_fun:
+            return self._map_fun(value)
+        return value
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self._exception_class, self._except_fun
 
 
 class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
