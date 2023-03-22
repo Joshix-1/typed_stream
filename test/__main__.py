@@ -271,15 +271,22 @@ assert str_var == "3"
 str_var = Stream(["1", "2", "3"]).min()
 assert str_var == "1"
 
+_stream1 = Stream.from_value(69).chunk(2).enumerate().nwise(3).catch()
 assert isinstance(
-    eval(  # pylint: disable=eval-used
-        repr(Stream.from_value(69).chunk(2).enumerate().nwise(3).catch()),
+    _stream2 := eval(  # pylint: disable=eval-used
+        repr(_stream1),
         {
             "typed_stream": __import__("typed_stream"),
             "repeat": __import__("itertools").repeat,
         },
     ),
     Stream,
+)
+_stream3 = pickle.loads(pickle.dumps(_stream1))
+assert (
+    _stream1.limit(1000).collect()
+    == _stream2.limit(1000).collect()
+    == _stream3.limit(1000).collect()
 )
 assert (
     repr(iter(Stream.from_value(69)))
