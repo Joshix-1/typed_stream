@@ -33,7 +33,7 @@ from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
     Chunked,
     Enumerator,
-    ExceptionMapper,
+    ExceptionHandler,
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
@@ -271,7 +271,7 @@ class Stream(StreamABC[T], Iterable[T]):
         handle_fun: Callable[[Exc], T] | None = None,
     ) -> "Stream[T]":
         """Catch exceptions."""
-        self._data = ExceptionMapper(self._data, exception_class, handle_fun)
+        self._data = ExceptionHandler(self._data, exception_class, handle_fun)
         return self
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":

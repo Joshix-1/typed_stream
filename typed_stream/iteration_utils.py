@@ -127,8 +127,8 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
         return *super()._get_args(), self._curr_idx
 
 
-class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
-    """Map Exceptions to values."""
+class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
+    """Handle Exceptions in iterators."""
 
     _exception_class: type[Exc] | tuple[type[Exc], ...]
     _default_fun: Callable[[], U] | None
@@ -147,7 +147,7 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         log_fun: Callable[[Exc], object] | None = None,
         default_fun: Callable[[], U] | None = None,
     ) -> None:
-        """Handle errors in iterables."""
+        """Handle Exceptions in iterables."""
         super().__init__(iterable)
         if (
             (exception_class == StopIteration)
@@ -159,7 +159,7 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         self._default_fun = default_fun
         self._log_fun = log_fun
 
-    def __next__(self: "ExceptionMapper[T, U, Exc]") -> T | U:
+    def __next__(self: "ExceptionHandler[T, U, Exc]") -> T | U:
         """Return the next value."""
         while True:  # pylint: disable=while-used
             try:
