@@ -273,7 +273,7 @@ assert str_var == "1"
 
 assert isinstance(
     eval(  # pylint: disable=eval-used
-        repr(Stream.from_value(69).chunk(2).enumerate().nwise(3)),
+        repr(Stream.from_value(69).chunk(2).enumerate().nwise(3).catch()),
         {
             "typed_stream": __import__("typed_stream"),
             "repeat": __import__("itertools").repeat,

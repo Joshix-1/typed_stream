@@ -17,6 +17,7 @@ from .streamable import Streamable, StreamableSequence
 __all__ = (
     "Chunked",
     "Enumerator",
+    "ExceptionHandler",
     "IndexValueTuple",
     "IterWithCleanUp",
     "Peeker",
