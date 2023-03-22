@@ -267,11 +267,15 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def catch(
         self: "Stream[T]",
-        exception_class: type[Exc],
-        handle_fun: Callable[[Exc], object] | None = None,
+        *exception_class: type[Exc],
+        handler: Callable[[Exc], object] | None = None,
+        default: Callable[[Exc], T] | Callable[[], T] | None = None,
     ) -> "Stream[T]":
         """Catch exceptions."""
-        self._data = ExceptionHandler(self._data, exception_class, handle_fun)
+        self._data = ExceptionHandler(
+            self._data, exception_class, handler, default
+        )
+
         return self
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":

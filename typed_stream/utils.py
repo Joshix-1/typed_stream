@@ -7,21 +7,22 @@
 import inspect
 from collections.abc import Callable
 
-
 __all__ = ("count_required_positional_arguments",)
 
 
-def count_required_positional_arguments(fun: Callable[..., object], /) -> int:
+def count_required_positional_arguments(  # type: ignore[misc]
+    fun: Callable[..., object], /  # noqa: W504
+) -> int:
     """Count the required positional arguments."""
     return len(
         [
             param
             for param in inspect.signature(fun).parameters.values()
             if param.kind
-               in {
-                   inspect.Parameter.POSITIONAL_ONLY,
-                   inspect.Parameter.POSITIONAL_OR_KEYWORD,
-               }
+            in {
+                inspect.Parameter.POSITIONAL_ONLY,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            }
             if param.default == inspect.Parameter.empty
         ]
     )

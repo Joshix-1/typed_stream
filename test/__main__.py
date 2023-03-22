@@ -72,6 +72,83 @@ assert_raises(ValueError, lambda: sliding_window((), 0))
 assert_raises(ValueError, lambda: Stream([]).nwise(0))
 assert_raises(ValueError, lambda: Stream(()).nwise(-1))
 
+assert_raises(ValueError, Stream("1a2b3c4d5").map(int).sum)
+assert_raises(ValueError, Stream("1a2b3c4d5").map(int).catch(TypeError).sum)
+assert_raises(ValueError, lambda: Stream(()).catch(StopIteration))
+assert_raises(ValueError, lambda: Stream(()).catch(StopIteration, TypeError))
+assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
+assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum() == 45
+assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
+
+
+def raise_exceptions(number: int) -> int:
+    """Raise different exceptions."""
+    if number == 1:
+        raise ValueError()
+    if number == 3:
+        raise TypeError()
+    if number == 5:
+        raise ZeroDivisionError()
+    return number
+
+
+assert (
+    Stream.range(20)
+    .map(raise_exceptions)
+    .catch(ValueError, TypeError, ZeroDivisionError)
+    .sum()
+    == sum(range(20)) - 1 - 3 - 5
+)
+assert (
+    Stream.range(20)
+    .map(raise_exceptions)
+    .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: 0)
+    .sum()
+    == sum(range(20)) - 1 - 3 - 5
+)
+assert (
+    Stream.range(20)
+    .map(raise_exceptions)
+    .catch(ValueError, TypeError, ZeroDivisionError, default=lambda _: 0)
+    .sum()
+    == sum(range(20)) - 1 - 3 - 5
+)
+
+
+errors: list[ValueError] = []
+assert (
+    Stream("1a2b3c4d5e6f7g8h9")
+    .map(int)
+    .catch(ValueError, handler=errors.append, default=lambda: 100)
+    .sum()
+    == 845
+)
+assert Stream(errors).map(type).collect(list) == [ValueError] * 8
+errors = []
+assert (
+    Stream("1x2x3x4x5x6x7x8x9")
+    .map(int)
+    .catch(
+        ValueError,
+        handler=errors.append,
+        default=lambda exc: len(exc.args) * 1000,
+    )
+    .sum()
+    == 8045
+)
+value_error: ValueError
+try:
+    int("x")
+except ValueError as exc:
+    value_error = exc
+else:
+    raise AssertionError("x is int")
+assert Stream(errors).map(type).collect(list) == [ValueError] * 8
+assert (
+    Stream(errors).flat_map(lambda exc: exc.args).distinct().collect()
+    == value_error.args
+)
+
 assert (
     Stream.range(69).collect()
     == Stream.range(69).nwise(1).sum()

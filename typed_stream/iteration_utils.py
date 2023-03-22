@@ -23,6 +23,8 @@ __all__ = (
     "sliding_window",
 )
 
+from .utils import count_required_positional_arguments
+
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
@@ -131,21 +133,17 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
     """Handle Exceptions in iterators."""
 
     _exception_class: type[Exc] | tuple[type[Exc], ...]
-    _default_fun: Callable[[], U] | None
+    _default_fun: Callable[[Exc], U] | None
     _log_fun: Callable[[Exc], object] | None
 
-    __slots__ = (
-        "_exception_class",
-        "_default_fun",
-        "_log_fun",
-    )
+    __slots__ = ("_exception_class", "_default_fun", "_log_fun")
 
     def __init__(
         self,
         iterable: Iterable[T],
         exception_class: type[Exc] | tuple[type[Exc], ...],
-        log_fun: Callable[[Exc], object] | None = None,
-        default_fun: Callable[[], U] | None = None,
+        log_callable: Callable[[Exc], object] | None = None,
+        default_factory: Callable[[Exc], U] | Callable[[], U] | None = None,
     ) -> None:
         """Handle Exceptions in iterables."""
         super().__init__(iterable)
@@ -156,8 +154,19 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         ):
             raise ValueError("Cannot catch StopIteration")
         self._exception_class = exception_class
-        self._default_fun = default_fun
-        self._log_fun = log_fun
+        self._log_fun = log_callable
+        if default_factory is not None:
+            def_fun = default_factory
+            if not count_required_positional_arguments(def_fun):
+
+                def _(_: Exc) -> U:
+                    return def_fun()  # type: ignore[call-arg]
+
+                self._default_fun = _
+            else:
+                self._default_fun = cast(Callable[[Exc], U], def_fun)
+        else:
+            self._default_fun = None
 
     def __next__(self: "ExceptionHandler[T, U, Exc]") -> T | U:  # noqa: C901
         """Return the next value."""
@@ -170,7 +179,7 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
                 if self._log_fun:
                     self._log_fun(exc)
                 if self._default_fun:
-                    return self._default_fun()
+                    return self._default_fun(exc)
                 # if no default fun is available just return the next element
             else:
                 return value
