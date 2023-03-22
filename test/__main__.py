@@ -96,6 +96,10 @@ assert Stream.range(6).map(raise_exceptions).catch(
     ValueError, TypeError, ZeroDivisionError, default=lambda: -1
 ).collect() == (0, -1, 2, -1, 4, -1)
 
+assert Stream.range(6).map(raise_exceptions).catch(
+    ValueError, TypeError, ZeroDivisionError
+).collect() == (0, 2, 4)
+
 assert Stream.range(6).map(raise_exceptions).map(str).catch(
     ValueError, TypeError, ZeroDivisionError, default=lambda _: f"E{_.args[0]}"
 ).collect() == ("0", "E1", "2", "E3", "4", "E5")
