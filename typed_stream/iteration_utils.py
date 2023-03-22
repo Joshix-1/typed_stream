@@ -169,7 +169,12 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
 
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
-        return *super()._get_args(), self._condition, self._if_fun, self._else_fun
+        return (
+            *super()._get_args(),
+            self._condition,
+            self._if_fun,
+            self._else_fun,
+        )
 
 
 class Peeker(Generic[T], PrettyRepr):
