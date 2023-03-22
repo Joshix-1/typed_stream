@@ -138,6 +138,7 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
     __slots__ = (
         "_exception_class",
         "_except_fun",
+        "_map_fun",
     )
 
     def __init__(
