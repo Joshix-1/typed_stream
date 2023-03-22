@@ -338,6 +338,7 @@ assert (
     .sum()
     == 7
 )
+assert FileStream(INPUT_TXT).map(int).catch(ValueError).sum() == 7
 
 assert FileStream(INPUT_TXT, keep_line_ends=True).map(
     lambda x: x[-1]
@@ -554,6 +555,8 @@ for name in dir(Stream(...)):  # noqa: C901
             "take_while",
         }:
             args = (lambda: ...,)
+        elif name == "catch":
+            args = (Exception,)
         else:
             args = ()
         assert_raises(StreamFinishedError, partial(method, *args))
