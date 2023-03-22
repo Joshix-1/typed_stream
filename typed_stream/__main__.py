@@ -5,12 +5,12 @@
 """Easy interface for streamy handling of files."""
 import argparse
 import dataclasses
-import inspect
 import operator
 import sys
 from collections.abc import Callable
 
 from . import Stream, functions
+from .utils import count_required_positional_arguments
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -21,21 +21,6 @@ class Options:
     bytes: bool
     keep_ends: bool
     actions: tuple[str, ...]
-
-
-def count_required_positional_arguments(fun: Callable[[object], object]) -> int:
-    """Count the required positional arguments."""
-    parameters: list[inspect.Parameter] = [
-        param
-        for param in inspect.signature(fun).parameters.values()
-        if param.kind
-        in {
-            inspect.Parameter.POSITIONAL_ONLY,
-            inspect.Parameter.POSITIONAL_OR_KEYWORD,
-        }
-        if param.default == inspect.Parameter.empty
-    ]
-    return len(parameters)
 
 
 def run_program(options: Options) -> str | None:  # noqa: C901
