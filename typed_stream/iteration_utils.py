@@ -131,7 +131,7 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
 class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
     """Map Exceptions to values."""
 
-    _exception_class: type[Exc]
+    _exception_class: type[Exc] | tuple[type[Exc], ...]
     _except_fun: Callable[[Exc], U] | None
     _map_fun: Callable[[T], U] | None
 
@@ -144,13 +144,17 @@ class ExceptionMapper(IteratorProxy[T | U, T], Generic[T, U, Exc]):
     def __init__(
         self,
         iterable: Iterable[T],
-        exception_class: type[Exc],
+        exception_class: type[Exc] | tuple[type[Exc], ...],
         except_fun: Callable[[Exc], U] | None = None,
         map_fun: Callable[[T], U] | None = None,
     ) -> None:
         """Handle errors in iterables."""
         super().__init__(iterable)
-        if exception_class == StopIteration:
+        if (
+            (exception_class == StopIteration)
+            if isinstance(exception_class, BaseException)
+            else (StopIteration in exception_class)
+        ):
             raise ValueError("Cannot catch StopIteration")
         self._exception_class = exception_class
         self._except_fun = except_fun
