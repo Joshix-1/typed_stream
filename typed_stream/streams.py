@@ -33,6 +33,7 @@ from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .iteration_utils import (
     Chunked,
     Enumerator,
+    ExceptionMapper,
     IndexValueTuple,
     IterWithCleanUp,
     Peeker,
@@ -59,6 +60,7 @@ V = TypeVar("V")
 W = TypeVar("W")
 X = TypeVar("X")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
+Exc = TypeVar("Prim", bound=BaseException)
 
 SA = TypeVar("SA", bound=SupportsAdd)
 SC = TypeVar("SC", bound=SupportsComparison)
@@ -262,6 +264,15 @@ class Stream(StreamABC[T], Iterable[T]):
     def all(self) -> bool:
         """Check whether all values are Truthy. This finishes the Stream."""
         return self._finish(all(self._data), close_source=True)
+
+    def catch(
+        self: "Stream[T]",
+        exception_class: type[Exc],
+        handle_fun: Callable[[Exc], T] | None = None,
+    ) -> Stream[T]
+         """Catch exceptions."""
+        self._data = ExceptionMapper(self._data, exception_class, handle_fun)
+        return self
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":
         """Add another iterable to the end of the Stream."""
