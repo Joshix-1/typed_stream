@@ -24,7 +24,7 @@ __all__ = (
 )
 
 T = TypeVar("T")
-U = TypeVar("V")
+U = TypeVar("U")
 V = TypeVar("V")
 
 
