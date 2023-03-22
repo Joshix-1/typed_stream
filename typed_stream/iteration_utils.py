@@ -24,6 +24,7 @@ __all__ = (
 )
 
 T = TypeVar("T")
+U = TypeVar("V")
 V = TypeVar("V")
 
 
@@ -122,6 +123,53 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self._curr_idx
+
+
+class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
+    """Map combined with conditions."""
+
+    _condition: Callable[[T], bool | object]
+    _if_fun: Callable[[T], U] | None
+    _else_fun: Callable[[T], V] | None
+
+    __slots__ = ("_condition", "_if_fun", "_else_fun")
+
+    def __init__(
+        self,
+        iterable: Iterable[T],
+        condition: Callable[[T], bool | object],
+        if_: Callable[[T], U] | None,
+        else_: Callable[[T], V] | None = None,
+    ) -> None:
+        """Map values depending on a condition.
+
+        Equivalent pairs:
+        - map(lambda _: (if_(_) if condition(_) else else_(_)), iterable)
+        - IfElseMap(iterable, condition, if_, else_)
+
+        - filter(callable, iterable)
+        - IfElseMap(iterable, callable, lambda _: _, None)
+
+        - itertools.filterfalse(callable, iterable)
+        - IfElseMap(iterable, callable, None, lambda _: _)
+        """
+        super().__init__(iterable)
+        self._condition = condition
+        if if_ is else_ is None:
+            raise ValueError("")
+        self._if_fun = if_
+        self._else_fun = else_
+
+    def __next__(self: "Iterator[U | V]") -> U | V:
+        """Return the next value."""
+        value: T = next(self._iterator)
+        if self._condition(value):
+            return self._if_fun(value) if self._if_fun else next(self)
+        return self._else_fun(value) if self._else_fun else next(self)
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return *super()._get_args(), self._condition, self._if_fun, self._else_fun
 
 
 class Peeker(Generic[T], PrettyRepr):
