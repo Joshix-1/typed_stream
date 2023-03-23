@@ -257,18 +257,52 @@ class Stream(StreamABC[T], Iterable[T]):
         """Check whether all values are Truthy. This finishes the Stream."""
         return self._finish(all(self._data), close_source=True)
 
+    if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
+
+        @overload
+        def catch(
+            self: "Stream[T]",
+            *exception_class: type[Exc],
+        ) -> "Stream[T]":
+            ...
+
+        @overload
+        def catch(
+            self: "Stream[T]",
+            *exception_class: type[Exc],
+            handler: Callable[[Exc], object],
+        ) -> "Stream[T]":
+            ...
+
+        @overload
+        def catch(
+            self: "Stream[T]",
+            *exception_class: type[Exc],
+            default: Callable[[Exc], K] | Callable[[], K],
+        ) -> "Stream[T | K]":
+            ...
+
+        @overload
+        def catch(
+            self: "Stream[T]",
+            *exception_class: type[Exc],
+            handler: Callable[[Exc], object],
+            default: Callable[[Exc], K] | Callable[[], K],
+        ) -> "Stream[T | K]":
+            ...
+
     def catch(
         self: "Stream[T]",
         *exception_class: type[Exc],
         handler: Callable[[Exc], object] | None = None,
-        default: Callable[[Exc], T] | Callable[[], T] | None = None,
-    ) -> "Stream[T]":
+        default: Callable[[Exc], K] | Callable[[], K] | None = None,
+    ) -> "Stream[T | K]":
         """Catch exceptions."""
-        self._data = ExceptionHandler(
-            self._data, exception_class, handler, default
+        return self._finish(
+            Stream(
+                ExceptionHandler(self._data, exception_class, handler, default)
+            )
         )
-
-        return self
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":
         """Add another iterable to the end of the Stream."""

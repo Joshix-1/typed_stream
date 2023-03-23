@@ -161,6 +161,13 @@ assert (
     == value_error.args
 )
 
+optional_float_list: list[float | None] = list(
+    Stream.range(3)
+    .map((5).__truediv__)
+    .catch(ZeroDivisionError, default=lambda: None)
+)
+assert optional_float_list == [None, 5.0, 2.5]
+
 assert (
     Stream.range(69).collect()
     == Stream.range(69).nwise(1).sum()
