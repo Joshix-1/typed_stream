@@ -6,7 +6,7 @@
 
 import inspect
 from collections.abc import Callable
-from typing import Generic, TypeVar
+from typing import Final, Generic, TypeVar
 
 __all__ = (
     "DEFAULT_VALUE",
@@ -42,7 +42,7 @@ class DefaultValueType:
     __slots__ = ()
 
 
-DEFAULT_VALUE: Final = DefaultValueType()
+DEFAULT_VALUE: Final[DefaultValueType] = DefaultValueType()
 
 
 class FunctionWrapperIgnoringArgs(Generic[T]):
