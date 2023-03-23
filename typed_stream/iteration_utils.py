@@ -162,7 +162,9 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         if default_factory is not None:
             def_fun = default_factory
             if not count_required_positional_arguments(def_fun):
-                self._default_fun = FunctionWrapperIgnoringArgs(def_fun)
+                self._default_fun = FunctionWrapperIgnoringArgs(
+                    cast(Callable[[], U], def_fun)
+                )
             else:
                 self._default_fun = cast(Callable[[Exc], U], def_fun)
         else:
