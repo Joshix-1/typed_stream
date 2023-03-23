@@ -6,7 +6,7 @@
 
 import inspect
 from collections.abc import Callable
-from typing import Final, Generic, TypeVar
+from typing import Final, Generic, NoReturn, TypeVar
 
 __all__ = (
     "DEFAULT_VALUE",
@@ -14,6 +14,7 @@ __all__ = (
     "FunctionWrapperIgnoringArgs",
     "IndexValueTuple",
     "count_required_positional_arguments",
+    "raise_exception",
 )
 
 
@@ -36,6 +37,11 @@ def count_required_positional_arguments(  # type: ignore[misc]
             if param.default == inspect.Parameter.empty
         ]
     )
+
+
+def raise_exception(exc: BaseException, /) -> NoReturn:
+    """Raise the exception."""
+    raise exc
 
 
 class DefaultValueType:
