@@ -7,7 +7,13 @@
 import inspect
 from collections.abc import Callable
 from typing import (
-    TYPE_CHECKING, Final, Generic, NoReturn, TypeVar, final, overload
+    TYPE_CHECKING,
+    Final,
+    Generic,
+    NoReturn,
+    TypeVar,
+    final,
+    overload,
 )
 
 __all__ = (
