@@ -21,6 +21,7 @@ from typing import (
     overload,
 )
 
+from ._utils import IndexValueTuple
 from .common_types import (
     PathLikeType,
     StarCallable,
@@ -45,7 +46,6 @@ from .lazy_file_iterators import (
 )
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
-from ._utils import IndexValueTuple
 
 __all__ = (
     "BinaryFileStream",
