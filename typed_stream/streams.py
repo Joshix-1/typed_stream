@@ -33,7 +33,7 @@ from .common_types import (
 )
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
-from .lazy_file_iterators import (
+from ._lazy_file_iterators import (
     LazyFileIterator,
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,

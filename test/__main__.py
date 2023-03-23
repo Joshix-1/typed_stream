@@ -31,7 +31,7 @@ from typed_stream.exceptions import (
     StreamIndexError,
 )
 from typed_stream.functions import is_even, is_odd
-from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
+from typed_stream._lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
 
 from .test_functions import (
     is_bool,
