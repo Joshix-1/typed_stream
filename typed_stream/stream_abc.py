@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator, Callable, Iterator
 from types import EllipsisType
 from typing import TYPE_CHECKING, Generic, NoReturn, TypeVar
 
-from .common_types import Closeable, PrettyRepr
+from ._types import Closeable, PrettyRepr
 from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)

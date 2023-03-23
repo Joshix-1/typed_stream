@@ -26,16 +26,16 @@ from ._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
-from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
-from ._utils import DefaultValueType as _DefaultValueType
-from ._utils import IndexValueTuple
-from .common_types import (
+from ._types import (
     PathLikeType,
     StarCallable,
     SupportsAdd,
     SupportsComparison,
     TypeGuardingCallable,
 )
+from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
+from ._utils import DefaultValueType as _DefaultValueType
+from ._utils import IndexValueTuple
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
 from .stream_abc import StreamABC

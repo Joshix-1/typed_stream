@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from .common_types import Closeable, PathLikeType, PrettyRepr
+from ._types import Closeable, PathLikeType, PrettyRepr
 
 __all__ = (
     "LazyFileIterator",
