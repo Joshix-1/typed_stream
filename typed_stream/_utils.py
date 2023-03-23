@@ -39,6 +39,8 @@ def count_required_positional_arguments(  # type: ignore[misc]
 
 
 class DefaultValueType:
+    """Class to use as default when None is a valid value."""
+
     __slots__ = ()
 
 
