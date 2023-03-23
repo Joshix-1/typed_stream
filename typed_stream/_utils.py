@@ -27,34 +27,6 @@ __all__ = (
 T = TypeVar("T")
 
 
-def count_required_positional_arguments(  # type: ignore[misc]
-    fun: Callable[..., object], /  # noqa: W504
-) -> int:
-    """Count the required positional arguments."""
-    return len(
-        [
-            param
-            for param in inspect.signature(fun).parameters.values()
-            if param.kind
-            in {
-                inspect.Parameter.POSITIONAL_ONLY,
-                inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            }
-            if param.default == inspect.Parameter.empty
-        ]
-    )
-
-
-def raise_exception(exc: BaseException, /) -> NoReturn:
-    """Raise the exception."""
-    raise exc
-
-
-def wrap_in_tuple(value: T, /) -> tuple[T]:
-    """Wrap the value in a single-element tuple."""
-    return (value,)
-
-
 class DefaultValueType:
     """Class to use as default when None is a valid value."""
 
@@ -152,3 +124,31 @@ class NotNoneChecker:
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is not None."""
         return value is not None
+
+
+def count_required_positional_arguments(  # type: ignore[misc]
+    fun: Callable[..., object], /  # noqa: W504
+) -> int:
+    """Count the required positional arguments."""
+    return len(
+        [
+            param
+            for param in inspect.signature(fun).parameters.values()
+            if param.kind
+            in {
+                inspect.Parameter.POSITIONAL_ONLY,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            }
+            if param.default == inspect.Parameter.empty
+        ]
+    )
+
+
+def raise_exception(exc: BaseException, /) -> NoReturn:
+    """Raise the exception."""
+    raise exc
+
+
+def wrap_in_tuple(value: T, /) -> tuple[T]:
+    """Wrap the value in a single-element tuple."""
+    return (value,)
