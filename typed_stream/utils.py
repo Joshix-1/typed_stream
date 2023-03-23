@@ -6,8 +6,15 @@
 
 import inspect
 from collections.abc import Callable
+from typing import Generic, TypeVar
 
-__all__ = ("count_required_positional_arguments",)
+__all__ = (
+    "FunctionWrapperIgnoringArgs",
+    "count_required_positional_arguments",
+)
+
+
+T = TypeVar("T")
 
 
 def count_required_positional_arguments(  # type: ignore[misc]
@@ -26,3 +33,19 @@ def count_required_positional_arguments(  # type: ignore[misc]
             if param.default == inspect.Parameter.empty
         ]
     )
+
+
+class FunctionWrapperIgnoringArgs(Generic[T]):
+    """Wrap a function that takes no arguments."""
+
+    _callable: Callable[[], T]
+
+    __slots__ = ("_callable",)
+
+    def __init__(self, callable: Callable[[], T]) -> None:
+        """Initalize self."""
+        self._callable = callable
+
+    def __call__(self, *_: object) -> T:
+        """Call the callable while ignoring all arguments."""
+        return self._callable()

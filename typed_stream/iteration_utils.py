@@ -24,7 +24,10 @@ __all__ = (
     "sliding_window",
 )
 
-from .utils import count_required_positional_arguments
+from .utils import (
+    FunctionWrapperIgnoringArgs,
+    count_required_positional_arguments,
+)
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -159,11 +162,7 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         if default_factory is not None:
             def_fun = default_factory
             if not count_required_positional_arguments(def_fun):
-
-                def _(_: Exc) -> U:
-                    return def_fun()  # type: ignore[call-arg]
-
-                self._default_fun = _
+                self._default_fun = FunctionWrapperIgnoringArgs(def_fun)
             else:
                 self._default_fun = cast(Callable[[Exc], U], def_fun)
         else:
