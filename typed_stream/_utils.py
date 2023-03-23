@@ -6,13 +6,18 @@
 
 import inspect
 from collections.abc import Callable
-from typing import Final, Generic, NoReturn, TypeVar
+from typing import (
+    TYPE_CHECKING, Final, Generic, NoReturn, TypeVar, final, overload
+)
 
 __all__ = (
     "DEFAULT_VALUE",
     "DefaultValueType",
     "FunctionWrapperIgnoringArgs",
     "IndexValueTuple",
+    "InstanceChecker",
+    "NoneChecker",
+    "NotNoneChecker",
     "count_required_positional_arguments",
     "raise_exception",
     "wrap_in_tuple",
@@ -89,3 +94,61 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
     def val(self: tuple[int, T]) -> T:
         """The value."""
         return self[1]
+
+
+@final
+class InstanceChecker(Generic[T]):
+    """Checks whether a value is an instance of a type."""
+
+    type_: type[T]
+
+    __slots__ = ("type_",)
+
+    def __init__(self, type_: type[T]) -> None:
+        self.type_ = type_
+
+    def __call__(self, value: object) -> TypeGuard[T]:
+        """Check whether a value has the correct type."""
+        return isinstance(value, self.type_)
+
+
+@final
+class NoneChecker:
+    """Check whether a value is None."""
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:  # pragma: no cover
+
+        @overload
+        def __call__(self, value: None) -> Literal[True]:
+            ...
+
+        @overload
+        def __call__(self, value: object | None) -> TypeGuard[None]:
+            ...
+
+    def __call__(self, value: object | None) -> bool:
+        """Return True if the value is None."""
+        return value is None
+
+
+@final
+class NotNoneChecker:
+    """Check whether a value is not None."""
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:  # pragma: no cover
+
+        @overload
+        def __call__(self, value: None) -> Literal[False]:
+            ...
+
+        @overload
+        def __call__(self, value: object) -> bool:
+            ...
+
+    def __call__(self, value: object | None) -> bool:
+        """Return True if the value is not None."""
+        return value is not None
