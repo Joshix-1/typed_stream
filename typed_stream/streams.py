@@ -34,7 +34,6 @@ from .iteration_utils import (
     Chunked,
     Enumerator,
     ExceptionHandler,
-    IndexValueTuple,
     IterWithCleanUp,
     Peeker,
     sliding_window,
@@ -46,6 +45,7 @@ from .lazy_file_iterators import (
 )
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
+from .utils import IndexValueTuple
 
 __all__ = (
     "BinaryFileStream",

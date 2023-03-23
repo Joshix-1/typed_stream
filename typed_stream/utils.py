@@ -10,6 +10,7 @@ from typing import Generic, TypeVar
 
 __all__ = (
     "FunctionWrapperIgnoringArgs",
+    "IndexValueTuple",
     "count_required_positional_arguments",
 )
 
@@ -49,3 +50,19 @@ class FunctionWrapperIgnoringArgs(Generic[T]):
     def __call__(self, *_: object) -> T:
         """Call the callable while ignoring all arguments."""
         return self._callable()
+
+
+class IndexValueTuple(tuple[int, T], Generic[T]):
+    """A tuple to hold index and value."""
+
+    __slots__ = ()
+
+    @property
+    def idx(self: tuple[int, object]) -> int:
+        """The index."""
+        return self[0]
+
+    @property
+    def val(self: tuple[int, T]) -> T:
+        """The value."""
+        return self[1]

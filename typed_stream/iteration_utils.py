@@ -18,7 +18,6 @@ __all__ = (
     "Chunked",
     "Enumerator",
     "ExceptionHandler",
-    "IndexValueTuple",
     "IterWithCleanUp",
     "Peeker",
     "sliding_window",
@@ -26,6 +25,7 @@ __all__ = (
 
 from .utils import (
     FunctionWrapperIgnoringArgs,
+    IndexValueTuple,
     count_required_positional_arguments,
 )
 
@@ -92,22 +92,6 @@ class Chunked(
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self.chunk_size
-
-
-class IndexValueTuple(tuple[int, T], Generic[T]):
-    """A tuple to hold index and value."""
-
-    __slots__ = ()
-
-    @property
-    def idx(self: tuple[int, object]) -> int:
-        """The index."""
-        return self[0]
-
-    @property
-    def val(self: tuple[int, T]) -> T:
-        """The value."""
-        return self[1]
 
 
 class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
