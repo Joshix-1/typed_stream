@@ -29,7 +29,11 @@ from ._iteration_utils import (
     Peeker,
     sliding_window,
 )
-from ._utils import IndexValueTuple
+from ._utils import (
+    IndexValueTuple,
+    DefaultValueType as _DefaultValueType,
+    DEFAULT_VALUE as _DEFAULT_VALUE,
+)
 from .common_types import (
     PathLikeType,
     StarCallable,
@@ -67,13 +71,6 @@ SC = TypeVar("SC", bound=SupportsComparison)
 
 
 add: Callable[[SA, SA], SA] = operator.add
-
-
-class _DefaultValueType:
-    __slots__ = ()
-
-
-_DEFAULT_VALUE: Final = _DefaultValueType()
 
 
 class Stream(StreamABC[T], Iterable[T]):

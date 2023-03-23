@@ -9,6 +9,8 @@ from collections.abc import Callable
 from typing import Generic, TypeVar
 
 __all__ = (
+    "DEFAULT_VALUE",
+    "DefaultValueType",
     "FunctionWrapperIgnoringArgs",
     "IndexValueTuple",
     "count_required_positional_arguments",
@@ -34,6 +36,13 @@ def count_required_positional_arguments(  # type: ignore[misc]
             if param.default == inspect.Parameter.empty
         ]
     )
+
+
+class DefaultValueType:
+    __slots__ = ()
+
+
+DEFAULT_VALUE: Final = DefaultValueType()
 
 
 class FunctionWrapperIgnoringArgs(Generic[T]):
