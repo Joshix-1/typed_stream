@@ -5,11 +5,14 @@
 """Helpful types."""
 import abc
 from abc import abstractmethod
+from collections.abc import Callable, Iterable, Iterator
 from os import PathLike
-from typing import Protocol, TypeAlias, TypeGuard, TypeVar
+from typing import Generic, Protocol, TypeAlias, TypeGuard, TypeVar
 
 __all__ = (
+    "ClassWithCleanUp",
     "Closeable",
+    "IteratorProxy",
     "PathLikeType",
     "PrettyRepr",
     "StarCallable",
@@ -23,6 +26,7 @@ __all__ = (
 PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 
 T = TypeVar("T")
+V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 
 
@@ -114,3 +118,48 @@ class PrettyRepr(abc.ABC):
     @abc.abstractmethod
     def _get_args(self) -> tuple[object, ...]:  # pragma: no cover
         """Return the args used to initializing self."""
+
+
+class ClassWithCleanUp(Closeable, PrettyRepr):
+    """A class that has a cleanup_fun and a close method."""
+
+    cleanup_fun: Callable[[], object | None] | None
+
+    __slots__ = ("cleanup_fun",)
+
+    def __init__(self, cleanup_fun: Callable[[], object | None]) -> None:
+        """Initialize this class."""
+        self.cleanup_fun = cleanup_fun
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self.cleanup_fun,)
+
+    def close(self) -> None:
+        """Run clean-up if not run yet."""
+        if self.cleanup_fun:
+            self.cleanup_fun()
+            self.cleanup_fun = None
+
+
+class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
+    """Proxy an iterator."""
+
+    _iterator: Iterator[T]
+    __slots__ = ("_iterator",)
+
+    def __init__(self, iterable: Iterable[T]) -> None:
+        """Init self."""
+        self._iterator = iter(iterable)
+
+    def __iter__(self) -> Iterator[V]:
+        """Return self."""
+        return self
+
+    @abc.abstractmethod
+    def __next__(self) -> V:
+        """Return the next element."""
+
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return (self._iterator,)

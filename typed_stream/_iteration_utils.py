@@ -3,14 +3,13 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Utility classes used in streams."""
-import abc
 import collections
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
-from ._types import Closeable, PrettyRepr
+from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
 from ._utils import wrap_in_tuple
 from .streamable import Streamable, StreamableSequence
 
@@ -34,29 +33,6 @@ U = TypeVar("U")
 V = TypeVar("V")
 
 Exc = TypeVar("Exc", bound=BaseException)
-
-
-class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
-    """Proxy an iterator."""
-
-    _iterator: Iterator[T]
-    __slots__ = ("_iterator",)
-
-    def __init__(self, iterable: Iterable[T]) -> None:
-        """Init self."""
-        self._iterator = iter(iterable)
-
-    def __iter__(self) -> Iterator[V]:
-        """Return self."""
-        return self
-
-    @abc.abstractmethod
-    def __next__(self) -> V:
-        """Return the next element."""
-
-    def _get_args(self) -> tuple[object, ...]:
-        """Return the args used to initializing self."""
-        return (self._iterator,)
 
 
 class Chunked(
@@ -251,28 +227,6 @@ class Peeker(Generic[T], PrettyRepr):
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (self.fun,)
-
-
-class ClassWithCleanUp(Closeable, PrettyRepr):
-    """A class that has a cleanup_fun and a close method."""
-
-    cleanup_fun: Callable[[], object | None] | None
-
-    __slots__ = ("cleanup_fun",)
-
-    def __init__(self, cleanup_fun: Callable[[], object | None]) -> None:
-        """Initialize this class."""
-        self.cleanup_fun = cleanup_fun
-
-    def _get_args(self) -> tuple[object, ...]:
-        """Return the args used to initializing self."""
-        return (self.cleanup_fun,)
-
-    def close(self) -> None:
-        """Run clean-up if not run yet."""
-        if self.cleanup_fun:
-            self.cleanup_fun()
-            self.cleanup_fun = None
 
 
 class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
