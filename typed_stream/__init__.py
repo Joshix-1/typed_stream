@@ -21,4 +21,7 @@ __all__ = (
     "Streamable",
     "StreamableSequence",
     "VERSION",
+    "version_info",
 )
+
+version_info: tuple[int, ...] = tuple(Stream(VERSION.split(".")).map(int))
