@@ -23,7 +23,7 @@ __all__ = (
     "sliding_window",
 )
 
-from .utils import (
+from ._utils import (
     FunctionWrapperIgnoringArgs,
     IndexValueTuple,
     count_required_positional_arguments,

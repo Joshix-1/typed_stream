@@ -45,7 +45,7 @@ from .lazy_file_iterators import (
 )
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
-from .utils import IndexValueTuple
+from ._utils import IndexValueTuple
 
 __all__ = (
     "BinaryFileStream",

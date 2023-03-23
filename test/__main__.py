@@ -27,7 +27,7 @@ from typed_stream.exceptions import (
 from typed_stream.functions import is_even, is_odd
 from typed_stream.iteration_utils import IterWithCleanUp, Peeker, sliding_window
 from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
-from typed_stream.utils import IndexValueTuple
+from typed_stream._utils import IndexValueTuple
 
 from .test_functions import (
     is_bool,

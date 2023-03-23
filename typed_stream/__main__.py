@@ -10,7 +10,7 @@ import sys
 from collections.abc import Callable
 
 from . import Stream, functions
-from .utils import count_required_positional_arguments
+from ._utils import count_required_positional_arguments
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
