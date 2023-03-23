@@ -21,6 +21,11 @@ from ._iteration_utils import (
     Peeker,
     sliding_window,
 )
+from ._lazy_file_iterators import (
+    LazyFileIterator,
+    LazyFileIteratorRemovingEndsBytes,
+    LazyFileIteratorRemovingEndsStr,
+)
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
 from ._utils import IndexValueTuple
@@ -33,11 +38,6 @@ from .common_types import (
 )
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
-from ._lazy_file_iterators import (
-    LazyFileIterator,
-    LazyFileIteratorRemovingEndsBytes,
-    LazyFileIteratorRemovingEndsStr,
-)
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
