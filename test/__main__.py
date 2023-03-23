@@ -26,7 +26,7 @@ from typed_stream.exceptions import (
     StreamIndexError,
 )
 from typed_stream.functions import is_even, is_odd
-from typed_stream.iteration_utils import IterWithCleanUp, Peeker, sliding_window
+from typed_stream._iteration_utils import IterWithCleanUp, Peeker, sliding_window
 from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
 
 from .test_functions import (
@@ -286,13 +286,13 @@ assert (
 )
 assert (
     repr(iter(Stream.from_value(69)))
-    == "typed_stream.iteration_utils.IterWithCleanUp"
+    == "typed_stream._iteration_utils.IterWithCleanUp"
     + "(<bound method StreamABC.close of typed_stream.streams.Stream"
     + "(repeat(69))>,repeat(69))"
 )
 assert (
     repr(Peeker(print))
-    == "typed_stream.iteration_utils.Peeker(<built-in function print>)"
+    == "typed_stream._iteration_utils.Peeker(<built-in function print>)"
 )
 
 

@@ -31,7 +31,7 @@ from .common_types import (
 )
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
-from .iteration_utils import (
+from ._iteration_utils import (
     Chunked,
     Enumerator,
     ExceptionHandler,
