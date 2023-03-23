@@ -42,9 +42,9 @@ class FunctionWrapperIgnoringArgs(Generic[T]):
 
     __slots__ = ("_callable",)
 
-    def __init__(self, callable: Callable[[], T]) -> None:
+    def __init__(self, fun: Callable[[], T], /) -> None:
         """Set the callable as attribute of self."""
-        self._callable = callable
+        self._callable = fun
 
     def __call__(self, *_: object) -> T:
         """Call the callable while ignoring all arguments."""
