@@ -80,16 +80,17 @@ class IndexValueTuple(tuple[int, T], Generic[T]):
 class InstanceChecker(Generic[T]):
     """Checks whether a value is an instance of a type."""
 
-    type_: type[T]
+    _type: type[T]
 
-    __slots__ = ("type_",)
+    __slots__ = ("_type",)
 
     def __init__(self, type_: type[T]) -> None:
-        self.type_ = type_
+        """Set the type that gets checked."""
+        self._type = type_
 
     def __call__(self, value: object) -> TypeGuard[T]:
         """Check whether a value has the correct type."""
-        return isinstance(value, self.type_)
+        return isinstance(value, self._type)
 
 
 @final
