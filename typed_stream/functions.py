@@ -34,7 +34,6 @@ __all__ = (
     "is_truthy",
     "noop",
     "one",
-    "wrap_in_tuple",
 )
 
 T = TypeVar("T")
@@ -161,8 +160,3 @@ class NoneChecker:
 
 is_none: NoneChecker = NoneChecker()
 """Check whether a value is None."""
-
-
-def wrap_in_tuple(value: T, /) -> tuple[T]:
-    """Wrap the value in a single-element tuple."""
-    return (value,)

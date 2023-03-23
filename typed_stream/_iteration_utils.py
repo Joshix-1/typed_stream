@@ -11,7 +11,7 @@ from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
 from ._types import Closeable, PrettyRepr
-from .functions import wrap_in_tuple
+from ._utils import wrap_in_tuple
 from .streamable import Streamable, StreamableSequence
 
 __all__ = (

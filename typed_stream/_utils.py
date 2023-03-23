@@ -15,6 +15,7 @@ __all__ = (
     "IndexValueTuple",
     "count_required_positional_arguments",
     "raise_exception",
+    "wrap_in_tuple",
 )
 
 
@@ -42,6 +43,11 @@ def count_required_positional_arguments(  # type: ignore[misc]
 def raise_exception(exc: BaseException, /) -> NoReturn:
     """Raise the exception."""
     raise exc
+
+
+def wrap_in_tuple(value: T, /) -> tuple[T]:
+    """Wrap the value in a single-element tuple."""
+    return (value,)
 
 
 class DefaultValueType:
