@@ -25,11 +25,7 @@ from typed_stream.exceptions import (
     StreamIndexError,
 )
 from typed_stream.functions import is_even, is_odd
-from typed_stream.iteration_utils import (
-    IterWithCleanUp,
-    Peeker,
-    sliding_window,
-)
+from typed_stream.iteration_utils import IterWithCleanUp, Peeker, sliding_window
 from typed_stream.lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
 from typed_stream.utils import IndexValueTuple
 
