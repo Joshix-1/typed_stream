@@ -11,6 +11,7 @@ from typing import (
     Final,
     Generic,
     NoReturn,
+    TypeGuard,
     TypeVar,
     final,
     overload,
