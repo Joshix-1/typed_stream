@@ -11,15 +11,7 @@ import operator
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
-from typing import (
-    TYPE_CHECKING,
-    AnyStr,
-    Final,
-    Literal,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, Union, overload
 
 from ._iteration_utils import (
     Chunked,
@@ -29,11 +21,9 @@ from ._iteration_utils import (
     Peeker,
     sliding_window,
 )
-from ._utils import (
-    IndexValueTuple,
-    DefaultValueType as _DefaultValueType,
-    DEFAULT_VALUE as _DEFAULT_VALUE,
-)
+from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
+from ._utils import DefaultValueType as _DefaultValueType
+from ._utils import IndexValueTuple
 from .common_types import (
     PathLikeType,
     StarCallable,
