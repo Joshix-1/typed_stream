@@ -35,9 +35,9 @@ from ._types import (
 )
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
-from ._utils import IndexValueTuple
+from ._utils import IndexValueTuple, InstanceChecker, NoneChecker, NotNoneChecker
 from .exceptions import StreamEmptyError, StreamIndexError
-from .functions import InstanceChecker, NoneChecker, NotNoneChecker, noop, one
+from .functions import noop, one
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 

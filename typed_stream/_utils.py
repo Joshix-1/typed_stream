@@ -10,6 +10,7 @@ from typing import (
     TYPE_CHECKING,
     Final,
     Generic,
+    Literal,
     NoReturn,
     TypeGuard,
     TypeVar,
