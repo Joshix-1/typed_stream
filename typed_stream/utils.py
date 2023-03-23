@@ -2,7 +2,7 @@
 # You may obtain a copy of the licence in all the official languages of the
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
-"""General utility functions."""
+"""General utility classes and functions."""
 
 import inspect
 from collections.abc import Callable
@@ -43,7 +43,7 @@ class FunctionWrapperIgnoringArgs(Generic[T]):
     __slots__ = ("_callable",)
 
     def __init__(self, callable: Callable[[], T]) -> None:
-        """Initalize self."""
+        """Set the callable as attribute of self."""
         self._callable = callable
 
     def __call__(self, *_: object) -> T:
