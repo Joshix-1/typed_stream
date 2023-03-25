@@ -80,6 +80,25 @@ assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum() == 45
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
 
+assert Stream.range(10).conditional_map(
+    is_even, lambda x: x, lambda x: -x
+).collect() == (0, -1, 2, -3, 4, -5, 6, -7, 8, -9)
+assert Stream.range(10).conditional_map(
+    is_even, lambda x: x * 2, lambda x: -x
+).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
+assert Stream.range(10).conditional_map(
+    is_odd, lambda x: -x, lambda x: x * 2
+).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
+assert Stream.range(10).conditional_map(
+    is_even, lambda _: ..., lambda x: None
+).collect() == (..., None) * 5
+assert Stream.range(10).conditional_map(
+    is_odd, lambda x: -x
+).collect() == (-1, -3, -5, -7, -9)
+assert Stream.range(10).conditional_map(
+    is_even, lambda _: ...
+).collect() == (...,) * 5
+
 
 def raise_exceptions(number: int) -> int:
     """Raise different exceptions."""
@@ -660,6 +679,8 @@ for name in dir(Stream(...)):  # noqa: C901
             args = (lambda: ...,)
         elif name == "catch":
             args = (Exception,)
+        elif name == "conditional_map":
+            args = (lambda _: ..., lambda _: ..., lambda _: ...)
         else:
             args = ()
         assert_raises(StreamFinishedError, partial(method, *args))

@@ -17,6 +17,7 @@ from ._iteration_utils import (
     Chunked,
     Enumerator,
     ExceptionHandler,
+    IfElseMap,
     IterWithCleanUp,
     Peeker,
     sliding_window,
@@ -399,6 +400,17 @@ class Stream(StreamABC[T], Iterable[T]):
             max_workers=max_workers
         ) as executor:
             return self._finish(Stream(executor.map(fun, self._data)))
+
+    def conditional_map(
+        self,
+        condition: Callable[[T], object],
+        if_true: Callable[[T], U],
+        if_false: Callable[[T], V] | None = None,
+    ) -> "Stream[U | V]":
+        """Map values conditionally."""
+        return self._finish(
+            Stream(IfElseMap(self._data, condition, if_true, if_false))
+        )
 
     def count(self) -> int:
         """Count the elements in this Stream. This finishes the Stream.

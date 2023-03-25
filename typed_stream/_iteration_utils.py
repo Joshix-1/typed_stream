@@ -160,7 +160,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
     """Map combined with conditions."""
 
     _condition: Callable[[T], bool | object]
-    _if_fun: Callable[[T], U] | None
+    _if_fun: Callable[[T], U]
     _else_fun: Callable[[T], V] | None
 
     __slots__ = ("_condition", "_if_fun", "_else_fun")
@@ -169,7 +169,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
         self,
         iterable: Iterable[T],
         condition: Callable[[T], bool | object],
-        if_: Callable[[T], U] | None,
+        if_: Callable[[T], U],
         else_: Callable[[T], V] | None = None,
     ) -> None:
         """Map values depending on a condition.
@@ -180,9 +180,6 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
 
         - filter(callable, iterable)
         - IfElseMap(iterable, callable, lambda _: _, None)
-
-        - itertools.filterfalse(callable, iterable)
-        - IfElseMap(iterable, callable, None, lambda _: _)
         """
         super().__init__(iterable)
         self._condition = condition
@@ -193,10 +190,13 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
 
     def __next__(self: "IfElseMap[T, U, V]") -> U | V:
         """Return the next value."""
-        value: T = next(self._iterator)
-        if self._condition(value):
-            return self._if_fun(value) if self._if_fun else next(self)
-        return self._else_fun(value) if self._else_fun else next(self)
+        while True:  # pylint: disable=while-used
+            value: T = next(self._iterator)
+            if self._condition(value):
+                return self._if_fun(value)
+            if self._else_fun:
+                return self._else_fun(value)
+            # just return the next element
 
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
