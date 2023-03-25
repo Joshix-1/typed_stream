@@ -89,15 +89,23 @@ assert Stream.range(10).conditional_map(
 assert Stream.range(10).conditional_map(
     is_odd, lambda x: -x, lambda x: x * 2
 ).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
-assert Stream.range(10).conditional_map(
-    is_even, lambda _: ..., lambda x: None
-).collect() == (..., None) * 5
-assert Stream.range(10).conditional_map(
-    is_odd, lambda x: -x
-).collect() == (-1, -3, -5, -7, -9)
-assert Stream.range(10).conditional_map(
-    is_even, lambda _: ...
-).collect() == (...,) * 5
+assert (
+    Stream.range(10)
+    .conditional_map(is_even, lambda _: ..., lambda x: None)
+    .collect()
+    == (..., None) * 5
+)
+assert Stream.range(10).conditional_map(is_odd, lambda x: -x).collect() == (
+    -1,
+    -3,
+    -5,
+    -7,
+    -9,
+)
+assert (
+    Stream.range(10).conditional_map(is_even, lambda _: ...).collect()
+    == (...,) * 5
+)
 
 
 def raise_exceptions(number: int) -> int:
