@@ -4,7 +4,6 @@
 
 """ABC for Java-like typed Stream classes for easier handling of generators."""
 import abc
-import contextlib
 import sys
 from collections.abc import AsyncIterator, Callable, Iterator
 from types import EllipsisType
@@ -61,10 +60,10 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         if self._close_source_callable:
             if close_source:
                 self._close_source_callable()
-                self._close_source_callable = None
             elif isinstance(ret, StreamABC):
                 # pylint: disable=protected-access
                 ret._close_source_callable = self._close_source_callable
+            self._close_source_callable = None
         self.__data = None
         return ret
 
@@ -77,10 +76,9 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     def close(self) -> None:
         """Close this stream cleanly."""
-        with contextlib.suppress(StreamFinishedError):
-            self._finish(None, close_source=True)
+        self._finish(None, close_source=True)
 
-    def distinct(self, use_set: bool = True) -> "Self":
+    def distinct(self, *, use_set: bool = True) -> "Self":
         """Remove duplicate values.
 
         Example:
