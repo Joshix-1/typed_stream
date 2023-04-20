@@ -47,7 +47,6 @@ from .functions import noop, one
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
-
 # pylint: disable=too-many-lines
 __all__ = (
     "BinaryFileStream",
