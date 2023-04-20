@@ -17,6 +17,7 @@ __all__ = (
     "Chunked",
     "Enumerator",
     "ExceptionHandler",
+    "IfElseMap",
     "IterWithCleanUp",
     "Peeker",
     "sliding_window",

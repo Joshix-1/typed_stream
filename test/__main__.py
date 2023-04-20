@@ -3,6 +3,8 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """The tests for the Stream."""
+import doctest
+import importlib
 import operator
 import pickle
 import sys
@@ -46,6 +48,23 @@ from .test_functions import (
     noop,
 )
 
+
+def run_doc_tests() -> None:
+    """Run the doctests in the typed_stream package."""
+    dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
+    for path in dir_.rglob("*.py"):
+        if path.name == "__main__.py":
+            continue
+        mod = (
+            path.relative_to(dir_)
+            .as_posix()
+            .replace("/", ".")
+            .removesuffix(".py")
+        )
+        doctest.testmod(importlib.import_module(f"typed_stream.{mod}"))
+
+
+run_doc_tests()
 # pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
 
 

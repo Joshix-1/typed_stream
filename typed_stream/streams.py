@@ -47,6 +47,8 @@ from .functions import noop, one
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
+
+# pylint: disable=too-many-lines
 __all__ = (
     "BinaryFileStream",
     "FileStream",
@@ -95,7 +97,13 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     def __contains__(self, value: T, /) -> bool:
-        """Check whether this stream contains the given value."""
+        """Check whether this stream contains the given value.
+
+        >>> 2 in Stream((1, 2, 3))
+        True
+        >>> 4 in Stream((1, 2, 3))
+        False
+        """
         for element in self._data:
             if element == value:
                 return self._finish(True, close_source=True)
@@ -112,7 +120,13 @@ class Stream(StreamABC[T], Iterable[T]):
             """Nobody inspects the spammish repetition."""
 
     def __getitem__(self, item: slice | int, /) -> StreamableSequence[T] | T:
-        """Finish the stream by collecting."""
+        """Finish the stream by collecting.
+
+        >>> Stream((1, 2, 3))[1]
+        2
+        >>> Stream((1, 2, 3))[1:3]
+        (2, 3)
+        """
         if isinstance(item, int):
             return self.nth(item)
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
@@ -127,6 +141,11 @@ class Stream(StreamABC[T], Iterable[T]):
         This finishes the Stream and collects all the element.
 
         Equivalent to reversed(self.collect()).
+
+        >>> tuple(reversed(Stream((1, 2, 3))))
+        (3, 2, 1)
+        >>> "".join(reversed(Stream("abc")))
+        'cba'
         """
         return reversed(self.collect())  # pylint: disable=bad-reversed-sequence
 
@@ -162,12 +181,22 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> "Stream[int]":
-        """Create an endless counting Stream."""
+        """Create an endless counting Stream.
+
+        >>> Stream.counting().limit(5).collect()
+        (0, 1, 2, 3, 4)
+        >>> Stream.counting(5, 2).limit(5).collect()
+        (5, 7, 9, 11, 13)
+        """
         return Stream(itertools.count(start, step))
 
     @staticmethod
     def from_value(value: K) -> "Stream[K]":
-        """Create an endless Stream of the same value."""
+        """Create an endless Stream of the same value.
+
+        >>> Stream.from_value(1).limit(5).collect()
+        (1, 1, 1, 1, 1)
+        """
         return Stream(itertools.repeat(value))
 
     if (  # pylint: disable=too-complex  # noqa: C901
@@ -231,6 +260,13 @@ class Stream(StreamABC[T], Iterable[T]):
         The arguments behave like to the built-in range function:
         - Stream.range(stop) -> Stream[int]
         - Stream.range(start, stop[, step]) -> Stream[int]
+
+        >>> Stream.range(5).collect() == Stream(range(5)).collect()
+        True
+        >>> Stream.range(1, 13).collect() == Stream(range(1, 13)).collect()
+        True
+        >>> Stream.range(1, 9, 2).collect() == Stream(range(1, 9, 2)).collect()
+        True
         """
         # pylint: disable=confusing-consecutive-elif
         if not isinstance(start, _DefaultValueType):
@@ -255,7 +291,13 @@ class Stream(StreamABC[T], Iterable[T]):
         raise TypeError("Unexpected arguments to Stream.range()")
 
     def all(self) -> bool:
-        """Check whether all values are Truthy. This finishes the Stream."""
+        """Check whether all values are Truthy. This finishes the Stream.
+
+        >>> Stream([1, 2, 3]).all()
+        True
+        >>> Stream([1, 0, 3]).all()
+        False
+        """
         return self._finish(all(self._data), close_source=True)
 
     if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
@@ -298,7 +340,14 @@ class Stream(StreamABC[T], Iterable[T]):
         handler: Callable[[Exc], object] | None = None,
         default: Callable[[Exc], K] | Callable[[], K] | None = None,
     ) -> "Stream[T | K]":
-        """Catch exceptions."""
+        """Catch exceptions.
+
+        >>> Stream("12a").map(int).catch(ValueError, handler=print).collect()
+        invalid literal for int() with base 10: 'a'
+        (1, 2)
+        >>> Stream("12a").map(int).catch(ValueError, default=lambda _:_).collect()
+        (1, 2, ValueError("invalid literal for int() with base 10: 'a'"))
+        """
         return self._finish(
             Stream(
                 ExceptionHandler(self._data, exception_class, handler, default)
@@ -306,12 +355,22 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     def chain(self, iterable: Iterable[T]) -> "Stream[T]":
-        """Add another iterable to the end of the Stream."""
+        """Add another iterable to the end of the Stream.
+
+        >>> Stream([1, 2, 3]).chain([4, 5, 6]).collect()
+        (1, 2, 3, 4, 5, 6)
+        """
         self._data = itertools.chain(self._data, iterable)
         return self
 
     def chunk(self, size: int) -> "Stream[StreamableSequence[T]]":
-        """Split stream into chunks of the specified size."""
+        """Split stream into chunks of the specified size.
+
+        >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
+        ((1, 2), (3, 4), (5, 6))
+        >>> Stream([1, 2, 3, 4, 5, 6]).chunk(3).collect()
+        ((1, 2, 3), (4, 5, 6))
+        """
         return self._finish(Chunked(self._data, size).stream())
 
     if (  # noqa: C901  # pylint: disable=too-complex
@@ -383,9 +442,14 @@ class Stream(StreamABC[T], Iterable[T]):
     ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
 
-        Examples:
-            - Stream([1, 2, 3]).collect(tuple)
-            - Stream([1, 2, 3]).collect(sum)
+        >>> Stream([1, 2, 3]).collect(list)
+        [1, 2, 3]
+        >>> Stream([1, 2, 3]).collect(sum)
+        6
+        >>> Stream([1, 2, 3]).collect(dict.fromkeys)
+        {1: None, 2: None, 3: None}
+        >>> Stream([(1, 2), (3, 4)]).collect(dict)
+        {1: 2, 3: 4}
         """
         return self._finish(fun(self._data), close_source=True)
 
@@ -395,6 +459,9 @@ class Stream(StreamABC[T], Iterable[T]):
         """Map values concurrently.
 
         See: https://docs.python.org/3/library/concurrent.futures.html
+
+        >>> Stream("123").concurrent_map(int).collect()
+        (1, 2, 3)
         """
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=max_workers
@@ -416,11 +483,20 @@ class Stream(StreamABC[T], Iterable[T]):
         """Count the elements in this Stream. This finishes the Stream.
 
         Equivalent to: Stream(...).map(lambda x: 1).sum()
+
+        >>> Stream([1, 2, 3]).count()
+        3
+        >>> Stream("abcdef").count()
+        6
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
 
     def drop(self, count: int) -> "Stream[T]":
-        """Drop the first count values."""
+        """Drop the first count values.
+
+        >>> Stream([1, 2, 3, 4, 5]).drop(2).collect()
+        (3, 4, 5)
+        """
         self._data = itertools.islice(self._data, count, None)
         return self
 
@@ -428,12 +504,21 @@ class Stream(StreamABC[T], Iterable[T]):
         """Drop values as long as the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
+
+        >>> Stream([1, 2, 3, 4, 5]).drop_while(lambda x: x < 3).collect()
+        (3, 4, 5)
         """
         self._data = itertools.dropwhile(fun, self._data)
         return self
 
     def empty(self) -> bool:
-        """Check whether this doesn't contain any value. This finishes the Stream."""
+        """Check whether this doesn't contain any value. This finishes the Stream.
+
+        >>> Stream([1, 2, 3]).empty()
+        False
+        >>> Stream([]).empty()
+        True
+        """
         try:
             self.first()
         except StreamEmptyError:
@@ -443,7 +528,13 @@ class Stream(StreamABC[T], Iterable[T]):
     def enumerate(
         self: "Stream[T]", start_index: int = 0
     ) -> "Stream[IndexValueTuple[T]]":
-        """Map the values to a tuple of index and value."""
+        """Map the values to a tuple of index and value.
+
+        >>> Stream([1, 2, 3]).enumerate().collect()
+        ((0, 1), (1, 2), (2, 3))
+        >>> Stream("abc").enumerate().collect()
+        ((0, 'a'), (1, 'b'), (2, 'c'))
+        """
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
     if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
@@ -480,6 +571,9 @@ class Stream(StreamABC[T], Iterable[T]):
         """Exclude values if the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
+
+        >>> Stream([1, 2, 3, 4, 5]).exclude(lambda x: x % 2).collect()
+        (2, 4)
         """
         self._data = itertools.filterfalse(fun, self._data)
         return self
@@ -517,12 +611,26 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     def filter(self, fun: Callable[[T], object] | None = None) -> object:
-        """Use built-in filter to filter values."""
+        """Use built-in filter to filter values.
+
+        >>> Stream([1, 2, 3, 4, 5]).filter(lambda x: x % 2).collect()
+        (1, 3, 5)
+        """
         self._data = filter(fun, self._data)
         return self
 
     def first(self) -> T:
-        """Return the first element of the Stream. This finishes the Stream."""
+        """Return the first element of the Stream. This finishes the Stream.
+
+        >>> Stream([1, 2, 3]).first()
+        1
+        >>> Stream("abc").first()
+        'a'
+        >>> Stream([]).first()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
+        """
         try:
             first = next(self._data)
         except StopIteration:
@@ -590,9 +698,10 @@ class Stream(StreamABC[T], Iterable[T]):
 
         This lazily finishes the current Stream and creates a new one.
 
-        Example:
-            - Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2])
-            - Stream(["abc", "def"]).flat_map(str.encode, "ASCII")
+        >>> Stream([1, 4, 7]).flat_map(lambda x: [x, x + 1, x + 2]).collect()
+        (1, 2, 3, 4, 5, 6, 7, 8, 9)
+        >>> Stream(["abc", "def"]).flat_map(str.encode, "ASCII").collect()
+        (97, 98, 99, 100, 101, 102)
         """
         return Stream(
             itertools.chain.from_iterable(
@@ -601,7 +710,13 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     def for_each(self, fun: Callable[[T], object] = noop) -> None:
-        """Consume all the values of the Stream with the callable."""
+        """Consume all the values of the Stream with the callable.
+
+        >>> Stream([1, 2, 3]).for_each(print)
+        1
+        2
+        3
+        """
         for value in self._data:
             fun(value)
         self._finish(None, close_source=True)
@@ -610,6 +725,13 @@ class Stream(StreamABC[T], Iterable[T]):
         """Return the last element of the Stream. This finishes the Stream.
 
         raises StreamEmptyError if stream is empty.
+
+        >>> Stream([1, 2, 3]).last()
+        3
+        >>> Stream([]).last()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
         """
         if tail := self.tail(1):
             return tail[-1]
@@ -618,8 +740,8 @@ class Stream(StreamABC[T], Iterable[T]):
     def limit(self, count: int) -> "Stream[T]":
         """Stop the Stream after count values.
 
-        Example:
-            - Stream([1, 2, 3, 4, 5]).limit(3)
+        >>> Stream([1, 2, 3, 4, 5]).limit(3).collect()
+        (1, 2, 3)
         """
         self._data = itertools.islice(self._data, count)
         return self
@@ -677,9 +799,10 @@ class Stream(StreamABC[T], Iterable[T]):
 
         This lazily finishes the current Stream and creates a new one.
 
-        Example:
-            - Stream([1, 2, 3]).map(lambda x: x * 3)
-            - Stream([1, 2, 3]).map(operator.mul, 3)
+        >>> Stream([1, 2, 3]).map(lambda x: x * 3).collect()
+        (3, 6, 9)
+        >>> Stream([1, 2, 3]).map(operator.mul, 3).collect()
+        (3, 6, 9)
         """
         return self._finish(
             Stream(
@@ -688,11 +811,23 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     def max(self: "Stream[SC]") -> SC:
-        """Return the biggest element of the stream."""
+        """Return the biggest element of the stream.
+
+        >>> Stream([1, 2, 3]).max()
+        3
+        >>> Stream(["a", "b", "c"]).max()
+        'c'
+        """
         return self._finish(max(self._data), close_source=True)
 
     def min(self: "Stream[SC]") -> SC:
-        """Return the smallest element of the stream."""
+        """Return the smallest element of the stream.
+
+        >>> Stream([1, 2, 3]).min()
+        1
+        >>> Stream(["a", "b", "c"]).min()
+        'a'
+        """
         return self._finish(min(self._data), close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover
@@ -720,6 +855,11 @@ class Stream(StreamABC[T], Iterable[T]):
         does not have an item at the given index.
 
         Stream(...).nth(0) gets the first element of the stream.
+
+        >>> Stream([1, 2, 3]).nth(0)
+        1
+        >>> Stream("abc").nth(1)
+        'b'
         """
         value: T | _DefaultValueType
         if index < 0:
@@ -767,14 +907,27 @@ class Stream(StreamABC[T], Iterable[T]):
 
         The returned Stream will consist of tuples of length n.
         If n is bigger than the count of values in self, it will be empty.
+
+        >>> Stream([1, 2, 3]).nwise(1).collect()
+        ((1,), (2,), (3,))
+        >>> Stream([1, 2, 3]).nwise(2).collect()
+        ((1, 2), (2, 3))
+        >>> Stream([1, 2, 3, 4]).nwise(3).collect()
+        ((1, 2, 3), (2, 3, 4))
+        >>> Stream([1, 2, 3, 4, 5]).nwise(4).collect()
+        ((1, 2, 3, 4), (2, 3, 4, 5))
         """
         return self._finish(Stream(sliding_window(self._data, size)))
 
     def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
         """Peek at every value, without modifying the values in the Stream.
 
-        Example:
-            - Stream([1, 2, 3]).peek(print)
+        >>> stream = Stream([1, 2, 3]).peek(print)
+        >>> stream.map(str).collect()
+        1
+        2
+        3
+        ('1', '2', '3')
         """
         self._data = map(Peeker(fun), self._data)
         return self
@@ -789,9 +942,14 @@ class Stream(StreamABC[T], Iterable[T]):
         If no initial value is provided a StreamEmptyError is raised if
         the stream is empty.
 
-        Examples:
-            - Stream([1, 2, 3]).accumulate(operator.add)
-            - Stream([1, 2, 3]).accumulate(operator.mul)
+        >>> Stream([1, 2, 3]).reduce(operator.add)
+        6
+        >>> Stream([1, 2, 3]).reduce(operator.mul)
+        6
+        >>> Stream([]).reduce(operator.mul)
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
         """
         if isinstance(initial, _DefaultValueType):
             try:
@@ -801,7 +959,13 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._finish(functools.reduce(fun, self._data, initial), True)
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
-        """Collect the values of this Stream. This finishes the Stream."""
+        """Collect the values of this Stream. This finishes the Stream.
+
+        >>> Stream([1, 2, 3]).starcollect(lambda *args: args)
+        (1, 2, 3)
+        >>> Stream([]).starcollect(lambda *args: args)
+        ()
+        """
         return self._finish(fun(*self._data), close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
@@ -873,8 +1037,10 @@ class Stream(StreamABC[T], Iterable[T]):
 
         This lazily finishes the current Stream and creates a new one.
 
-        Example:
-            - Stream([(1, 2), (3, 4)]).starmap(operator.mul)
+        >>> Stream([(1, 2), (3, 4)]).starmap(operator.mul).collect()
+        (2, 12)
+        >>> Stream([(2, "x"), (3, "y")]).starmap(operator.mul).collect()
+        ('xx', 'yyy')
         """
         return self._finish(Stream(itertools.starmap(fun, self._data)))
 
@@ -887,11 +1053,26 @@ class Stream(StreamABC[T], Iterable[T]):
         For strings stream.collect("".join) could be faster.
         For lists stream.flat_map(lambda _: _).collect(list) could be faster.
         For tuples stream.flat_map(lambda _: _).collect(tuple) could be faster.
+
+        >>> Stream([1, 2, 3]).sum()
+        6
+        >>> Stream(["a", "b", "c"]).sum()
+        'abc'
+        >>> Stream([(1, 2), (3, 4)]).sum()
+        (1, 2, 3, 4)
+        >>> Stream(([1], [2], [3])).sum()
+        [1, 2, 3]
         """
         return self.reduce(add)
 
     def tail(self, count: int, /) -> StreamableSequence[T]:
-        """Return a Sequence with the last count items."""
+        """Return a Sequence with the last count items.
+
+        >>> Stream([1, 2, 3]).tail(2)
+        (2, 3)
+        >>> Stream.range(100).tail(10)
+        (90, 91, 92, 93, 94, 95, 96, 97, 98, 99)
+        """
         return self._finish(
             StreamableSequence(collections.deque(self._data, maxlen=count)),
             close_source=True,
@@ -901,6 +1082,11 @@ class Stream(StreamABC[T], Iterable[T]):
         """Take values as long the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
+
+        >>> Stream([1, 2, 3, 4, 1]).take_while(lambda x: x < 4).collect()
+        (1, 2, 3)
+        >>> Stream([1, 2, 3, 4, 1]).take_while(lambda x: x < 0).collect()
+        ()
         """
         self._data = itertools.takewhile(fun, self._data)
         return self
