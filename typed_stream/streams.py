@@ -809,25 +809,47 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
-    def max(self: "Stream[SC]") -> SC:
+    def max(
+        self: "Stream[SC]", default: SC | _DefaultValueType = _DEFAULT_VALUE
+    ) -> SC:
         """Return the biggest element of the stream.
 
-        >>> Stream([1, 2, 3]).max()
+        >>> Stream([3, 2, 1]).max()
         3
         >>> Stream(["a", "b", "c"]).max()
         'c'
+        >>> Stream([]).max(default=0)
+        0
+        >>> Stream([]).max()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
         """
-        return self._finish(max(self._data), close_source=True)
+        max_ = max(self._data, default=default)
+        if isinstance(max_, _DefaultValueType):
+            raise StreamEmptyError() from None
+        return self._finish(max_, close_source=True)
 
-    def min(self: "Stream[SC]") -> SC:
+    def min(
+        self: "Stream[SC]", default: SC | _DefaultValueType = _DEFAULT_VALUE
+    ) -> SC:
         """Return the smallest element of the stream.
 
         >>> Stream([1, 2, 3]).min()
         1
         >>> Stream(["a", "b", "c"]).min()
         'a'
+        >>> Stream([]).min(default=0)
+        0
+        >>> Stream([]).min()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
         """
-        return self._finish(min(self._data), close_source=True)
+        min_ = min(self._data, default=default)
+        if isinstance(min_, _DefaultValueType):
+            raise StreamEmptyError() from None
+        return self._finish(min_, close_source=True)
 
     if TYPE_CHECKING:  # pragma: no cover
 
