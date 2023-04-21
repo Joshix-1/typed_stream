@@ -81,8 +81,15 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     def distinct(self, *, use_set: bool = True) -> "Self":
         """Remove duplicate values.
 
-        Example:
-            - Stream([1, 2, 2, 2, 3]).distinct()
+        >>> from typed_stream import Stream
+        >>> Stream([1, 2, 2, 2, 3, 2, 2]).distinct().collect()
+        (1, 2, 3)
+        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct().collect()
+        Traceback (most recent call last):
+        ...
+        TypeError: unhashable type: 'set'
+        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct(use_set=False).collect()
+        ({1}, {2}, {3})
         """
         encountered: set[T] | list[T]
         peek_fun: Callable[[T], None]

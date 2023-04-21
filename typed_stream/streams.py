@@ -102,6 +102,11 @@ class Stream(StreamABC[T], Iterable[T]):
         True
         >>> 4 in Stream((1, 2, 3))
         False
+        >>> 3 in Stream((1, 2, 3, 4, 5, 6, 7, 8)).peek(print)
+        1
+        2
+        3
+        True
         """
         for element in self._data:
             if element == value:
@@ -131,7 +136,14 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
 
     def __iter__(self) -> IterWithCleanUp[T]:
-        """Iterate over the values of this Stream. This finishes the Stream."""
+        """Iterate over the values of this Stream. This finishes the Stream.
+
+        >>> for value in Stream((1, 2, 3)):
+        ...     print(value)
+        1
+        2
+        3
+        """
         return IterWithCleanUp(self._data, self.close)
 
     def __reversed__(self) -> Iterator[T]:
@@ -266,6 +278,8 @@ class Stream(StreamABC[T], Iterable[T]):
         True
         >>> Stream.range(1, 9, 2).collect() == Stream(range(1, 9, 2)).collect()
         True
+        >>> Stream.range(start=1, stop=7, step=2).collect()
+        (1, 3, 5)
         """
         # pylint: disable=confusing-consecutive-elif
         if not isinstance(start, _DefaultValueType):
@@ -292,10 +306,20 @@ class Stream(StreamABC[T], Iterable[T]):
     def all(self) -> bool:
         """Check whether all values are Truthy. This finishes the Stream.
 
-        >>> Stream([1, 2, 3]).all()
+        Returns False if there is any false value in the Stream.
+
+        >>> Stream([1, 2, 3]).peek(print).all()
+        1
+        2
+        3
         True
-        >>> Stream([1, 0, 3]).all()
+        >>> Stream([1, 2, 0, 4, 5, 6, 7, 8]).peek(print).all()
+        1
+        2
+        0
         False
+        >>> Stream([]).all()
+        True
         """
         return self._finish(all(self._data), close_source=True)
 
@@ -340,12 +364,16 @@ class Stream(StreamABC[T], Iterable[T]):
         default: Callable[[Exc], K] | Callable[[], K] | None = None,
     ) -> "Stream[T | K]":
         """Catch exceptions.
-
-        >>> Stream("12a").map(int).catch(ValueError, handler=print).collect()
+        >>> Stream("1a2").map(int).catch(ValueError, handler=print).collect()
         invalid literal for int() with base 10: 'a'
         (1, 2)
-        >>> Stream("12a").map(int).catch(ValueError, default=lambda _:_).collect()
-        (1, 2, ValueError("invalid literal for int() with base 10: 'a'"))
+        >>> Stream("1a2").map(int).catch(ValueError, default=lambda _:_).collect()
+        (1, ValueError("invalid literal for int() with base 10: 'a'"), 2)
+        >>> Stream("1a2").map(int).peek(print).catch(ValueError, handler=print).collect()
+        1
+        invalid literal for int() with base 10: 'a'
+        2
+        (1, 2)
         """
         return self._finish(
             Stream(
@@ -473,7 +501,13 @@ class Stream(StreamABC[T], Iterable[T]):
         if_true: Callable[[T], U],
         if_false: Callable[[T], V] | None = None,
     ) -> "Stream[U | V]":
-        """Map values conditionally."""
+        """Map values conditionally.
+
+        >>> Stream("1x2x3x").conditional_map(str.isdigit, int).collect()
+        (1, 2, 3)
+        >>> Stream("1x2x3x").conditional_map(str.isdigit, int, ord).collect()
+        (1, 120, 2, 120, 3, 120)
+        """
         return self._finish(
             Stream(IfElseMap(self._data, condition, if_true, if_false))
         )
@@ -504,8 +538,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
 
-        >>> Stream([1, 2, 3, 4, 5]).drop_while(lambda x: x < 3).collect()
-        (3, 4, 5)
+        >>> Stream([1, 2, 3, 4, 1]).drop_while(lambda x: x < 3).collect()
+        (3, 4, 1)
         """
         self._data = itertools.dropwhile(fun, self._data)
         return self
@@ -533,6 +567,10 @@ class Stream(StreamABC[T], Iterable[T]):
         ((0, 1), (1, 2), (2, 3))
         >>> Stream("abc").enumerate().collect()
         ((0, 'a'), (1, 'b'), (2, 'c'))
+        >>> Stream("abc").enumerate(100).collect()
+        ((100, 'a'), (101, 'b'), (102, 'c'))
+        >>> Stream("abc").enumerate().map(lambda el: {el.idx: el.val}).collect()
+        ({0: 'a'}, {1: 'b'}, {2: 'c'})
         """
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
@@ -573,6 +611,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
         >>> Stream([1, 2, 3, 4, 5]).exclude(lambda x: x % 2).collect()
         (2, 4)
+        >>> Stream([1, 2, None, 3]).exclude(lambda x: x is None).collect()
+        (1, 2, 3)
         """
         self._data = itertools.filterfalse(fun, self._data)
         return self
@@ -741,6 +781,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
         >>> Stream([1, 2, 3, 4, 5]).limit(3).collect()
         (1, 2, 3)
+        >>> Stream.from_value(3).limit(1000).collect() == (3,) * 1000
+        True
         """
         self._data = itertools.islice(self._data, count)
         return self
