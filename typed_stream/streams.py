@@ -364,12 +364,14 @@ class Stream(StreamABC[T], Iterable[T]):
         default: Callable[[Exc], K] | Callable[[], K] | None = None,
     ) -> "Stream[T | K]":
         """Catch exceptions.
+
         >>> Stream("1a2").map(int).catch(ValueError, handler=print).collect()
         invalid literal for int() with base 10: 'a'
         (1, 2)
         >>> Stream("1a2").map(int).catch(ValueError, default=lambda _:_).collect()
         (1, ValueError("invalid literal for int() with base 10: 'a'"), 2)
-        >>> Stream("1a2").map(int).peek(print).catch(ValueError, handler=print).collect()
+        >>> Stream("1a2").map(int).peek(print) \
+              .catch(ValueError, handler=print).collect()
         1
         invalid literal for int() with base 10: 'a'
         2
