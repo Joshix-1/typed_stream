@@ -660,7 +660,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = filter(fun, self._data)
         return self
 
-    def first(self) -> T:
+    def first(self, default: K | _DefaultValueType = _DEFAULT_VALUE) -> T | K:
         """Return the first element of the Stream. This finishes the Stream.
 
         >>> Stream([1, 2, 3]).first()
@@ -671,10 +671,14 @@ class Stream(StreamABC[T], Iterable[T]):
         Traceback (most recent call last):
         ...
         typed_stream.exceptions.StreamEmptyError
+        >>> Stream([]).first(default="default")
+        'default'
         """
         try:
             first = next(self._data)
         except StopIteration:
+            if not isinstance(default, _DefaultValueType):
+                return default
             raise StreamEmptyError() from None
         finally:
             self._finish(None, close_source=True)

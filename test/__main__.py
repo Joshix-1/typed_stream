@@ -431,6 +431,14 @@ optional_int: None | int = Stream([1, 2, 3]).max(default=None)
 assert optional_int == 3
 optional_int = Stream([]).max(default=None)
 assert not optional_int
+optional_int = Stream([1, 2, 3]).first(default=None)
+assert optional_int == 1
+optional_int = Stream([]).first(default=None)
+assert not optional_int
+optional_int = Stream([1, 2, 3]).min(default=None)
+assert optional_int == 1
+optional_int = Stream([]).min(default=None)
+assert not optional_int
 
 assert Stream((1,)).drop(100).reduce(add, 1) == 1
 assert Stream("").reduce(add, "x") == "x"
