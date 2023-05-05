@@ -425,6 +425,13 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def collect(
+            self: "Stream[T]",
+            fun: type[collections.Counter[T]],
+        ) -> collections.Counter[T]:
+            ...
+
+        @overload
+        def collect(
             self: "Stream[T]", fun: Callable[[Iterable[T]], tuple[T, ...]]
         ) -> tuple[T, ...]:
             ...
@@ -1208,7 +1215,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         >>> Stream([1, 2, 3, 4, 1]).take_while(lambda x: x < 4).collect()
         (1, 2, 3)
-        >>> Stream([1, 2, 3, 4, 1]).take_while(lambda x: x < 0).collect()
+        >>> Stream([1, 2, 3, -4, -1]).take_while(lambda x: x <= 0).collect()
         ()
         """
         self._data = itertools.takewhile(fun, self._data)

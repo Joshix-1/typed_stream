@@ -8,6 +8,7 @@ import importlib
 import operator
 import pickle
 import sys
+from collections import Counter
 from collections.abc import Callable
 from functools import partial
 from numbers import Number, Real
@@ -98,6 +99,15 @@ assert_raises(ValueError, lambda: Stream(()).catch(StopIteration, TypeError))
 assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum() == 45
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
+
+assert Stream("abbccc122333").collect(Counter) == {
+    "a": 1,
+    "b": 2,
+    "c": 3,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+}
 
 assert Stream.range(10).conditional_map(
     is_even, lambda x: x, lambda x: -x
