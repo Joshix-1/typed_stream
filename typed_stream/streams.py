@@ -825,7 +825,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg2: W,
             arg3: X,
             /,
-        ) -> "Stream[K]":
+        ) -> "Stream[K]":  # pragma: no cover
             ...
 
     def map(
@@ -853,15 +853,39 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
+    @overload
+    def max(self: "Stream[SC]") -> SC:  # pragma: no cover
+        ...
+
+    @overload
     def max(
-        self: "Stream[SC]", default: SC | _DefaultValueType = _DEFAULT_VALUE
-    ) -> SC:
+        self: "Stream[SC]", default: K | _DefaultValueType = _DEFAULT_VALUE
+    ) -> SC | K:  # pragma: no cover
+        ...
+
+    @overload
+    def max(
+        self: "Stream[T]",
+        default: K | _DefaultValueType = _DEFAULT_VALUE,
+        *,
+        key: Callable[[T], SC],
+    ) -> T | K:  # pragma: no cover
+        ...
+
+    def max(
+        self: "Stream[T]",
+        default: object = _DEFAULT_VALUE,
+        *,
+        key: Callable[[T], SC] | None = None,
+    ) -> object:
         """Return the biggest element of the stream.
 
         >>> Stream([3, 2, 1]).max()
         3
         >>> Stream(["a", "b", "c"]).max()
         'c'
+        >>> Stream(["abc", "de", "f"]).max(key=len)
+        'abc'
         >>> Stream([]).max(default=0)
         0
         >>> Stream([]).max()
@@ -869,20 +893,44 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
         typed_stream.exceptions.StreamEmptyError
         """
-        max_ = max(self._data, default=default)
+        max_ = max(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(max_, _DefaultValueType):
             raise StreamEmptyError() from None
         return self._finish(max_, close_source=True)
 
+    @overload
+    def min(self: "Stream[SC]") -> SC:  # pragma: no cover
+        ...
+
+    @overload
     def min(
-        self: "Stream[SC]", default: SC | _DefaultValueType = _DEFAULT_VALUE
-    ) -> SC:
+        self: "Stream[SC]", default: K | _DefaultValueType = _DEFAULT_VALUE
+    ) -> SC | K:  # pragma: no cover
+        ...
+
+    @overload
+    def min(
+        self: "Stream[T]",
+        default: K | _DefaultValueType = _DEFAULT_VALUE,
+        *,
+        key: Callable[[T], SC],
+    ) -> T | K:  # pragma: no cover
+        ...
+
+    def min(
+        self: "Stream[T]",
+        default: object = _DEFAULT_VALUE,
+        *,
+        key: Callable[[T], SC] | None = None,
+    ) -> object:
         """Return the smallest element of the stream.
 
         >>> Stream([1, 2, 3]).min()
         1
         >>> Stream(["a", "b", "c"]).min()
         'a'
+        >>> Stream(["abc", "de", "f"]).min(key=len)
+        'f'
         >>> Stream([]).min(default=0)
         0
         >>> Stream([]).min()
@@ -890,24 +938,24 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
         typed_stream.exceptions.StreamEmptyError
         """
-        min_ = min(self._data, default=default)
+        min_ = min(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(min_, _DefaultValueType):
             raise StreamEmptyError() from None
         return self._finish(min_, close_source=True)
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def nth(self: "Stream[T]", index: int) -> T:  # pragma: no cover
+        ...
 
-        @overload
-        def nth(self: "Stream[T]", index: int) -> T:
-            ...
+    @overload
+    def nth(self: "Stream[T]", index: int, default: T) -> T:  # pragma: no cover
+        ...
 
-        @overload
-        def nth(self: "Stream[T]", index: int, default: T) -> T:
-            ...
-
-        @overload
-        def nth(self: "Stream[T]", index: int, default: K) -> T | K:
-            ...
+    @overload
+    def nth(
+        self: "Stream[T]", index: int, default: K
+    ) -> T | K:  # pragma: no cover
+        ...
 
     def nth(  # noqa: C901
         self: "Stream[T]",
@@ -925,6 +973,12 @@ class Stream(StreamABC[T], Iterable[T]):
         1
         >>> Stream("abc").nth(1)
         'b'
+        >>> Stream([]).nth(22)
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamIndexError
+        >>> Stream([]).nth(22, default=42)
+        42
         """
         value: T | _DefaultValueType
         if index < 0:
