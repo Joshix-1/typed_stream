@@ -47,8 +47,26 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     @property
     def _data(self) -> AsyncIterator[T] | Iterator[T]:
-        """Return the internal iterator."""
-        return self.__data or raise_exception(StreamFinishedError())
+        """Return the internal iterator.
+
+        >>> from typed_stream import Stream
+        >>> iterator = iter([1, 2, 3])
+        >>> stream = Stream(iterator)
+        >>> stream._data == iterator
+        True
+        >>> stream.close()
+        >>> stream._data
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamFinishedError: Stream is finished.
+        >>> Stream(...)._data
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamFinishedError: Stream is finished.
+        """
+        return self.__data or raise_exception(
+            StreamFinishedError("Stream is finished.")
+        )
 
     @_data.setter
     def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
@@ -75,7 +93,14 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         return data, self._close_source_callable
 
     def close(self) -> None:
-        """Close this stream cleanly."""
+        """Close this stream cleanly.
+
+        >>> from typed_stream import Stream
+        >>> stream = Stream([1, 2, 3], lambda: print("abc"))
+        >>> stream.close()
+        abc
+        >>> stream.close()
+        """
         self._finish(None, close_source=True)
 
     def distinct(self, *, use_set: bool = True) -> "Self":
