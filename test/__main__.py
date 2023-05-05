@@ -313,6 +313,7 @@ mapping: dict[int, str] = (
 )
 assert mapping == {1: "1", 2: "2", 3: "3"}
 
+# pylint: disable=invalid-name
 assert Stream([1, 2, 3]).sum() == 6
 int_var: int = Stream([1, 2, 3]).max()
 assert int_var == 3
