@@ -318,10 +318,14 @@ int_var: int = Stream([1, 2, 3]).max()
 assert int_var == 3
 int_var = Stream([1, 2, 3]).min()
 assert int_var == 1
+int_var = Stream([1, 2, 3]).min(default=0)
+assert int_var == 1
 
 str_var: str = Stream(["1", "2", "3"]).max()
 assert str_var == "3"
 str_var = Stream(["1", "2", "3"]).min()
+assert str_var == "1"
+str_var = Stream(["1", "2", "3"]).min(default="a")
 assert str_var == "1"
 
 _stream1 = Stream.from_value(69).chunk(2).enumerate().nwise(3).catch()
@@ -416,8 +420,17 @@ assert (
 
 max_: int = Stream([1, 2, 3, -1]).max()
 assert max_ == 3
+max_set_: set[int] = Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).max(key=len)
+assert max_set_ == {3, 4, 5}
 min_: int = Stream([1, 2, -1, 3]).min()
 assert min_ == -1
+min_set_: set[int] = Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).min(key=len)
+assert min_set_ == {2}
+
+optional_int: None | int = Stream([1, 2, 3]).max(default=None)
+assert optional_int == 3
+optional_int = Stream([]).max(default=None)
+assert not optional_int
 
 assert Stream((1,)).drop(100).reduce(add, 1) == 1
 assert Stream("").reduce(add, "x") == "x"
