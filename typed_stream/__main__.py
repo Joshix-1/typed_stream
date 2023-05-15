@@ -5,12 +5,17 @@
 """Easy interface for streamy handling of files."""
 import argparse
 import dataclasses
+import inspect
 import operator
 import sys
 from collections.abc import Callable
+from itertools import chain
+from typing import Final, NamedTuple
 
 from . import Stream, functions
 from ._utils import count_required_positional_arguments
+
+FINISHED_STREAM: Final[Stream[object]] = Stream(...)
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -23,83 +28,195 @@ class Options:
     actions: tuple[str, ...]
 
 
-def run_program(options: Options) -> str | None:  # noqa: C901
-    # pylint: disable=too-complex, too-many-branches, too-many-statements
-    """Run the program with the options."""
-    code: list[str]
-    stream: Stream[bytes] | Stream[str] | object
-    if options.bytes:
-        stream = Stream(sys.stdin.buffer)
-        code = ["Stream(sys.stdin.buffer)"]
-        if not options.keep_ends:
-            code.append(r""".map(bytes.removesuffix, b"\n")""")
-            stream = stream.map(bytes.removesuffix, b"\n")
-    else:
-        stream = Stream(sys.stdin)
-        code = ["Stream(sys.stdin)"]
-        if not options.keep_ends:
-            code.append(r""".map(str.removesuffix, "\n")""")
-            stream = stream.map(str.removesuffix, "\n")
+def is_stream_method(method_name: str) -> bool:
+    """Check if a string is the name of a public stream method."""
+    if method_name.startswith("_"):
+        return False
+    if not (method := getattr(FINISHED_STREAM, method_name, None)):
+        return False
+    return inspect.ismethod(method)
 
-    method: None | Callable[[object], object] = None
-    args: list[object] = []
-    for index, action in Stream(options.actions).map(str.strip).enumerate(1):
-        if action.startswith("_"):
-            return f"{index}: {action!r} isn't allowed to start with '_'."
-        args_left = (
-            count_required_positional_arguments(method) - len(args)
-            if method
-            else 0
+
+STREAM_METHODS: Final[tuple[str, ...]] = tuple(
+    sorted({name for name in dir(Stream) if is_stream_method(name)})
+)
+
+
+def count_required_stream_method_args(method_name: str) -> int:
+    """Count the required arguments of a stream method."""
+    method = getattr(FINISHED_STREAM, method_name)
+    return count_required_positional_arguments(method)
+
+
+class Argument(NamedTuple):
+    """An argument for a stream operation."""
+
+    string: str
+    value: object
+
+    @classmethod
+    def from_token(cls, token: str) -> "Argument":
+        """Parse a token as an argument."""
+        if token in functions.__all__:
+            return cls(
+                f"typed_stream.functions.{token}", getattr(functions, token)
+            )
+        if token in operator.__all__:
+            return cls(f"operator.{token}", getattr(operator, token))
+        return cls(
+            token, eval(token, {})  # nosec: B307  # pylint: disable=eval-used
         )
-        if (not args_left or args_left < 0) and hasattr(stream, action):
-            if method:
-                stream = method(*args)  # pylint: disable=not-callable
-                args.clear()
-                if code and code[-1] == ",":
-                    code[-1] = ")"
-                else:
-                    code.append(")")
-            method = getattr(stream, action)
-            code.append(f".{action}(")
-        else:
-            if not method:
-                return f"{action!r} needs to be a Stream method."
-            full_action_qual: str
-            if action in functions.__all__:
-                args.append(getattr(functions, action))
-                full_action_qual = f"typed_stream.functions.{action}"
-            elif action in operator.__all__:
-                args.append(getattr(operator, action))
-                full_action_qual = f"operator.{action}"
-            else:
-                args.append(
-                    eval(action, {})  # nosec: B307  # pylint: disable=eval-used
+
+
+class InvalidTokenError(ValueError):
+    """Raised when a token is not valid."""
+
+    token: str
+    expected: str
+    possible_values: tuple[str, ...] | None
+
+    __slots__ = ("token", "expected", "possible_values")
+
+    def __init__(
+        self, token: str, expected: str, possible_values: tuple[str, ...] | None
+    ) -> None:
+        """Set the token as attribute of self."""
+        super().__init__(f"Invalid token {token!r}, expected {expected}")
+        self.token = token
+        self.expected = expected
+        self.possible_values = possible_values
+
+
+class StreamOperation(NamedTuple):
+    """A stream operation."""
+
+    method: str
+    args: tuple[Argument, ...]
+
+    def copy_with_new_args(self, *args: Argument) -> "StreamOperation":
+        """Return a copy of self with new args."""
+        return StreamOperation(self.method, self.args + args)
+
+    def __str__(self) -> str:
+        """Return a string representation of self."""
+        return f".{self.method}({', '.join(arg.string for arg in self.args)})"
+
+
+class CodeParser:
+    """Parse code."""
+
+    input_words: list[str]
+    resulting_code: list[str]
+    init_stream: Callable[[], Stream[object]]
+    stream_init_code: str
+    stream_operations: list[StreamOperation]
+    current_operation: None | StreamOperation
+
+    def __init__(self, *, as_bytes: bool, keep_ends: bool) -> None:
+        """Initialize the CodeParser."""
+        self.input_words = []
+        self.resulting_code = []
+        self.stream_operations = []
+        self.current_operation = None
+        if as_bytes:
+            self.init_stream = lambda: Stream(sys.stdin.buffer)
+            self.stream_init_code = "Stream(sys.stdin.buffer)"
+            if not keep_ends:
+                self.stream_operations.append(
+                    StreamOperation(
+                        "map",
+                        (
+                            Argument("bytes.removesuffix", bytes.removesuffix),
+                            Argument(r'b"\n"', b"\n"),
+                        ),
+                    )
                 )
-                full_action_qual = action
-            code.extend((full_action_qual, ","))
-    if method:
-        if code and code[-1] == ",":
-            code[-1] = ")"
         else:
-            code.append(")")
-        stream = method(*args)
+            self.init_stream = lambda: Stream(sys.stdin)
+            self.stream_init_code = "Stream(sys.stdin)"
+            if not keep_ends:
+                self.stream_operations.append(
+                    StreamOperation(
+                        "map",
+                        (
+                            Argument("str.removesuffix", str.removesuffix),
+                            Argument(r'"\n"', "\n"),
+                        ),
+                    )
+                )
+
+    def get_code(self) -> str:
+        """Return the python code."""
+        return (
+            self.stream_init_code
+            + "".join(map(str, self.stream_operations))
+            + (str(self.current_operation) if self.current_operation else "")
+        )
+
+    def run(self) -> object:
+        """Run the parsed code."""
+        stream: object = self.init_stream()
+        for operation in chain(
+            self.stream_operations,
+            ((self.current_operation,) if self.current_operation else ()),
+        ):
+            stream = getattr(stream, operation.method)(
+                *(arg.value for arg in operation.args)
+            )
+        return stream
+
+    def _add_token(self, token: str) -> None:
+        """Add another token to parse."""
+        is_method = is_stream_method(token)
+        if self.current_operation is None:
+            if not is_method:
+                raise InvalidTokenError(
+                    token, "a stream method", STREAM_METHODS
+                )
+            self.current_operation = StreamOperation(token, ())
+            return None
+        arguments_left = count_required_stream_method_args(
+            self.current_operation.method
+        ) - len(self.current_operation.args)
+        if arguments_left <= 0 and is_method:
+            self.stream_operations.append(self.current_operation)
+            self.current_operation = None
+            return self._add_token(token)
+        self.current_operation = self.current_operation.copy_with_new_args(
+            Argument.from_token(token)
+        )
+        return None
+
+    def add_tokens(self, *tokens: str) -> None:
+        """Add more tokens to parse."""
+        for token in tokens:
+            self._add_token(token)
+
+
+def run_program(options: Options) -> None:
+    """Run the program with the options."""
+    code_parser = CodeParser(
+        as_bytes=options.bytes, keep_ends=options.keep_ends
+    )
+
+    code_parser.add_tokens(*options.actions)
+
+    stream = code_parser.run()
 
     if isinstance(stream, Stream):
-        # pytype: disable=attribute-error
         stream.for_each(print)
-        # pytype: enable=attribute-error
-        code.append(".for_each(print)")
+        code_fmt = "{code}.for_each(print)"
     elif stream:
         print(stream)
-        code.insert(0, "print(")
-        code.append(")")
+        code_fmt = "print({code})"
+    else:
+        code_fmt = "{code}"
 
     if options.debug:
-        print("".join(code), file=sys.stderr)
-    return None
+        print(code_fmt.format(code=code_parser.get_code()), file=sys.stderr)
 
 
-def main() -> str | None:
+def main() -> None:
     """Parse arguments and then run the program."""
     arg_parser = argparse.ArgumentParser(
         prog="typed_stream",
@@ -118,7 +235,7 @@ def main() -> str | None:
         keep_ends=bool(args.keep_ends),
         actions=tuple(map(str, args.actions)),
     )
-    return run_program(options)
+    run_program(options)
 
 
-sys.exit(main())
+main()
