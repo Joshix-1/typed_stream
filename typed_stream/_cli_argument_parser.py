@@ -110,12 +110,21 @@ class StreamOperation(NamedTuple):
 class CLIArgumentParser:
     """Parse code."""
 
+    __slots__ = (
+        "current_operation",
+        "init_stream",
+        "input_words",
+        "resulting_code",
+        "stream_init_code",
+        "stream_operations",
+    )
+
+    current_operation: None | StreamOperation
+    init_stream: Callable[[], Stream[object]]
     input_words: list[str]
     resulting_code: list[str]
-    init_stream: Callable[[], Stream[object]]
     stream_init_code: str
     stream_operations: list[StreamOperation]
-    current_operation: None | StreamOperation
 
     def __init__(self, *, as_bytes: bool, keep_ends: bool) -> None:
         """Initialize the CodeParser."""
