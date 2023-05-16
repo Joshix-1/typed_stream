@@ -7,6 +7,7 @@
 import builtins
 import inspect
 import operator
+import re
 import sys
 from collections.abc import Callable, Iterable
 from itertools import chain
@@ -77,12 +78,23 @@ class Argument(NamedTuple):
     value: object
 
     @classmethod
-    def from_token(cls, token: str) -> "Argument":
+    def from_token(  # noqa: C901
+        cls, token: str, *, allow_eval: bool
+    ) -> "Argument":
         """Parse a token as an argument."""
         token = token.strip()
-        for qual, mod, tokens in MODULES:
-            if token in tokens:
+        for qual, mod, _tokens in MODULES:
+            if token in _tokens:
                 return cls(f"{qual}{token}", getattr(mod, token))
+        if re.fullmatch(r"([A-Za-z_]+\.)+[A-Za-z_]+", token):
+            tokens = token.split(".")
+            value = cls.from_token(tokens[0], allow_eval=False).value
+            for name in tokens[1:]:
+                value = getattr(value, name)
+            return cls(token, value)
+        if not allow_eval:
+            raise InvalidTokenError(token, "a valid name", NAMES_IN_MODULES)
+        # print("Evaluating", token, file=sys.stderr)
         _globals = {"__builtins__": dict(SAFER_BUILTINS)}
         return cls(
             # pylint: disable=fixme
@@ -237,7 +249,7 @@ class CLIArgumentParser:
             self.current_operation = None
             return self._add_token(token)
         self.current_operation = cop.copy_with_new_args(
-            Argument.from_token(token)
+            Argument.from_token(token, allow_eval=True)
         )
         return None
 
