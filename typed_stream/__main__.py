@@ -4,6 +4,7 @@
 
 """Easy interface for streamy handling of files."""
 import argparse
+import builtins
 import dataclasses
 import inspect
 import operator
@@ -16,6 +17,15 @@ from . import Stream, functions
 from ._utils import count_required_positional_arguments
 
 FINISHED_STREAM: Final[Stream[object]] = Stream(...)
+
+MODULES: Final[tuple[tuple[str, object, frozenset[str]], ...]] = (
+    ("", builtins, frozenset(_ for _ in dir(builtins) if _[0] != "_")),
+    ("operator.", operator, frozenset(operator.__all__)),
+    ("typed_stream.functions.", functions, frozenset(functions.__all__)),
+)
+NAMES_IN_MODULES: Final[tuple[str, ...]] = tuple(
+    sorted(frozenset(chain.from_iterable(tokens for _, _, tokens in MODULES)))
+)
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -57,14 +67,14 @@ class Argument(NamedTuple):
     @classmethod
     def from_token(cls, token: str) -> "Argument":
         """Parse a token as an argument."""
-        if token in functions.__all__:
-            return cls(
-                f"typed_stream.functions.{token}", getattr(functions, token)
-            )
-        if token in operator.__all__:
-            return cls(f"operator.{token}", getattr(operator, token))
+        for qual, mod, tokens in MODULES:
+            if token in tokens:
+                return cls(f"{qual}{token}", getattr(mod, token))
         return cls(
-            token, eval(token, {})  # nosec: B307  # pylint: disable=eval-used
+            # TODO: Figure out how to do this in a safer way without
+            #       losing too much functionality (e.g. for lambdas)
+            token,
+            eval(token, {}),  # nosec: B307  # pylint: disable=eval-used
         )
 
 
@@ -165,6 +175,29 @@ class CodeParser:
             )
         return stream
 
+    def _get_arguments_left(self) -> int:
+        """Return the amount of arguments left for the current operation."""
+        if (cop := self.current_operation) is None:
+            return 0
+        return count_required_stream_method_args(cop.method) - len(cop.args)
+
+    def _auto_complete(self) -> tuple[str, ...]:
+        """Return a sorted tuple of possible tokens."""
+        if self._get_arguments_left() <= 0:
+            # could be a new method
+            return STREAM_METHODS
+        return NAMES_IN_MODULES
+
+    def auto_complete(self, token: str = "") -> tuple[str, ...]:  # nosec: B107
+        """Return a sorted tuple of possible tokens."""
+        if not token:
+            return self._auto_complete()
+        return tuple(
+            possible_value
+            for possible_value in self._auto_complete()
+            if possible_value.startswith(token)
+        )
+
     def _add_token(self, token: str) -> None:
         """Add another token to parse."""
         is_method = is_stream_method(token)
@@ -175,10 +208,7 @@ class CodeParser:
                 )
             self.current_operation = StreamOperation(token, ())
             return None
-        arguments_left = count_required_stream_method_args(
-            self.current_operation.method
-        ) - len(self.current_operation.args)
-        if arguments_left <= 0 and is_method:
+        if self._get_arguments_left() <= 0 and is_method:
             self.stream_operations.append(self.current_operation)
             self.current_operation = None
             return self._add_token(token)
