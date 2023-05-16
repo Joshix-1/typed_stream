@@ -8,8 +8,9 @@ import builtins
 import inspect
 import operator
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from itertools import chain
+from types import MappingProxyType
 from typing import Final, NamedTuple
 
 from . import Stream, functions
@@ -20,15 +21,29 @@ __all__ = (
     "InvalidTokenError",
 )
 
+
+def get_builtin_names() -> Iterable[str]:
+    """Get builtin names, that aren't completely unsafe."""
+    for name in dir(builtins):
+        if name[0] != "_" and name not in {"eval", "exec"}:
+            yield name
+
+
 FINISHED_STREAM: Final[Stream[object]] = Stream(...)
 
 MODULES: Final[tuple[tuple[str, object, frozenset[str]], ...]] = (
-    ("", builtins, frozenset(_ for _ in dir(builtins) if _[0] != "_")),
+    ("", builtins, frozenset(get_builtin_names())),
     ("operator.", operator, frozenset(operator.__all__)),
     ("typed_stream.functions.", functions, frozenset(functions.__all__)),
 )
 NAMES_IN_MODULES: Final[tuple[str, ...]] = tuple(
-    sorted(frozenset(chain.from_iterable(tokens for _, _, tokens in MODULES)))
+    sorted(
+        frozenset(chain.from_iterable(tokens for _, _, tokens in MODULES)),
+        key=str.lower,
+    )
+)
+SAFER_BUILTINS: Final[MappingProxyType[str, object]] = MappingProxyType(
+    {name: getattr(builtins, name) for name in get_builtin_names()}
 )
 
 
@@ -42,7 +57,10 @@ def is_stream_method(method_name: str) -> bool:
 
 
 STREAM_METHODS: Final[tuple[str, ...]] = tuple(
-    sorted({name for name in dir(Stream) if is_stream_method(name)})
+    sorted(
+        {name for name in dir(Stream) if is_stream_method(name)},
+        key=str.lower,
+    )
 )
 
 
@@ -61,15 +79,17 @@ class Argument(NamedTuple):
     @classmethod
     def from_token(cls, token: str) -> "Argument":
         """Parse a token as an argument."""
+        token = token.strip()
         for qual, mod, tokens in MODULES:
             if token in tokens:
                 return cls(f"{qual}{token}", getattr(mod, token))
+        _globals = {"__builtins__": dict(SAFER_BUILTINS)}
         return cls(
             # pylint: disable=fixme
             # TODO: Figure out how to do this in a safer way without
             #       losing too much functionality (e.g. for lambdas)
             token,
-            eval(token, {}),  # nosec: B307  # pylint: disable=eval-used
+            eval(token, _globals),  # nosec: B307  # pylint: disable=eval-used
         )
 
 
