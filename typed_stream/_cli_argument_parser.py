@@ -65,6 +65,7 @@ class Argument(NamedTuple):
             if token in tokens:
                 return cls(f"{qual}{token}", getattr(mod, token))
         return cls(
+            # pylint: disable=fixme
             # TODO: Figure out how to do this in a safer way without
             #       losing too much functionality (e.g. for lambdas)
             token,
@@ -195,7 +196,7 @@ class CLIArgumentParser:
     def _add_token(self, token: str) -> None:
         """Add another token to parse."""
         is_method = is_stream_method(token)
-        if self.current_operation is None:
+        if (cop := self.current_operation) is None:
             if not is_method:
                 raise InvalidTokenError(
                     token, "a stream method", STREAM_METHODS
@@ -203,10 +204,10 @@ class CLIArgumentParser:
             self.current_operation = StreamOperation(token, ())
             return None
         if self._get_arguments_left() <= 0 and is_method:
-            self.stream_operations.append(self.current_operation)
+            self.stream_operations.append(cop)
             self.current_operation = None
             return self._add_token(token)
-        self.current_operation = self.current_operation.copy_with_new_args(
+        self.current_operation = cop.copy_with_new_args(
             Argument.from_token(token)
         )
         return None
