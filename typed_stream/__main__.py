@@ -2,13 +2,15 @@
 # You may obtain a copy of the licence in all the official languages of the
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
-"""Easy interface for streamy handling of standard input."""
+"""Easy interface for streamy handling of files."""
 import argparse
 import dataclasses
+import operator
 import sys
+from collections.abc import Callable
 
-from . import Stream
-from ._cli_argument_parser import CLIArgumentParser
+from . import Stream, functions
+from ._utils import count_required_positional_arguments
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -21,30 +23,83 @@ class Options:
     actions: tuple[str, ...]
 
 
-def run_program(options: Options) -> None:
+def run_program(options: Options) -> str | None:  # noqa: C901
+    # pylint: disable=too-complex, too-many-branches, too-many-statements
     """Run the program with the options."""
-    cli_parser = CLIArgumentParser(
-        as_bytes=options.bytes, keep_ends=options.keep_ends
-    )
+    code: list[str]
+    stream: Stream[bytes] | Stream[str] | object
+    if options.bytes:
+        stream = Stream(sys.stdin.buffer)
+        code = ["Stream(sys.stdin.buffer)"]
+        if not options.keep_ends:
+            code.append(r""".map(bytes.removesuffix, b"\n")""")
+            stream = stream.map(bytes.removesuffix, b"\n")
+    else:
+        stream = Stream(sys.stdin)
+        code = ["Stream(sys.stdin)"]
+        if not options.keep_ends:
+            code.append(r""".map(str.removesuffix, "\n")""")
+            stream = stream.map(str.removesuffix, "\n")
 
-    cli_parser.add_tokens(*options.actions)
-
-    stream = cli_parser.run()
+    method: None | Callable[[object], object] = None
+    args: list[object] = []
+    for index, action in Stream(options.actions).map(str.strip).enumerate(1):
+        if action.startswith("_"):
+            return f"{index}: {action!r} isn't allowed to start with '_'."
+        args_left = (
+            count_required_positional_arguments(method) - len(args)
+            if method
+            else 0
+        )
+        if (not args_left or args_left < 0) and hasattr(stream, action):
+            if method:
+                stream = method(*args)  # pylint: disable=not-callable
+                args.clear()
+                if code and code[-1] == ",":
+                    code[-1] = ")"
+                else:
+                    code.append(")")
+            method = getattr(stream, action)
+            code.append(f".{action}(")
+        else:
+            if not method:
+                return f"{action!r} needs to be a Stream method."
+            full_action_qual: str
+            if action in functions.__all__:
+                args.append(getattr(functions, action))
+                full_action_qual = f"typed_stream.functions.{action}"
+            elif action in operator.__all__:
+                args.append(getattr(operator, action))
+                full_action_qual = f"operator.{action}"
+            else:
+                args.append(
+                    eval(action, {})  # nosec: B307  # pylint: disable=eval-used
+                )
+                full_action_qual = action
+            code.extend((full_action_qual, ","))
+    if method:
+        if code and code[-1] == ",":
+            code[-1] = ")"
+        else:
+            code.append(")")
+        stream = method(*args)
 
     if isinstance(stream, Stream):
+        # pytype: disable=attribute-error
         stream.for_each(print)
-        code_fmt = "{code}.for_each(print)"
+        # pytype: enable=attribute-error
+        code.append(".for_each(print)")
     elif stream:
         print(stream)
-        code_fmt = "print({code})"
-    else:
-        code_fmt = "{code}"
+        code.insert(0, "print(")
+        code.append(")")
 
     if options.debug:
-        print(code_fmt.format(code=cli_parser.get_code()), file=sys.stderr)
+        print("".join(code), file=sys.stderr)
+    return None
 
 
-def main() -> None:
+def main() -> str | None:
     """Parse arguments and then run the program."""
     arg_parser = argparse.ArgumentParser(
         prog="typed_stream",
@@ -63,7 +118,7 @@ def main() -> None:
         keep_ends=bool(args.keep_ends),
         actions=tuple(map(str, args.actions)),
     )
-    run_program(options)
+    return run_program(options)
 
 
-main()
+sys.exit(main())
