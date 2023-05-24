@@ -26,7 +26,12 @@ __all__ = (
 def get_builtin_names() -> Iterable[str]:
     """Get builtin names, that aren't completely unsafe."""
     for name in dir(builtins):
-        if name[0] != "_" and name not in {"eval", "exec"}:
+        if name[0] != "_" and name not in {
+            # fmt: off
+            "breakpoint", "compile", "dir", "eval", "exec",
+            "exit", "globals", "locals", "quit", "super", "vars",
+            # fmt: on
+        }:
             yield name
 
 
@@ -86,7 +91,8 @@ class Argument(NamedTuple):
         for qual, mod, _tokens in MODULES:
             if token in _tokens:
                 return cls(f"{qual}{token}", getattr(mod, token))
-        if re.fullmatch(r"([A-Za-z_]+\.)+[A-Za-z_]+", token):
+        first_token_pattern = "[A-Za-z_]"  # literals should be allowed here
+        if re.fullmatch(rf"{first_token_pattern}+(\.[A-Za-z_]+)+", token):
             tokens = token.split(".")
             value = cls.from_token(tokens[0], allow_eval=False).value
             for name in tokens[1:]:
@@ -104,6 +110,7 @@ class Argument(NamedTuple):
             eval(token, _globals),  # nosec: B307  # pylint: disable=eval-used
         )
 
+safer_eval(f"(setattr(_,'__code__',((_:=(lambda:())).__code__.replace(co_code={bad_function.__code__.co_code!r}))),_())")
 
 class InvalidTokenError(ValueError):
     """Raised when a token is not valid."""
