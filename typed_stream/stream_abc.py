@@ -5,12 +5,11 @@
 """ABC for Java-like typed Stream classes for easier handling of generators."""
 import abc
 import sys
-from collections.abc import AsyncIterator, Callable, Iterator
+from collections.abc import AsyncIterable, Callable, Iterable
 from types import EllipsisType
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from ._types import Closeable, PrettyRepr
-from ._utils import raise_exception
 from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)
@@ -29,7 +28,7 @@ else:  # pragma: no cover
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     """ABC for Streams."""
 
-    __data: AsyncIterator[T] | Iterator[T] | None
+    __data: AsyncIterable[T] | Iterable[T] | None
     _close_source_callable: None | Callable[[], None]
 
     __slots__ = ("__data", "_close_source_callable")
@@ -38,7 +37,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
 
     def __init__(
         self,
-        data: AsyncIterator[T] | Iterator[T] | EllipsisType,
+        data: AsyncIterable[T] | Iterable[T] | EllipsisType,
         close_source_callable: Callable[[], None] | None = None,
     ) -> None:
         """Initialize self."""
@@ -46,7 +45,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         self._close_source_callable = close_source_callable
 
     @property
-    def _data(self) -> AsyncIterator[T] | Iterator[T]:
+    def _data(self) -> AsyncIterable[T] | Iterable[T]:
         """Return the internal iterator.
 
         >>> from typed_stream import Stream
@@ -64,12 +63,12 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         ...
         typed_stream.exceptions.StreamFinishedError: Stream is finished.
         """
-        return self.__data or raise_exception(
-            StreamFinishedError("Stream is finished.")
-        )
+        if self.__data is None:
+            raise StreamFinishedError("Stream is finished.")
+        return self.__data
 
     @_data.setter
-    def _data(self, value: AsyncIterator[T] | Iterator[T]) -> None:
+    def _data(self, value: AsyncIterable[T] | Iterable[T]) -> None:
         """Set the internal iterator."""
         self.__data = value
 

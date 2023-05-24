@@ -79,7 +79,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     __slots__ = ()
 
-    _data: Iterator[T]
+    _data: Iterable[T]
 
     def __init__(
         self,
@@ -91,7 +91,7 @@ class Stream(StreamABC[T], Iterable[T]):
         To create a finished Stream do Stream(...).
         """
         super().__init__(
-            ... if isinstance(data, EllipsisType) else iter(data),
+            ... if isinstance(data, EllipsisType) else data,
             close_source_callable,
         )
 
@@ -145,6 +145,17 @@ class Stream(StreamABC[T], Iterable[T]):
         3
         """
         return IterWithCleanUp(self._data, self.close)
+
+    def __length_hint__(self) -> int:
+        """Return an estimated length for this Stream.
+
+        >>> from operator import length_hint
+        >>> length_hint(Stream([1, 2, 3]))
+        3
+        >>> length_hint(Stream.range(100))
+        100
+        """
+        return operator.length_hint(self._data)
 
     def __reversed__(self) -> Iterator[T]:
         """Return the items of this Stream in reversed order.
@@ -682,7 +693,7 @@ class Stream(StreamABC[T], Iterable[T]):
         'default'
         """
         try:
-            first = next(self._data)
+            first = next(iter(self._data))
         except StopIteration:
             if not isinstance(default, _DefaultValueType):
                 return default
@@ -1081,12 +1092,13 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
         typed_stream.exceptions.StreamEmptyError
         """
+        iterator = iter(self._data)
         if isinstance(initial, _DefaultValueType):
             try:
-                initial = next(self._data)
+                initial = next(iterator)
             except StopIteration:
                 raise StreamEmptyError() from None
-        return self._finish(functools.reduce(fun, self._data, initial), True)
+        return self._finish(functools.reduce(fun, iterator, initial), True)
 
     def starcollect(self, fun: StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream.
