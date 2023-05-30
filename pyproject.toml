@@ -45,7 +45,7 @@ skip_gitignore = true
 # sort_reexports = true
 
 [tool.mypy]
-packages = ["typed_stream", "test", "examples"]
+packages = ["typed_stream", "tests", "examples"]
 python_version = "3.10"
 show_error_codes = true
 strict = true
@@ -70,12 +70,12 @@ enable_error_code = [
 ]
 
 [tool.pytype]
-inputs = ["typed_stream", "test", "examples"]
+inputs = ["typed_stream", "tests", "examples"]
 disable = ["not-supported-yet"]
 python_version = "3.10"
 
 [tool.pyright]
-include = ["typed_stream", "test", "examples"]
+include = ["typed_stream", "tests", "examples"]
 strictListInference = true
 strictDictionaryInference = true
 strictSetInference = true
