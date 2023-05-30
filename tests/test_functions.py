@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Test functions in typed_stream.functions."""
+
+from __future__ import annotations
+
 import operator
 
 from typed_stream.functions import (

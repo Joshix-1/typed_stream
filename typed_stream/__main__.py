@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Easy interface for streamy handling of files."""
+
+from __future__ import annotations
+
 import argparse
 import dataclasses
 import operator

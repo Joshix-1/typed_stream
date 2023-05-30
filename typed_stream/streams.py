@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Java-like typed Stream classes for easier handling of generators."""
+
+from __future__ import annotations
+
 import collections
 import concurrent.futures
 import functools

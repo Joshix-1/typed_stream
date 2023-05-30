@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Utility classes used in streams."""
+
+from __future__ import annotations
+
 import collections
 import contextlib
 import itertools

@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """ABC for Java-like typed Stream classes for easier handling of generators."""
+
+from __future__ import annotations
+
 import abc
 import sys
 from collections.abc import AsyncIterable, Callable, Iterable

@@ -4,6 +4,8 @@
 
 """Exception classes raised while handling Streams."""
 
+from __future__ import annotations
+
 __all__ = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
 
 

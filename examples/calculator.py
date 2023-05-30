@@ -5,6 +5,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """A simple unsafe calculator."""
+
+from __future__ import annotations
+
 import cmath
 import math
 import re

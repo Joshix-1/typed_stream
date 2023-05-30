@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Utilities for lazy iteration over lines of files."""
+
+from __future__ import annotations
+
 import contextlib
 from collections.abc import Iterator
 from io import BytesIO

@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Simple helper functions for easy Stream usage."""
+
+from __future__ import annotations
+
 import operator
 from collections.abc import Callable
 from numbers import Number, Real

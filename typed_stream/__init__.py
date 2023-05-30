@@ -4,6 +4,8 @@
 
 """Java-like typed Stream class for easier handling of generators."""
 
+from __future__ import annotations
+
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
 from .stream_abc import StreamABC
 from .streamable import Streamable, StreamableSequence

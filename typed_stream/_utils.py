@@ -4,6 +4,8 @@
 
 """General utility classes and functions."""
 
+from __future__ import annotations
+
 import inspect
 from collections.abc import Callable
 from typing import (

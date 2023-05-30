@@ -6,6 +6,8 @@ Update this to create a new release.
 To get the current version run this script.
 """
 
+from __future__ import annotations
+
 VERSION = "0.32.2"
 
 if __name__ == "__main__":  # pragma: no cover

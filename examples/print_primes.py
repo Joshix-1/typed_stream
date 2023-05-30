@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Print an 'endless' stream of primes."""
+
+from __future__ import annotations
+
 import contextlib
 import math
 

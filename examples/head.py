@@ -5,6 +5,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """A simple head program."""
+
+from __future__ import annotations
+
 import contextlib
 import sys
 

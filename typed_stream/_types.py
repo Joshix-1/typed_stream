@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """Helpful types."""
+
+from __future__ import annotations
+
 import abc
 from abc import abstractmethod
 from collections.abc import Callable, Iterable, Iterator

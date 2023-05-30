@@ -3,6 +3,9 @@
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
 """The tests for the Stream."""
+
+from __future__ import annotations
+
 import doctest
 import importlib
 import operator
