@@ -62,7 +62,7 @@ jobs:
       - name: Run tests
         run: |
           python3 -m examples.test
-          coverage run -m test
+          coverage run -m tests
       - name: Upload coverage as artifact
         uses: actions/upload-artifact@v3
         with:
