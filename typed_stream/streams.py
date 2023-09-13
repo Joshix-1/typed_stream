@@ -1259,7 +1259,7 @@ class FileStreamBase(Stream[AnyStr]):
             self._file_iterator.path,
             self._file_iterator.encoding,
             # pylint: disable=unidiomatic-typecheck
-            type(self._file_iterator) == LazyFileIterator,
+            type(self._file_iterator) is LazyFileIterator,
         )
 
 
