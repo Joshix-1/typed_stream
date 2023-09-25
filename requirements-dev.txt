@@ -23,7 +23,7 @@ flake8-comprehensions==3.*
 flake8-docstrings==1.*
 flake8-no-pep420==2.*
 flake8-scream==0.1.*
-flake8-simplify==0.20.*
+flake8-simplify==0.21.*
 flake8-return==1.2.*
 flake8-no-implicit-concat==0.3.*
 pep8-naming==0.13.*
