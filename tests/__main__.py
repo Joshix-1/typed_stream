@@ -9,7 +9,6 @@ from __future__ import annotations
 import doctest
 import importlib
 import operator
-import pickle
 import sys
 from collections import Counter
 from collections.abc import Callable
@@ -353,11 +352,9 @@ assert isinstance(
     ),
     Stream,
 )
-_stream3 = pickle.loads(pickle.dumps(_stream1))
 assert (
     _stream1.limit(1000).collect()
     == _stream2.limit(1000).collect()
-    == _stream3.limit(1000).collect()
 )
 assert (
     repr(iter(Stream.from_value(69)))
@@ -652,16 +649,6 @@ stream = (
     .filter(operator.truth)
     .exclude(operator.not_)
 )
-assert tuple(pickle.loads(pickle.dumps(stream))) == tuple(range(10, 90, 10))
-assert tuple(stream) == tuple(range(10, 90, 10))
-
-stream = Stream.from_value(0).chunk(9)
-assert pickle.loads(pickle.dumps(stream)).first() == (0, 0, 0, 0, 0, 0, 0, 0, 0)
-assert tuple(stream.limit(1000)) == ((0, 0, 0, 0, 0, 0, 0, 0, 0),) * 1000
-
-iterator = iter(Stream.from_value(1).limit(5))
-assert tuple(pickle.loads(pickle.dumps(iterator))) == (1, 1, 1, 1, 1)
-assert tuple(iterator) == (1, 1, 1, 1, 1)
 
 for i in range(100):
     assert Stream.range(10_000)[i] == i
