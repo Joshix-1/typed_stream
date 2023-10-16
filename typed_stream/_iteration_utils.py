@@ -14,7 +14,7 @@ from typing import Generic, Literal, TypeVar, cast, overload
 
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
 from ._utils import wrap_in_tuple
-from .streamable import Streamable, StreamableSequence
+from .streamable import Streamable
 
 __all__ = (
     "Chunked",
