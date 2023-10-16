@@ -342,7 +342,7 @@ assert str_var == "1"
 str_var = Stream(["1", "2", "3"]).min(default="a")
 assert str_var == "1"
 
-_stream1 = Stream.from_value(69).chunk(2).enumerate().nwise(3).catch()
+_stream1 = Stream.from_value(69).enumerate().nwise(3).catch()
 assert isinstance(
     _stream2 := eval(  # pylint: disable=eval-used
         repr(_stream1),
