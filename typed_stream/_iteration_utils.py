@@ -63,9 +63,7 @@ class Chunked(
 
     def __next__(self) -> tuple[T, ...]:
         """Get the next chunk."""
-        if chunk := tuple(
-            itertools.islice(self._iterator, self.chunk_size)
-        ):
+        if chunk := tuple(itertools.islice(self._iterator, self.chunk_size)):
             return chunk
         raise StopIteration()
 

@@ -352,10 +352,7 @@ assert isinstance(
     ),
     Stream,
 )
-assert (
-    _stream1.limit(1000).collect()
-    == _stream2.limit(1000).collect()
-)
+assert _stream1.limit(1000).collect() == _stream2.limit(1000).collect()
 assert (
     repr(iter(Stream.from_value(69)))
     == "typed_stream._iteration_utils.IterWithCleanUp"
