@@ -407,7 +407,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> "Stream[StreamableSequence[T]]":
+    def chunk(self, size: int) -> "Stream[tuple[T, ...]]":
         """Split stream into chunks of the specified size.
 
         >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
@@ -423,7 +423,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         def chunk(  # pylint: disable=function-redefined  # noqa: F811
             self, size: int
-        ) -> "Stream[StreamableSequence[T]]":
+        ) -> "Stream[tuple[T, ...]]":
             """Split stream into chunks of the specified size.
 
             >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
@@ -435,12 +435,9 @@ class Stream(StreamABC[T], Iterable[T]):
             """
             return self._finish(
                 Stream(
-                    map(
-                        StreamableSequence,
-                        itertools.batched(  # pylint: disable=no-member
-                            self._data, size
-                        ),
-                    )
+                    itertools.batched(  # pylint: disable=no-member
+                        self._data, size
+                    ),
                 )
             )
 
