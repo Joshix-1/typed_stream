@@ -479,7 +479,9 @@ assert Stream([]).empty()
 assert not Stream([1]).empty()
 
 assert Stream([1, 2, 3]).chain([4, 5, 6]).collect(tuple) == (1, 2, 3, 4, 5, 6)
-assert Stream.range(25).chunk(5).map(lambda x: list(x)).collect(tuple) == (
+assert Stream.range(25).chunk(5).map(lambda x: list(x.stream())).collect(
+    tuple
+) == (
     [0, 1, 2, 3, 4],
     [5, 6, 7, 8, 9],
     [10, 11, 12, 13, 14],

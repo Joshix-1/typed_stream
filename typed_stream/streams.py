@@ -11,6 +11,7 @@ import concurrent.futures
 import functools
 import itertools
 import operator
+import sys
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
@@ -413,8 +414,35 @@ class Stream(StreamABC[T], Iterable[T]):
         ((1, 2), (3, 4), (5, 6))
         >>> Stream([1, 2, 3, 4, 5, 6]).chunk(3).collect()
         ((1, 2, 3), (4, 5, 6))
+        >>> Stream([1, 2, 3, 4, 5, 6, 7]).chunk(3).collect()
+        ((1, 2, 3), (4, 5, 6), (7,))
         """
         return self._finish(Chunked(self._data, size).stream())
+
+    if sys.version_info >= (3, 12):
+
+        def chunk(  # pylint: disable=function-redefined  # noqa: F811
+            self, size: int
+        ) -> "Stream[StreamableSequence[T]]":
+            """Split stream into chunks of the specified size.
+
+            >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
+            ((1, 2), (3, 4), (5, 6))
+            >>> Stream([1, 2, 3, 4, 5, 6]).chunk(3).collect()
+            ((1, 2, 3), (4, 5, 6))
+            >>> Stream([1, 2, 3, 4, 5, 6, 7]).chunk(3).collect()
+            ((1, 2, 3), (4, 5, 6), (7,))
+            """
+            return self._finish(
+                Stream(
+                    map(
+                        StreamableSequence,
+                        itertools.batched(  # pylint: disable=no-member
+                            self._data, size
+                        ),
+                    )
+                )
+            )
 
     if (  # noqa: C901  # pylint: disable=too-complex
         TYPE_CHECKING
@@ -1279,11 +1307,11 @@ class FileStream(FileStreamBase[str]):
         To create a finished FileStream do FileStream(...).
         """
         if isinstance(data, EllipsisType):
-            self._file_iterator = None
+            self._file_iterator = None  # pylint: disable=assigning-non-slot
             super().__init__(...)
             return
 
-        self._file_iterator = (
+        self._file_iterator = (  # pylint: disable=assigning-non-slot
             LazyFileIterator(data, encoding=encoding)
             if keep_line_ends
             else LazyFileIteratorRemovingEndsStr(data, encoding=encoding)
@@ -1306,11 +1334,11 @@ class BinaryFileStream(FileStreamBase[bytes]):
         To create a finished BinaryFileStream do BinaryFileStream(...).
         """
         if isinstance(data, EllipsisType):
-            self._file_iterator = None
+            self._file_iterator = None  # pylint: disable=assigning-non-slot
             super().__init__(...)
             return
 
-        self._file_iterator = (
+        self._file_iterator = (  # pylint: disable=assigning-non-slot
             LazyFileIterator(data)
             if keep_line_ends
             else LazyFileIteratorRemovingEndsBytes(data)
