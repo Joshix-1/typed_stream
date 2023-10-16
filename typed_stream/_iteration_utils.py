@@ -40,8 +40,8 @@ Exc = TypeVar("Exc", bound=BaseException)
 
 
 class Chunked(
-    IteratorProxy[StreamableSequence[T], T],
-    Streamable[StreamableSequence[T]],
+    IteratorProxy[tuple[T, ...], T],
+    Streamable[tuple[T, ...]],
     Generic[T],
 ):
     """Chunk data into Sequences of length size. The last chunk may be shorter.
@@ -61,9 +61,9 @@ class Chunked(
         super().__init__(iterable)
         self.chunk_size = chunk_size
 
-    def __next__(self) -> StreamableSequence[T]:
+    def __next__(self) -> tuple[T, ...]:
         """Get the next chunk."""
-        if chunk := StreamableSequence(
+        if chunk := tuple(
             itertools.islice(self._iterator, self.chunk_size)
         ):
             return chunk
