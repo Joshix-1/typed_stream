@@ -11,7 +11,7 @@ coverage==7.*
 # pyright==1.*
 mypy==1.6.*
 typing-extensions==4.*
-pytype==2023.3.13
+pytype==2023.10.17
 
 # linting
 bandit[toml]==1.*
