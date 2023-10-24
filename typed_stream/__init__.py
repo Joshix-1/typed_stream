@@ -27,4 +27,9 @@ __all__ = (
     "version_info",
 )
 
-version_info: tuple[int, ...] = tuple(Stream(VERSION.split(".")).map(int))
+version_info: tuple[int, int, int] = __import__("typing").cast(
+    tuple[int, int, int], tuple(map(int, VERSION.split(".")))
+)
+if len(version_info) != 3:
+    raise AssertionError(f"Invalid version: {VERSION}")
+del annotations
