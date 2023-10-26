@@ -587,8 +587,6 @@ class Stream(StreamABC[T], Iterable[T]):
         ()
         >>> Stream("ABC").dedup(key=str.lower).collect("".join)
         'ABC'
-        >>> Stream("ABC").dedup(key=str.lower).collect("".join)
-        'ABC'
         >>> Stream("aAaAbbbcCCAaBbCc").dedup(key=str.lower).collect("".join)
         'abcABC'
         """
