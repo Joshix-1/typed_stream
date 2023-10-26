@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, Union, overload
 
 from ._iteration_utils import (
     Chunked,
-    Deduplicator,
     Enumerator,
     ExceptionHandler,
     IfElseMap,
@@ -573,7 +572,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
 
-    def dedup(self) -> "Stream[T]":
+    def dedup(self, *, key: None | Callable[[T], object] = None) -> "Stream[T]":
         """Remove consecutive equal values.
 
         If the input is sorted this is the same as Stream.distinct().
@@ -586,9 +585,26 @@ class Stream(StreamABC[T], Iterable[T]):
         (1, 2, 3, 1)
         >>> Stream([]).dedup().collect()
         ()
+        >>> Stream("ABC").dedup(key=str.lower).collect("".join)
+        'ABC'
+        >>> Stream("ABC").dedup(key=str.lower).collect("".join)
+        'ABC'
+        >>> Stream("aAaAbbbcCCAaBbCc").dedup(key=str.lower).collect("".join)
+        'abcABC'
         """
+        # Inspire by the unique_justseen itertools recipe
+        # https://docs.python.org/3/library/itertools.html#itertools-recipes
         return self._finish(
-            Stream(Deduplicator(self._data)), close_source=False
+            Stream(
+                map(
+                    next,
+                    map(
+                        operator.itemgetter(1),
+                        itertools.groupby(self._data, key=key),
+                    ),
+                )
+            ),
+            close_source=False,
         )
 
     def drop(self, count: int) -> "Stream[T]":

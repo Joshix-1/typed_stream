@@ -18,7 +18,6 @@ from .streamable import Streamable
 
 __all__ = (
     "Chunked",
-    "Deduplicator",
     "Enumerator",
     "ExceptionHandler",
     "IfElseMap",
@@ -71,25 +70,6 @@ class Chunked(
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self.chunk_size
-
-
-class Deduplicator(IteratorProxy[T, T], Streamable[T], Generic[T]):
-    """Deduplicate values."""
-
-    __slots__ = ("_last_value",)
-
-    _last_value: T
-
-    def __next__(self) -> T:
-        """Get the next value."""
-        if not hasattr(self, "_last_value"):
-            self._last_value = next(self._iterator)
-            return self._last_value
-        for value in self._iterator:
-            if value != self._last_value:
-                self._last_value = value
-                return value
-        raise StopIteration()
 
 
 class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
