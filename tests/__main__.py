@@ -71,6 +71,7 @@ run_doc_tests()
 
 
 def typed_nwise_stuff() -> None:
+    """Test whether the Stream.nwise overloads work."""
     one: Stream[tuple[str]] = Stream("abc").nwise(1)
     assert one.map("".join).collect("".join) == "abc"
 
