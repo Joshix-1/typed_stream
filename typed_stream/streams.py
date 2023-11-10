@@ -1082,13 +1082,13 @@ class Stream(StreamABC[T], Iterable[T]):
         return default
 
     @overload
-    def nwise(  # type: ignore[misc]
+    def nwise(  # type: ignore[overload-overlap]
         self, size: Literal[1], /  # noqa: W504
     ) -> "Stream[tuple[T]]":  # pragma: no cover
         ...
 
     @overload
-    def nwise(  # type: ignore[misc]
+    def nwise(  # type: ignore[overload-overlap]
         self, size: Literal[2], /  # noqa: W504
     ) -> "Stream[tuple[T, T]]":  # pragma: no cover
         ...

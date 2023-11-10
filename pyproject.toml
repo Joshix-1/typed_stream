@@ -52,7 +52,6 @@ packages = ["typed_stream", "tests", "examples"]
 python_version = "3.10"
 show_error_codes = true
 strict = true
-enable_incomplete_feature = ["TypeVarTuple", "Unpack"]
 warn_unreachable = true
 pretty = true
 disallow_any_unimported = true
