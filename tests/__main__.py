@@ -68,8 +68,23 @@ def run_doc_tests() -> None:
 
 
 run_doc_tests()
-# pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
 
+
+def typed_nwise_stuff() -> None:
+    one: Stream[tuple[str]] = Stream("abc").nwise(1)
+    assert one.map("".join).collect("".join) == "abc"
+
+    two: Stream[tuple[str, str]] = Stream("abc").nwise(2)
+    assert two.map("".join).collect("".join) == "abbc"
+
+    three: Stream[tuple[str, ...]] = Stream("abcd").nwise(3)
+    assert three.map("".join).collect("".join) == "abcbcd"
+
+
+typed_nwise_stuff()
+
+
+# pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
 
 def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
     """Assert that fun raises exc."""
