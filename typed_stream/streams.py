@@ -349,22 +349,22 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def catch(
-            self: "Stream[T]",
+            self,
             *exception_class: type[Exc],
-        ) -> "Stream[T]":
+        ) -> "Self":
             ...
 
         @overload
         def catch(
-            self: "Stream[T]",
+            self,
             *exception_class: type[Exc],
             handler: Callable[[Exc], object],
-        ) -> "Stream[T]":
+        ) -> "Self":
             ...
 
         @overload
         def catch(
-            self: "Stream[T]",
+            self,
             *exception_class: type[Exc],
             default: Callable[[Exc], K] | Callable[[], K],
         ) -> "Stream[T | K]":
@@ -372,7 +372,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def catch(
-            self: "Stream[T]",
+            self,
             *exception_class: type[Exc],
             handler: Callable[[Exc], object],
             default: Callable[[Exc], K] | Callable[[], K],
@@ -380,7 +380,7 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
     def catch(
-        self: "Stream[T]",
+        self,
         *exception_class: type[Exc],
         handler: Callable[[Exc], object] | None = None,
         default: Callable[[Exc], K] | Callable[[], K] | None = None,
@@ -405,7 +405,7 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
-    def chain(self, iterable: Iterable[T]) -> "Stream[T]":
+    def chain(self, iterable: Iterable[T]) -> "Self":
         """Add another iterable to the end of the Stream.
 
         >>> Stream([1, 2, 3]).chain([4, 5, 6]).collect()
@@ -453,7 +453,7 @@ class Stream(StreamABC[T], Iterable[T]):
     ):  # pragma: no cover
 
         @overload
-        def collect(self: "Stream[T]") -> StreamableSequence[T]:
+        def collect(self) -> StreamableSequence[T]:
             ...
 
         @overload
@@ -464,39 +464,35 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def collect(
-            self: "Stream[T]",
+            self,
             fun: Callable[[Iterable[T]], StreamableSequence[T]],
         ) -> StreamableSequence[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[T]",
+            self,
             fun: type[collections.Counter[T]],
         ) -> collections.Counter[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[T]", fun: Callable[[Iterable[T]], tuple[T, ...]]
+            self, fun: Callable[[Iterable[T]], tuple[T, ...]]
         ) -> tuple[T, ...]:
             ...
 
         @overload
-        def collect(
-            self: "Stream[T]", fun: Callable[[Iterable[T]], set[T]]
-        ) -> set[T]:
+        def collect(self, fun: Callable[[Iterable[T]], set[T]]) -> set[T]:
+            ...
+
+        @overload
+        def collect(self, fun: Callable[[Iterable[T]], list[T]]) -> list[T]:
             ...
 
         @overload
         def collect(
-            self: "Stream[T]", fun: Callable[[Iterable[T]], list[T]]
-        ) -> list[T]:
-            ...
-
-        @overload
-        def collect(
-            self: "Stream[T]", fun: Callable[[Iterable[T]], frozenset[T]]
+            self, fun: Callable[[Iterable[T]], frozenset[T]]
         ) -> frozenset[T]:
             ...
 
@@ -515,7 +511,7 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
         @overload
-        def collect(self: "Stream[T]", fun: Callable[[Iterable[T]], K]) -> K:
+        def collect(self, fun: Callable[[Iterable[T]], K]) -> K:
             ...
 
     def collect(
@@ -579,7 +575,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
 
-    def dedup(self, *, key: None | Callable[[T], object] = None) -> "Stream[T]":
+    def dedup(self, *, key: None | Callable[[T], object] = None) -> "Self":
         """Remove consecutive equal values.
 
         If the input is sorted this is the same as Stream.distinct().
@@ -637,7 +633,7 @@ class Stream(StreamABC[T], Iterable[T]):
         )
         return self
 
-    def drop(self, count: int) -> "Stream[T]":
+    def drop(self, count: int) -> "Self":
         """Drop the first count values.
 
         >>> Stream([1, 2, 3, 4, 5]).drop(2).collect()
@@ -646,7 +642,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.islice(self._data, count, None)
         return self
 
-    def drop_while(self, fun: Callable[[T], object]) -> "Stream[T]":
+    def drop_while(self, fun: Callable[[T], object]) -> "Self":
         """Drop values as long as the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
@@ -671,9 +667,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return True
         return False
 
-    def enumerate(
-        self: "Stream[T]", start_index: int = 0
-    ) -> "Stream[IndexValueTuple[T]]":
+    def enumerate(self, start_index: int = 0) -> "Stream[IndexValueTuple[T]]":
         """Map the values to a tuple of index and value.
 
         >>> Stream([1, 2, 3]).enumerate().collect()
@@ -717,7 +711,7 @@ class Stream(StreamABC[T], Iterable[T]):
         ) -> "Stream[T]":
             ...
 
-    def exclude(self: "Stream[T]", fun: Callable[[T], object]) -> "object":
+    def exclude(self, fun: Callable[[T], object]) -> "object":
         """Exclude values if the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
@@ -758,7 +752,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def filter(
-        self, fun: Callable[[T], object]
+        self: "Stream[T]", fun: Callable[[T], object]
     ) -> "Stream[T]":  # pragma: no cover
         ...
 
@@ -893,7 +887,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return tail[-1]
         raise StreamEmptyError()
 
-    def limit(self, count: int) -> "Stream[T]":
+    def limit(self, count: int) -> "Self":
         """Stop the Stream after count values.
 
         >>> Stream([1, 2, 3, 4, 5]).limit(3).collect()
@@ -980,7 +974,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def max(
-        self: "Stream[T]",
+        self,
         default: K | _DefaultValueType = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC],
@@ -988,7 +982,7 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     def max(
-        self: "Stream[T]",
+        self,
         default: object = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC] | None = None,
@@ -1025,7 +1019,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def min(
-        self: "Stream[T]",
+        self,
         default: K | _DefaultValueType = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC],
@@ -1033,7 +1027,7 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     def min(
-        self: "Stream[T]",
+        self,
         default: object = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC] | None = None,
@@ -1059,21 +1053,19 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._finish(min_, close_source=True)
 
     @overload
-    def nth(self: "Stream[T]", index: int) -> T:  # pragma: no cover
+    def nth(self, index: int) -> T:  # pragma: no cover
         ...
 
     @overload
-    def nth(self: "Stream[T]", index: int, default: T) -> T:  # pragma: no cover
+    def nth(self, index: int, default: T) -> T:  # pragma: no cover
         ...
 
     @overload
-    def nth(
-        self: "Stream[T]", index: int, default: K
-    ) -> T | K:  # pragma: no cover
+    def nth(self, index: int, default: K) -> T | K:  # pragma: no cover
         ...
 
     def nth(  # noqa: C901
-        self: "Stream[T]",
+        self,
         index: int,
         default: K | _DefaultValueType = _DEFAULT_VALUE,
     ) -> T | K:
@@ -1153,7 +1145,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Stream(sliding_window(self._data, size)))
 
-    def peek(self, fun: Callable[[T], object]) -> "Stream[T]":
+    def peek(self, fun: Callable[[T], object]) -> "Self":
         """Peek at every value, without modifying the values in the Stream.
 
         >>> stream = Stream([1, 2, 3]).peek(print)
@@ -1313,7 +1305,7 @@ class Stream(StreamABC[T], Iterable[T]):
             close_source=True,
         )
 
-    def take_while(self, fun: Callable[[T], object]) -> "Stream[T]":
+    def take_while(self, fun: Callable[[T], object]) -> "Self":
         """Take values as long the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
