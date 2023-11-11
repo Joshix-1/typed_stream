@@ -213,7 +213,7 @@ class Stream(StreamABC[T], Iterable[T]):
         return self.collect()[start:stop:step]
 
     @staticmethod
-    def counting(start: int = 0, step: int = 1) -> "Stream[int]":
+    def counting(start: int = 0, step: int = 1) -> Stream[int]:
         """Create an endless counting Stream.
 
         >>> Stream.counting().limit(5).collect()
@@ -224,7 +224,7 @@ class Stream(StreamABC[T], Iterable[T]):
         return Stream(itertools.count(start, step))
 
     @staticmethod
-    def from_value(value: K) -> "Stream[K]":
+    def from_value(value: K) -> Stream[K]:
         """Create an endless Stream of the same value.
 
         >>> Stream.from_value(1).limit(5).collect()
@@ -238,47 +238,47 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         @staticmethod
-        def range(stop: int, /) -> "Stream[int]":
+        def range(stop: int, /) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(*, stop: int) -> "Stream[int]":
+        def range(*, stop: int) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(*, start: int, stop: int) -> "Stream[int]":
+        def range(*, start: int, stop: int) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(start: int, stop: int, /) -> "Stream[int]":
+        def range(start: int, stop: int, /) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(start: int, /, *, stop: int) -> "Stream[int]":
+        def range(start: int, /, *, stop: int) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(start: int, stop: int, /, *, step: int) -> "Stream[int]":
+        def range(start: int, stop: int, /, *, step: int) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(start: int, stop: int, step: int, /) -> "Stream[int]":
+        def range(start: int, stop: int, step: int, /) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(start: int, /, *, stop: int, step: int) -> "Stream[int]":
+        def range(start: int, /, *, stop: int, step: int) -> Stream[int]:
             ...
 
         @overload
         @staticmethod
-        def range(*, start: int, stop: int, step: int) -> "Stream[int]":
+        def range(*, start: int, stop: int, step: int) -> Stream[int]:
             ...
 
     @staticmethod
@@ -287,7 +287,7 @@ class Stream(StreamABC[T], Iterable[T]):
         start: int | _DefaultValueType = _DEFAULT_VALUE,
         stop: int | _DefaultValueType = _DEFAULT_VALUE,
         step: int | _DefaultValueType = _DEFAULT_VALUE,
-    ) -> "Stream[int]":
+    ) -> Stream[int]:
         """Create a Stream[int] from a range.
 
         The arguments behave like to the built-in range function:
@@ -351,7 +351,7 @@ class Stream(StreamABC[T], Iterable[T]):
         def catch(
             self,
             *exception_class: type[Exc],
-        ) -> "Self":
+        ) -> Self:
             ...
 
         @overload
@@ -359,7 +359,7 @@ class Stream(StreamABC[T], Iterable[T]):
             self,
             *exception_class: type[Exc],
             handler: Callable[[Exc], object],
-        ) -> "Self":
+        ) -> Self:
             ...
 
         @overload
@@ -367,7 +367,7 @@ class Stream(StreamABC[T], Iterable[T]):
             self,
             *exception_class: type[Exc],
             default: Callable[[Exc], K] | Callable[[], K],
-        ) -> "Stream[T | K]":
+        ) -> Stream[T | K]:
             ...
 
         @overload
@@ -376,7 +376,7 @@ class Stream(StreamABC[T], Iterable[T]):
             *exception_class: type[Exc],
             handler: Callable[[Exc], object],
             default: Callable[[Exc], K] | Callable[[], K],
-        ) -> "Stream[T | K]":
+        ) -> Stream[T | K]:
             ...
 
     def catch(
@@ -384,7 +384,7 @@ class Stream(StreamABC[T], Iterable[T]):
         *exception_class: type[Exc],
         handler: Callable[[Exc], object] | None = None,
         default: Callable[[Exc], K] | Callable[[], K] | None = None,
-    ) -> "Stream[T | K]":
+    ) -> Stream[T | K]:
         """Catch exceptions.
 
         >>> Stream("1a2").map(int).catch(ValueError, handler=print).collect()
@@ -405,7 +405,7 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
-    def chain(self, iterable: Iterable[T]) -> "Self":
+    def chain(self, iterable: Iterable[T]) -> Self:
         """Add another iterable to the end of the Stream.
 
         >>> Stream([1, 2, 3]).chain([4, 5, 6]).collect()
@@ -414,7 +414,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> "Stream[tuple[T, ...]]":
+    def chunk(self, size: int) -> Stream[tuple[T, ...]]:
         """Split stream into chunks of the specified size.
 
         >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
@@ -430,7 +430,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         def chunk(  # pylint: disable=function-redefined  # noqa: F811
             self, size: int
-        ) -> "Stream[tuple[T, ...]]":
+        ) -> Stream[tuple[T, ...]]:
             """Split stream into chunks of the specified size.
 
             >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
@@ -457,9 +457,7 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
         @overload
-        def collect(
-            self: "Stream[SA]", fun: Callable[[Iterable[SA]], SA]
-        ) -> SA:
+        def collect(self: Stream[SA], fun: Callable[[Iterable[SA]], SA]) -> SA:
             ...
 
         @overload
@@ -498,14 +496,14 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def collect(
-            self: "Stream[tuple[K, V]]",
+            self: Stream[tuple[K, V]],
             fun: Callable[[Iterable[tuple[K, V]]], dict[K, V]],
         ) -> dict[K, V]:
             ...
 
         @overload
         def collect(
-            self: "Stream[tuple[K, V]]",
+            self: Stream[tuple[K, V]],
             fun: Callable[[Iterable[tuple[K, V]]], Mapping[K, V]],
         ) -> Mapping[K, V]:
             ...
@@ -515,7 +513,7 @@ class Stream(StreamABC[T], Iterable[T]):
             ...
 
     def collect(
-        self: "Stream[U]",
+        self: Stream[U],
         fun: Callable[[Iterable[U]], object] = StreamableSequence,
     ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
@@ -533,7 +531,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None
-    ) -> "Stream[K]":
+    ) -> Stream[K]:
         """Map values concurrently.
 
         See: https://docs.python.org/3/library/concurrent.futures.html
@@ -551,7 +549,7 @@ class Stream(StreamABC[T], Iterable[T]):
         condition: Callable[[T], object],
         if_true: Callable[[T], U],
         if_false: Callable[[T], V] | None = None,
-    ) -> "Stream[U | V]":
+    ) -> Stream[U | V]:
         """Map values conditionally.
 
         >>> Stream("1x2x3x").conditional_map(str.isdigit, int).collect()
@@ -575,7 +573,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(sum(map(one, self._data)), close_source=True)
 
-    def dedup(self, *, key: None | Callable[[T], object] = None) -> "Self":
+    def dedup(self, *, key: None | Callable[[T], object] = None) -> Self:
         """Remove consecutive equal values.
 
         If the input is sorted this is the same as Stream.distinct().
@@ -604,7 +602,7 @@ class Stream(StreamABC[T], Iterable[T]):
         )
         return self
 
-    def distinct(self, *, use_set: bool = True) -> "Self":
+    def distinct(self, *, use_set: bool = True) -> Self:
         """Remove duplicate values.
 
         >>> from typed_stream import Stream
@@ -633,7 +631,7 @@ class Stream(StreamABC[T], Iterable[T]):
         )
         return self
 
-    def drop(self, count: int) -> "Self":
+    def drop(self, count: int) -> Self:
         """Drop the first count values.
 
         >>> Stream([1, 2, 3, 4, 5]).drop(2).collect()
@@ -642,7 +640,7 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.islice(self._data, count, None)
         return self
 
-    def drop_while(self, fun: Callable[[T], object]) -> "Self":
+    def drop_while(self, fun: Callable[[T], object]) -> Self:
         """Drop values as long as the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.dropwhile
@@ -667,7 +665,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return True
         return False
 
-    def enumerate(self, start_index: int = 0) -> "Stream[IndexValueTuple[T]]":
+    def enumerate(self, start_index: int = 0) -> Stream[IndexValueTuple[T]]:
         """Map the values to a tuple of index and value.
 
         >>> Stream([1, 2, 3]).enumerate().collect()
@@ -685,30 +683,26 @@ class Stream(StreamABC[T], Iterable[T]):
 
         @overload
         def exclude(
-            self: "Stream[K | Prim]", fun: InstanceChecker[Prim]
-        ) -> "Stream[K]":
+            self: Stream[K | Prim], fun: InstanceChecker[Prim]
+        ) -> Stream[K]:
+            ...
+
+        @overload
+        def exclude(self: Stream[K | U], fun: InstanceChecker[U]) -> Stream[K]:
+            ...
+
+        @overload
+        def exclude(self: Stream[K | None], fun: NoneChecker) -> Stream[K]:
             ...
 
         @overload
         def exclude(
-            self: "Stream[K | U]", fun: InstanceChecker[U]
-        ) -> "Stream[K]":
+            self: Stream[K | U], fun: TypeGuardingCallable[U]
+        ) -> Stream[K]:
             ...
 
         @overload
-        def exclude(self: "Stream[K | None]", fun: NoneChecker) -> "Stream[K]":
-            ...
-
-        @overload
-        def exclude(
-            self: "Stream[K | U]", fun: TypeGuardingCallable[U]
-        ) -> "Stream[K]":
-            ...
-
-        @overload
-        def exclude(
-            self: "Stream[T]", fun: Callable[[T], object]
-        ) -> "Stream[T]":
+        def exclude(self: Stream[T], fun: Callable[[T], object]) -> Stream[T]:
             ...
 
     def exclude(self, fun: Callable[[T], object]) -> "object":
@@ -726,34 +720,32 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def filter(
-        self: "Stream[K | None]", fun: NotNoneChecker
-    ) -> "Stream[K]":  # pragma: no cover
+        self: Stream[K | None], fun: NotNoneChecker
+    ) -> Stream[K]:  # pragma: no cover
         ...
 
     @overload
-    def filter(self: "Stream[K | None]") -> "Stream[K]":  # pragma: no cover
+    def filter(self: Stream[K | None]) -> Stream[K]:  # pragma: no cover
         ...
 
     @overload
-    def filter(self: "Stream[T]") -> "Stream[T]":  # pragma: no cover
+    def filter(self: Stream[T]) -> Stream[T]:  # pragma: no cover
         ...
 
     @overload
-    def filter(
-        self, fun: InstanceChecker[K]
-    ) -> "Stream[K]":  # pragma: no cover
+    def filter(self, fun: InstanceChecker[K]) -> Stream[K]:  # pragma: no cover
         ...
 
     @overload
     def filter(
         self, fun: TypeGuardingCallable[K]
-    ) -> "Stream[K]":  # pragma: no cover
+    ) -> Stream[K]:  # pragma: no cover
         ...
 
     @overload
     def filter(
-        self: "Stream[T]", fun: Callable[[T], object]
-    ) -> "Stream[T]":  # pragma: no cover
+        self: Stream[T], fun: Callable[[T], object]
+    ) -> Stream[T]:  # pragma: no cover
         ...
 
     def filter(self, fun: Callable[[T], object] | None = None) -> object:
@@ -792,13 +784,13 @@ class Stream(StreamABC[T], Iterable[T]):
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
-        def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> "Stream[K]":
+        def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> Stream[K]:
             ...
 
         @overload
         def flat_map(
             self, fun: Callable[[T, U], Iterable[K]], arg0: U, /  # noqa: W504
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
@@ -808,7 +800,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg0: U,
             arg1: V,
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
@@ -819,7 +811,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg1: V,
             arg2: W,
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
@@ -831,7 +823,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg2: W,
             arg3: X,
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
     def flat_map(
@@ -843,7 +835,7 @@ class Stream(StreamABC[T], Iterable[T]):
         | Callable[[T, U, V, W, X], Iterable[K]],
         /,
         *args: object,
-    ) -> "Stream[K]":
+    ) -> Stream[K]:
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
@@ -887,7 +879,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return tail[-1]
         raise StreamEmptyError()
 
-    def limit(self, count: int) -> "Self":
+    def limit(self, count: int) -> Self:
         """Stop the Stream after count values.
 
         >>> Stream([1, 2, 3, 4, 5]).limit(3).collect()
@@ -901,17 +893,17 @@ class Stream(StreamABC[T], Iterable[T]):
     if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
-        def map(self, fun: Callable[[T], K], /) -> "Stream[K]":
+        def map(self, fun: Callable[[T], K], /) -> Stream[K]:
             ...
 
         @overload
-        def map(self, fun: Callable[[T, U], K], arg0: U, /) -> "Stream[K]":
+        def map(self, fun: Callable[[T, U], K], arg0: U, /) -> Stream[K]:
             ...
 
         @overload
         def map(
             self, fun: Callable[[T, U, V], K], arg0: U, arg1: V, /  # noqa: W504
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
@@ -922,7 +914,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg1: V,
             arg2: W,
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
@@ -934,7 +926,7 @@ class Stream(StreamABC[T], Iterable[T]):
             arg2: W,
             arg3: X,
             /,
-        ) -> "Stream[K]":  # pragma: no cover
+        ) -> Stream[K]:  # pragma: no cover
             ...
 
     def map(
@@ -946,7 +938,7 @@ class Stream(StreamABC[T], Iterable[T]):
         | Callable[[T, U, V, W, X], K],
         /,
         *args: object,
-    ) -> "Stream[K]":
+    ) -> Stream[K]:
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
@@ -963,12 +955,12 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     @overload
-    def max(self: "Stream[SC]") -> SC:  # pragma: no cover
+    def max(self: Stream[SC]) -> SC:  # pragma: no cover
         ...
 
     @overload
     def max(
-        self: "Stream[SC]", default: K | _DefaultValueType = _DEFAULT_VALUE
+        self: Stream[SC], default: K | _DefaultValueType = _DEFAULT_VALUE
     ) -> SC | K:  # pragma: no cover
         ...
 
@@ -1008,12 +1000,12 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._finish(max_, close_source=True)
 
     @overload
-    def min(self: "Stream[SC]") -> SC:  # pragma: no cover
+    def min(self: Stream[SC]) -> SC:  # pragma: no cover
         ...
 
     @overload
     def min(
-        self: "Stream[SC]", default: K | _DefaultValueType = _DEFAULT_VALUE
+        self: Stream[SC], default: K | _DefaultValueType = _DEFAULT_VALUE
     ) -> SC | K:  # pragma: no cover
         ...
 
@@ -1108,24 +1100,24 @@ class Stream(StreamABC[T], Iterable[T]):
     @overload
     def nwise(  # type: ignore[overload-overlap]
         self, size: Literal[1], /  # noqa: W504
-    ) -> "Stream[tuple[T]]":  # pragma: no cover
+    ) -> Stream[tuple[T]]:  # pragma: no cover
         ...
 
     @overload
     def nwise(  # type: ignore[overload-overlap]
         self, size: Literal[2], /  # noqa: W504
-    ) -> "Stream[tuple[T, T]]":  # pragma: no cover
+    ) -> Stream[tuple[T, T]]:  # pragma: no cover
         ...
 
     @overload
     def nwise(
         self, size: int, /  # noqa: W504
-    ) -> "Stream[tuple[T, ...]]":  # pragma: no cover
+    ) -> Stream[tuple[T, ...]]:  # pragma: no cover
         ...
 
     def nwise(
         self, size: int, /  # noqa: W504
-    ) -> "Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]":
+    ) -> Stream[tuple[T, ...]] | Stream[tuple[T, T]] | Stream[tuple[T]]:
         """Return a Stream of overlapping n-lets.
 
         This is often called a sliding window.
@@ -1145,7 +1137,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Stream(sliding_window(self._data, size)))
 
-    def peek(self, fun: Callable[[T], object]) -> "Self":
+    def peek(self, fun: Callable[[T], object]) -> Self:
         """Peek at every value, without modifying the values in the Stream.
 
         >>> stream = Stream([1, 2, 3]).peek(print)
@@ -1199,58 +1191,58 @@ class Stream(StreamABC[T], Iterable[T]):
         # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
         @overload
         def starmap(
-            self: "Stream[tuple[T]]", fun: Callable[[T], K], /  # noqa: W504
-        ) -> "Stream[K]":
+            self: Stream[tuple[T]], fun: Callable[[T], K], /  # noqa: W504
+        ) -> Stream[K]:
             ...
 
         @overload
         def starmap(
-            self: "Stream[IndexValueTuple[U]]",
+            self: Stream[IndexValueTuple[U]],
             fun: Callable[[int, U], K],
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U]]",
+            self: Stream[tuple[T, U]],
             fun: Callable[[T, U], K],
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U, V]]",
+            self: Stream[tuple[T, U, V]],
             fun: Callable[[T, U, V], K],
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U, V, W]]",
+            self: Stream[tuple[T, U, V, W]],
             fun: Callable[[T, U, V, W], K],
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
         @overload
         def starmap(
-            self: "Stream[tuple[T, U, V, W, X]]",
+            self: Stream[tuple[T, U, V, W, X]],
             fun: Callable[[T, U, V, W, X], K],
             /,
-        ) -> "Stream[K]":
+        ) -> Stream[K]:
             ...
 
     def starmap(
         self: Union[  # pylint: disable=consider-alternative-union-syntax
-            "Stream[tuple[T, U, V, W, X]]",
-            "Stream[tuple[T, U, V, W]]",
-            "Stream[tuple[T, U, V]]",
-            "Stream[tuple[T, U]]",
-            "Stream[IndexValueTuple[U]]",
-            "Stream[tuple[T]]",
+            Stream[tuple[T, U, V, W, X]],
+            Stream[tuple[T, U, V, W]],
+            Stream[tuple[T, U, V]],
+            Stream[tuple[T, U]],
+            Stream[IndexValueTuple[U]],
+            Stream[tuple[T]],
         ],
         fun: Callable[[T], K]
         | Callable[[T, U], K]
@@ -1259,7 +1251,7 @@ class Stream(StreamABC[T], Iterable[T]):
         | Callable[[T, U, V, W], K]
         | Callable[[T, U, V, W, X], K],
         /,
-    ) -> "Stream[K]":
+    ) -> Stream[K]:
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
@@ -1271,7 +1263,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Stream(itertools.starmap(fun, self._data)))
 
-    def sum(self: "Stream[SA]") -> SA:
+    def sum(self: Stream[SA]) -> SA:
         """Calculate the sum of the elements.
 
         This works for every type that supports addition.
@@ -1305,7 +1297,7 @@ class Stream(StreamABC[T], Iterable[T]):
             close_source=True,
         )
 
-    def take_while(self, fun: Callable[[T], object]) -> "Self":
+    def take_while(self, fun: Callable[[T], object]) -> Self:
         """Take values as long the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.takewhile
