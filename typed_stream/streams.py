@@ -74,6 +74,13 @@ SC = TypeVar("SC", bound=SupportsComparison)
 add: Callable[[SA, SA], SA] = operator.add
 
 
+if sys.version_info < (3, 11):  # pragma: no cover
+    if TYPE_CHECKING:
+        from typing_extensions import Self
+else:  # pragma: no cover
+    from typing import Self
+
+
 class Stream(StreamABC[T], Iterable[T]):
     """Stream class providing an interface similar to Stream in Java.
 
@@ -590,20 +597,45 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream("aAaAbbbcCCAaBbCc").dedup(key=str.lower).collect("".join)
         'abcABC'
         """
-        # Inspire by the unique_justseen itertools recipe
+        # Inspired by the unique_justseen itertools recipe
         # https://docs.python.org/3/library/itertools.html#itertools-recipes
-        return self._finish(
-            Stream(
-                map(
-                    next,
-                    map(
-                        operator.itemgetter(1),
-                        itertools.groupby(self._data, key=key),
-                    ),
-                )
+        self._data = map(
+            next,
+            map(
+                operator.itemgetter(1),
+                itertools.groupby(self._data, key=key),
             ),
-            close_source=False,
         )
+        return self
+
+    def distinct(self, *, use_set: bool = True) -> "Self":
+        """Remove duplicate values.
+
+        >>> from typed_stream import Stream
+        >>> Stream([1, 2, 2, 2, 3, 2, 2]).distinct().collect()
+        (1, 2, 3)
+        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct().collect()
+        Traceback (most recent call last):
+        ...
+        TypeError: unhashable type: 'set'
+        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct(use_set=False).collect()
+        ({1}, {2}, {3})
+        """
+        # pylint: disable=duplicate-code
+        encountered: set[T] | list[T]
+        peek_fun: Callable[[T], None]
+        if use_set:
+            encountered = set()
+            peek_fun = encountered.add
+        else:
+            encountered = []
+            peek_fun = encountered.append
+
+        self._data = map(
+            Peeker(peek_fun),
+            itertools.filterfalse(encountered.__contains__, self._data),
+        )
+        return self
 
     def drop(self, count: int) -> "Stream[T]":
         """Drop the first count values.
