@@ -31,14 +31,14 @@ PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
+V_co = TypeVar("V_co", contravariant=True)
 
-
-class TypeGuardingCallable(Protocol[T_co]):
+class TypeGuardingCallable(Protocol[T_co, V_co]):
     """A class representing a function that type guards."""
 
     @abstractmethod
-    def __call__(self, value: object) -> TypeGuard[T_co]:
-        """Return True if value isinstance of TGC_CHECKED."""
+    def __call__(self, value: V_co) -> TypeGuard[T_co]:
+        """Return True if value isinstance of T_co."""
 
 
 # pylint: disable=invalid-name

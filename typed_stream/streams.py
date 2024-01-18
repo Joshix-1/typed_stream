@@ -695,17 +695,17 @@ class Stream(StreamABC[T], Iterable[T]):
         def exclude(self: Stream[K | None], fun: NoneChecker) -> Stream[K]:
             ...
 
-        @overload
-        def exclude(
-            self: Stream[K | U], fun: TypeGuardingCallable[U]
-        ) -> Stream[K]:
-            ...
+        # @overload
+        # def exclude(
+        #     self: Stream[K | U], fun: TypeGuardingCallable[U, K | U]
+        # ) -> Stream[K]:
+        #     ...
 
         @overload
         def exclude(self: Stream[T], fun: Callable[[T], object]) -> Stream[T]:
             ...
 
-    def exclude(self, fun: Callable[[T], object]) -> "object":
+    def exclude(self, fun: Callable[[T], object]) -> object:
         """Exclude values if the function returns a truthy value.
 
         See: https://docs.python.org/3/library/itertools.html#itertools.filterfalse
@@ -738,7 +738,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def filter(
-        self, fun: TypeGuardingCallable[K]
+        self, fun: TypeGuardingCallable[K, T]
     ) -> Stream[K]:  # pragma: no cover
         ...
 
