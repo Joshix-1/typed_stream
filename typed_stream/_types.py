@@ -33,6 +33,7 @@ V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 V_co = TypeVar("V_co", contravariant=True)
 
+
 class TypeGuardingCallable(Protocol[T_co, V_co]):
     """A class representing a function that type guards."""
 
