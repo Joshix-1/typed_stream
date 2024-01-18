@@ -31,14 +31,14 @@ PathLikeType = bytes | PathLike[bytes] | PathLike[str] | str
 T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
-V_co = TypeVar("V_co", contravariant=True)
+V_contra = TypeVar("V_contra", contravariant=True)
 
 
-class TypeGuardingCallable(Protocol[T_co, V_co]):
+class TypeGuardingCallable(Protocol[T_co, V_contra]):
     """A class representing a function that type guards."""
 
     @abstractmethod
-    def __call__(self, value: V_co) -> TypeGuard[T_co]:
+    def __call__(self, value: V_contra) -> TypeGuard[T_co]:
         """Return True if value isinstance of T_co."""
 
 
