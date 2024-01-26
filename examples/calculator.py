@@ -34,9 +34,9 @@ GLOBALS: Final[Mapping[str, object]] = {
     "log": math.log,
     "pi": math.pi,
     "sin": math.sin,
-    "sqrt": lambda x: cmath.sqrt(x)
-    if isinstance(x, complex) or x < 0
-    else math.sqrt(x),
+    "sqrt": lambda x: (
+        cmath.sqrt(x) if isinstance(x, complex) or x < 0 else math.sqrt(x)
+    ),
     "tan": math.tan,
     "tau": math.tau,
 }

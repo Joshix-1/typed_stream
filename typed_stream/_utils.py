@@ -104,12 +104,10 @@ class NoneChecker:
     if TYPE_CHECKING:  # pragma: no cover
 
         @overload
-        def __call__(self, value: None) -> Literal[True]:
-            ...
+        def __call__(self, value: None) -> Literal[True]: ...
 
         @overload
-        def __call__(self, value: object | None) -> TypeGuard[None]:
-            ...
+        def __call__(self, value: object | None) -> TypeGuard[None]: ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is None."""
@@ -125,12 +123,10 @@ class NotNoneChecker:
     if TYPE_CHECKING:  # pragma: no cover
 
         @overload
-        def __call__(self, value: None) -> Literal[False]:
-            ...
+        def __call__(self, value: None) -> Literal[False]: ...
 
         @overload
-        def __call__(self, value: object) -> bool:
-            ...
+        def __call__(self, value: object) -> bool: ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is not None."""
