@@ -120,12 +120,10 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
     if TYPE_CHECKING:  # pragma: no cover
 
         @overload
-        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO:
-            ...
+        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO: ...
 
         @overload
-        def _open_file(self: "LazyFileIterator[str]") -> TextIO:
-            ...
+        def _open_file(self: "LazyFileIterator[str]") -> TextIO: ...
 
     def _open_file(
         self: "LazyFileIterator[str] | LazyFileIterator[bytes]",
