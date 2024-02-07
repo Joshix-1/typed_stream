@@ -23,10 +23,6 @@ In [examples](./examples) are cool examples using Streams.
 
 I'll try to answer questions that could occur.
 
-### Which type-checkers do you support?
-
-Currently only mypy is fully supported, because I couldn't get the others to work properly.
-
 ### Why are there no changelogs?
 
 I'm too lazy. I don't know of anybody using this (except me) and I don't need to write changelogs for myself.
