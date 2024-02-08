@@ -515,7 +515,6 @@ class Stream(StreamABC[T], Iterable[T]):
         ) -> StreamableSequence[asyncio.Task[K]]:
             """Collect the values of this stream of Awaitables to awaited Tasks.
 
-            >>> import asyncio
             >>> async def duplicate(a: SA) -> SA:
             ...     await asyncio.sleep(0.1)
             ...     return a + a
@@ -540,7 +539,6 @@ class Stream(StreamABC[T], Iterable[T]):
         ) -> Stream[K]:
             """Await all Awaitables in the Stream and collect them in a Stream.
 
-            >>> import asyncio
             >>> async def duplicate(a: SA) -> SA:
             ...     await asyncio.sleep(0.1)
             ...     return a + a
