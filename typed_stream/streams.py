@@ -6,13 +6,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import collections
 import concurrent.futures
 import functools
 import itertools
 import operator
 import sys
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Awaitable, Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, Union, overload
@@ -506,6 +507,57 @@ class Stream(StreamABC[T], Iterable[T]):
         {1: 2, 3: 4}
         """
         return self._finish(fun(self._data), close_source=True)
+
+    if sys.version_info >= (3, 11, 0):
+
+        async def collect_async_to_tasks(
+            self: Stream[Awaitable[K]],
+        ) -> StreamableSequence[asyncio.Task[K]]:
+            """Collect the values of this stream of Awaitables to awaited Tasks.
+
+            >>> import asyncio
+            >>> async def duplicate(a: SA) -> SA:
+            ...     await asyncio.sleep(0.1)
+            ...     return a + a
+            >>> tasks = asyncio.run(
+            ...     Stream.range(5_000).map(duplicate).collect_async_to_tasks()
+            ... )
+            >>> tasks[0].result()
+            0
+            >>> tasks[333].result()
+            666
+            >>> tasks[4_500].result()
+            9000
+            """
+            async with asyncio.TaskGroup() as group:  # type: ignore[attr-defined]
+                result: StreamableSequence[asyncio.Task[K]] = (
+                    StreamableSequence(map(group.create_task, self._data))
+                )
+            return self._finish(result, close_source=True)
+
+        async def collect_async_to_result_stream(
+            self: Stream[Awaitable[K]],
+        ) -> Stream[K]:
+            """Await all Awaitables in the Stream and collect them in a Stream.
+
+            >>> import asyncio
+            >>> async def duplicate(a: SA) -> SA:
+            ...     await asyncio.sleep(0.1)
+            ...     return a + a
+            >>> tasks = asyncio.run(
+            ...     Stream.range(5_000).map(duplicate).collect_async_to_result_stream()
+            ... ).collect()
+            >>> tasks[0]
+            0
+            >>> tasks[333]
+            666
+            >>> tasks[4_500]
+            9000
+            >>> tasks  # doctest: +ELLIPSIS
+            (0, 2, 4, 6, ..., 9994, 9996, 9998)
+            """
+            tasks = await self.collect_async_to_tasks()
+            return Stream(task.result() for task in tasks)
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None

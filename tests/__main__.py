@@ -728,6 +728,8 @@ for name in dir(Stream(...)):  # noqa: C901
         "_get_args",
         "_StreamABC__data",
         "close",
+        "collect_async_to_tasks",
+        "collect_async_to_result_stream",
         "counting",
         "from_value",
         "range",
