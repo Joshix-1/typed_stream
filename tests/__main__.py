@@ -55,6 +55,7 @@ from .test_functions import (
 def run_doc_tests() -> None:
     """Run the doctests in the typed_stream package."""
     dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
+    acc_fails, acc_tests = 0, 0
     for path in dir_.rglob("*.py"):
         if path.name == "__main__.py":
             continue
@@ -64,7 +65,26 @@ def run_doc_tests() -> None:
             .replace("/", ".")
             .removesuffix(".py")
         )
-        doctest.testmod(importlib.import_module(f"typed_stream.{mod}"))
+        full_mod = f"typed_stream.{mod}"
+        fails, tests = doctest.testmod(
+            importlib.import_module(full_mod),
+            exclude_empty=True,
+            raise_on_error=False,
+        )
+        acc_fails += fails
+        acc_tests += tests
+        if tests:
+            print(
+                f"{full_mod}: {tests - fails} / {tests} doctests successful",
+                file=sys.stderr,
+            )
+
+    print(
+        f"typed_stream: {acc_tests - acc_fails} / {acc_tests} doctests successful",
+        file=sys.stderr,
+    )
+    if acc_fails:
+        sys.exit(1)
 
 
 run_doc_tests()
