@@ -508,7 +508,29 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(fun(self._data), close_source=True)
 
-    if sys.version_info >= (3, 11, 0):
+    if sys.version_info >= (3, 11):  # noqa: C901
+
+        async def await_all_ignoring_result(self: Stream[Awaitable[K]]) -> None:
+            """Await all the values of this stream of Awaitables.
+
+            >>> counter = [0]
+            >>> async def count(a: int) -> None:
+            ...     await asyncio.sleep(0.1)
+            ...     counter[0] += a
+            >>> asyncio.run(
+            ...     Stream.from_value(1)
+            ...     .limit(5_000)
+            ...     .map(count)
+            ...     .await_all_ignoring_result()
+            ... )
+            >>> counter
+            [5000]
+            """
+            async with asyncio.TaskGroup() as group:  # type: ignore[attr-defined]
+                for awaitable in self._data:
+                    group.create_task(awaitable)
+
+            return self._finish(None, close_source=True)
 
         async def collect_async_to_tasks(
             self: Stream[Awaitable[K]],

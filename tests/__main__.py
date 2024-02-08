@@ -727,6 +727,7 @@ for name in dir(Stream(...)):  # noqa: C901
         "_finish",
         "_get_args",
         "_StreamABC__data",
+        "await_all_ignoring_result",
         "close",
         "collect_async_to_tasks",
         "collect_async_to_result_stream",
