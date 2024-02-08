@@ -70,6 +70,7 @@ def run_doc_tests() -> None:
             importlib.import_module(full_mod),
             exclude_empty=True,
             raise_on_error=False,
+            optionflags=doctest.DONT_ACCEPT_TRUE_FOR_1,
         )
         acc_fails += fails
         acc_tests += tests
