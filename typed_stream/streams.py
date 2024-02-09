@@ -538,17 +538,23 @@ class Stream(StreamABC[T], Iterable[T]):
             """Collect the values of this stream of Awaitables to awaited Tasks.
 
             >>> async def duplicate(a: SA) -> SA:
+            ...     if a == 101:
+            ...         raise asyncio.CancelledError()
             ...     await asyncio.sleep(0.1)
             ...     return a + a
             >>> tasks = asyncio.run(
             ...     Stream.range(5_000).map(duplicate).collect_async_to_tasks()
             ... )
+            >>> len(tasks)
+            5000
             >>> tasks[0].result()
             0
             >>> tasks[333].result()
             666
             >>> tasks[4_500].result()
             9000
+            >>> tasks[101].cancelled()
+            True
             """
             async with asyncio.TaskGroup() as group:  # type: ignore[attr-defined]
                 result: StreamableSequence[asyncio.Task[K]] = (
