@@ -50,7 +50,7 @@ from ._utils import (
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import noop, one
 from .stream_abc import StreamABC
-from .streamable import StreamableSequence
+from .streamable import StreamableSequence, TaskCollection
 
 # pylint: disable=too-many-lines
 __all__ = (
@@ -510,29 +510,37 @@ class Stream(StreamABC[T], Iterable[T]):
 
     if sys.version_info >= (3, 11):  # noqa: C901
 
-        async def await_all_ignoring_result(self: Stream[Awaitable[K]]) -> None:
+        async def collect_and_await_all(
+            self: Stream[Awaitable[K]],
+        ) -> tuple[K | BaseException]:
             """Await all the values of this stream of Awaitables.
 
             >>> counter = [0]
             >>> async def count(a: int) -> None:
             ...     await asyncio.sleep(0.1)
             ...     counter[0] += a
-            >>> asyncio.run(
+            ...
+            >>> result = asyncio.run(
             ...     Stream.from_value(1)
             ...     .limit(5_000)
             ...     .map(count)
-            ...     .await_all_ignoring_result()
+            ...     .collect_and_await_all()
             ... )
+            >>> len(result)
+            5000
+            >>> result # doctest: +ELLIPSIS
+            (None, None, ..., None, None)
             >>> counter
             [5000]
             """
-            async with asyncio.TaskGroup() as group:  # type: ignore[attr-defined]
-                for awaitable in self._data:
-                    group.create_task(awaitable)
+            return self._finish(
+                tuple(
+                    await asyncio.gather(*self._data, return_exceptions=True)
+                ),
+                close_source=True,
+            )
 
-            return self._finish(None, close_source=True)
-
-        async def collect_async_to_tasks(
+        async def collect_async_to_awaited_tasks(
             self: Stream[Awaitable[K]],
         ) -> StreamableSequence[asyncio.Task[K]]:
             """Collect the values of this stream of Awaitables to awaited Tasks.
@@ -542,8 +550,11 @@ class Stream(StreamABC[T], Iterable[T]):
             ...         raise asyncio.CancelledError()
             ...     await asyncio.sleep(0.1)
             ...     return a + a
+            ...
             >>> tasks = asyncio.run(
-            ...     Stream.range(5_000).map(duplicate).collect_async_to_tasks()
+            ...     Stream.range(5_000)
+            ...     .map(duplicate)
+            ...     .collect_async_to_awaited_tasks()
             ... )
             >>> len(tasks)
             5000
@@ -556,34 +567,11 @@ class Stream(StreamABC[T], Iterable[T]):
             >>> tasks[101].cancelled()
             True
             """
-            async with asyncio.TaskGroup() as group:  # type: ignore[attr-defined]
-                result: StreamableSequence[asyncio.Task[K]] = (
-                    StreamableSequence(map(group.create_task, self._data))
-                )
+            result: TaskCollection[K] = TaskCollection.from_iterable(self._data)
+
+            await result.await_all()
+
             return self._finish(result, close_source=True)
-
-        async def collect_async_to_result_stream(
-            self: Stream[Awaitable[K]],
-        ) -> Stream[K]:
-            """Await all Awaitables in the Stream and collect them in a Stream.
-
-            >>> async def duplicate(a: SA) -> SA:
-            ...     await asyncio.sleep(0.1)
-            ...     return a + a
-            >>> tasks = asyncio.run(
-            ...     Stream.range(5_000).map(duplicate).collect_async_to_result_stream()
-            ... ).collect()
-            >>> tasks[0]
-            0
-            >>> tasks[333]
-            666
-            >>> tasks[4_500]
-            9000
-            >>> tasks  # doctest: +ELLIPSIS
-            (0, 2, 4, 6, ..., 9994, 9996, 9998)
-            """
-            tasks = await self.collect_async_to_tasks()
-            return Stream(task.result() for task in tasks)
 
     def concurrent_map(
         self, fun: Callable[[T], K], max_workers: int | None = None

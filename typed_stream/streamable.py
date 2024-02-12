@@ -6,8 +6,9 @@
 
 from __future__ import annotations
 
+import asyncio
 from abc import ABC
-from collections.abc import Iterable
+from collections.abc import Awaitable, Iterable
 from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -83,3 +84,54 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         if isinstance(item, slice):
             return StreamableSequence(super().__getitem__(item))
         return super().__getitem__(item)
+
+
+class TaskCollection(StreamableSequence[asyncio.Task[V]]):
+    """A streamable immutable Sequence.
+
+    >>> async def duplicate(a: int) -> int:
+    ...     if a == 18:
+    ...         raise ValueError(f"{a=}")
+    ...     await asyncio.sleep(0.1)
+    ...     return a + a
+    ...
+    >>> async def get_tasks() -> TaskCollection[int]:
+    ...     return await TaskCollection.from_iterable(
+    ...         duplicate(i) for i in range(100)
+    ...     ).await_all()
+    ...
+    >>> tasks = asyncio.run(get_tasks())
+    >>> len(tasks)
+    100
+    >>> tasks[21].result()
+    42
+    >>> tasks[69].result()
+    138
+    >>> tasks[18].exception()
+    ValueError('a=18')
+    >>> results = tasks.stream_results().catch(ValueError).collect()
+    >>> len(results)
+    99
+    >>> results  # doctest: +ELLIPSIS
+    (0, 2, 4, ..., 34, 38, ..., 194, 196, 198)
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def from_iterable(
+        cls, iterable: Iterable[Awaitable[T]]
+    ) -> TaskCollection[T]:
+        """Create a TaskCollection from an iterable of Awaitables."""
+        return TaskCollection(map(asyncio.Task, iterable))
+
+    async def await_all(self) -> TaskCollection[V]:
+        """Await all tasks in this collection ignoring exceptions."""
+        await asyncio.gather(*self, return_exceptions=True)
+        return self
+
+    def stream_results(self) -> Stream[V]:
+        """Return a stream of the results of the tasks."""
+        from .streams import Stream  # pylint: disable=import-outside-toplevel
+
+        return Stream(map(asyncio.Task.result, self))  # type: ignore[arg-type]
