@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC
-from collections.abc import Awaitable, Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -123,7 +123,8 @@ class TaskCollection(StreamableSequence[asyncio.Task[V]]):
         cls, iterable: Iterable[Awaitable[T]]
     ) -> TaskCollection[T]:
         """Create a TaskCollection from an iterable of Awaitables."""
-        return TaskCollection(map(asyncio.Task, iterable))
+        to_task: Callable[[Awaitable[T]], asyncio.Task[T]] = asyncio.Task
+        return TaskCollection(map(to_task, iterable))
 
     async def await_all(self) -> TaskCollection[V]:
         """Await all tasks in this collection ignoring exceptions."""

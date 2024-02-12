@@ -512,7 +512,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
         async def collect_and_await_all(
             self: Stream[Awaitable[K]],
-        ) -> tuple[K | BaseException]:
+        ) -> tuple[K | BaseException, ...]:
             """Await all the values of this stream of Awaitables.
 
             >>> counter = [0]
@@ -533,16 +533,14 @@ class Stream(StreamABC[T], Iterable[T]):
             >>> counter
             [5000]
             """
-            return self._finish(
-                tuple(
-                    await asyncio.gather(*self._data, return_exceptions=True)
-                ),
-                close_source=True,
+            result: tuple[K | BaseException, ...] = tuple(
+                await asyncio.gather(*self._data, return_exceptions=True)
             )
+            return self._finish(result, close_source=True)
 
         async def collect_async_to_awaited_tasks(
             self: Stream[Awaitable[K]],
-        ) -> StreamableSequence[asyncio.Task[K]]:
+        ) -> TaskCollection[K]:
             """Collect the values of this stream of Awaitables to awaited Tasks.
 
             >>> async def duplicate(a: SA) -> SA:
@@ -567,7 +565,7 @@ class Stream(StreamABC[T], Iterable[T]):
             >>> tasks[101].cancelled()
             True
             """
-            result: TaskCollection[K] = TaskCollection.from_iterable(self._data)
+            result = TaskCollection.from_iterable(self._data)
 
             await result.await_all()
 
