@@ -71,6 +71,30 @@ jobs:
           path: .coverage
           name: coverage
 
+  test-rustpython:
+    name: Test RustPython
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup RustPython
+        run: |
+          rustup update stable && rustup default stable
+          cargo install --features "bz2,encodings,ssl" --git https://github.com/RustPython/RustPython.git
+          rustpython -m ensurepip
+      - name: Run tests
+        run: |
+          rustpython -m examples.test
+          rustpython -m tests
+      - name: Upload coverage as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: .coverage
+          name: coverage
+
   mypy:
     name: mypy
     runs-on: ubuntu-latest
