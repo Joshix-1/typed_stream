@@ -86,6 +86,7 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         return super().__getitem__(item)
 
 
+# pylint: disable-next=invalid-name
 _convert_to_task = cast(Callable[[Awaitable[T]], asyncio.Task[T]], asyncio.Task)
 
 
