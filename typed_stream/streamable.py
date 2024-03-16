@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC
 from collections.abc import Awaitable, Callable, Iterable
-from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
+from typing import TYPE_CHECKING, SupportsIndex, TypeVar, cast, overload
 
 if TYPE_CHECKING:  # pragma: no cover
     from .streams import Stream
@@ -86,6 +86,9 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         return super().__getitem__(item)
 
 
+_convert_to_task = cast(Callable[[Awaitable[T]], asyncio.Task[T]], asyncio.Task)
+
+
 class TaskCollection(StreamableSequence[asyncio.Task[V]]):
     """A streamable immutable Sequence.
 
@@ -123,8 +126,7 @@ class TaskCollection(StreamableSequence[asyncio.Task[V]]):
         cls, iterable: Iterable[Awaitable[T]]
     ) -> TaskCollection[T]:
         """Create a TaskCollection from an iterable of Awaitables."""
-        to_task: Callable[[Awaitable[T]], asyncio.Task[T]] = asyncio.Task
-        return TaskCollection(map(to_task, iterable))
+        return TaskCollection(map(_convert_to_task, iterable))
 
     async def await_all(self) -> TaskCollection[V]:
         """Await all tasks in this collection ignoring exceptions."""
