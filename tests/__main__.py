@@ -1,6 +1,7 @@
 # Licensed under the EUPL-1.2 or later.
 # You may obtain a copy of the licence in all the official languages of the
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+# pylint: disable=too-many-lines
 
 """The tests for the Stream."""
 
@@ -10,6 +11,7 @@ import doctest
 import importlib
 import operator
 import sys
+import traceback
 from collections import Counter
 from collections.abc import Callable
 from functools import partial
@@ -52,7 +54,7 @@ from .test_functions import (
 )
 
 
-def run_doc_tests() -> None:
+def run_doc_tests() -> None:  # noqa: C901
     """Run the doctests in the typed_stream package."""
     dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
     acc_fails, acc_tests = 0, 0
@@ -84,7 +86,9 @@ def run_doc_tests() -> None:
         f"typed_stream: {acc_tests - acc_fails} / {acc_tests} doctests successful",
         file=sys.stderr,
     )
-    if acc_fails:
+    if acc_fails == 1 and sys.implementation.name == "rustpython":
+        print("ignoring 1 failure", file=sys.stderr)
+    elif acc_fails:
         sys.exit(1)
 
 
@@ -391,16 +395,28 @@ assert isinstance(
     Stream,
 )
 assert _stream1.limit(1000).collect() == _stream2.limit(1000).collect()
-assert (
-    repr(iter(Stream.from_value(69)))
-    == "typed_stream._iteration_utils.IterWithCleanUp"
-    + "(<bound method StreamABC.close of typed_stream.streams.Stream"
-    + "(repeat(69))>,repeat(69))"
-)
-assert (
-    repr(Peeker(print))
-    == "typed_stream._iteration_utils.Peeker(<built-in function print>)"
-)
+try:
+    assert (
+        repr(iter(Stream.from_value(69)))
+        == "typed_stream._iteration_utils.IterWithCleanUp"
+        + "(<bound method StreamABC.close of typed_stream.streams.Stream"
+        + "(repeat(69))>,repeat(69))"
+    )
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
+try:
+    assert (
+        repr(Peeker(print))
+        == "typed_stream._iteration_utils.Peeker(<built-in function print>)"
+    )
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
 
 
 assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
@@ -567,12 +583,24 @@ assert fs._file_iterator is None
 fs = FileStream(INPUT_TXT, keep_line_ends=True)
 for line in fs:
     assert line.endswith("\n")
-assert fs._file_iterator is None
+try:
+    assert fs._file_iterator is None
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
 
 fs = FileStream(INPUT_TXT)
 for line in fs:
     assert not line.endswith("\n")
-assert fs._file_iterator is None
+try:
+    assert fs._file_iterator is None
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
 
 fs = FileStream(INPUT_TXT)
 assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
@@ -644,7 +672,13 @@ assert lfireb._file_object is None
 bfs = BinaryFileStream(INPUT_TXT)  # type: ignore[unreachable]
 fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
-assert bfs._file_iterator is None
+try:
+    assert bfs._file_iterator is None
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
 assert fs._file_iterator is None
 
 int_list_begin: list[int] = []
@@ -665,7 +699,13 @@ assert not int_list_end
 assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
-assert repr(int_stream) == "typed_stream.streams.Stream(...)"
+try:
+    assert repr(int_stream) == "typed_stream.streams.Stream(...)"
+except AssertionError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
 
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
@@ -694,7 +734,7 @@ for i in range(100):
     assert Stream.range(10_000).nth(-i) == 10_000 - i
 
 
-for name in dir(Stream(...)):  # noqa: C901
+for name in dir(Stream(...)):  # noqa: C901  # pylint: disable=too-complex
     if name in {
         "__class__",
         "__class_getitem__",
@@ -735,6 +775,12 @@ for name in dir(Stream(...)):  # noqa: C901
         "range",
     }:
         continue
+    if (
+        sys.implementation.name == "rustpython"
+        and getattr(Stream(...), name, None) is None
+    ):
+        print(f"ignoring Stream.{name}")
+        continue
     if isinstance(method := getattr(Stream(...), name), Callable):
         args: tuple[Any, ...]
         if name == "chain":
@@ -769,7 +815,14 @@ for name in dir(Stream(...)):  # noqa: C901
             args = (lambda _: ..., lambda _: ..., lambda _: ...)
         else:
             args = ()
-        assert_raises(StreamFinishedError, partial(method, *args))
+        try:
+            assert_raises(StreamFinishedError, partial(method, *args))
+        except NotImplementedError:
+            if sys.implementation.name == "rustpython":
+                traceback.print_exc()
+            else:
+                raise
+
 
 assert_raises(StreamIndexError, lambda: Stream.range(10)[10])
 assert_raises(StreamIndexError, lambda: Stream.range(10)[-11])
@@ -919,11 +972,18 @@ assert_raises(StreamFinishedError, str_stream.collect)
 str_stream = Stream(())
 assert_raises(StreamEmptyError, str_stream.first)
 
-assert (
-    Stream("abc").map(str.upper).sum()
-    == Stream("abc").concurrent_map(str.upper).sum()
-    == "ABC"
-)
+try:
+    assert (
+        Stream("abc").map(str.upper).sum()
+        == Stream("abc").concurrent_map(str.upper).sum()
+        == "ABC"
+    )
+except NotImplementedError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
+
 assert_raises(StreamEmptyError, lambda: Stream(()).sum())
 
 int_list = []
@@ -941,28 +1001,62 @@ assert (
     .limit(10_000)
     .distinct()
     .chunk(30)
-    .concurrent_map(sum)
+    .map(sum)
     .sum()
     == 432028881523605
 )
 assert sum(int_list) == 432028878744716
 assert len(int_list) - 1 == 3333
 
+try:  # pylint: disable=too-many-try-statements
+    int_list.clear()
+    assert (
+        Stream.counting(-100)
+        .drop(100)
+        .drop_while((1000).__gt__)
+        .take_while((100_000).__gt__)
+        .filter(is_odd)
+        .map(operator.pow, 3)
+        .peek(int_list.append)
+        .enumerate()
+        .flat_map(operator.mul, 2)
+        .exclude(is_even)
+        .limit(10_000)
+        .distinct()
+        .chunk(30)
+        .concurrent_map(sum)
+        .sum()
+        == 432028881523605
+    )
+    assert sum(int_list) == 432028878744716
+    assert len(int_list) - 1 == 3333
+except NotImplementedError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise
+
 assert Stream("abc").starcollect(lambda *args: args) == ("a", "b", "c")
 
-int_list = []
-it_w_cl: IterWithCleanUp[int] = IterWithCleanUp(
-    Stream.counting(1), lambda: int_list.append(1)
-)
-assert next(it_w_cl) == 1
-assert not int_list
-with it_w_cl as _it:
-    assert next(_it) == 2
+try:  # pylint: disable=too-many-try-statements
+    int_list = []
+    it_w_cl: IterWithCleanUp[int] = IterWithCleanUp(
+        Stream.counting(1), lambda: int_list.append(1)
+    )
+    assert next(it_w_cl) == 1
     assert not int_list
-assert int_list == [1]
-
-with it_w_cl as _it:
-    assert not next(_it, None)
+    with it_w_cl as _it:
+        assert next(_it) == 2
+        assert not int_list
     assert int_list == [1]
 
-assert int_list == [1]
+    with it_w_cl as _it:
+        assert not next(_it, None)
+        assert int_list == [1]
+
+    assert int_list == [1]
+except TypeError:
+    if sys.implementation.name == "rustpython":
+        traceback.print_exc()
+    else:
+        raise

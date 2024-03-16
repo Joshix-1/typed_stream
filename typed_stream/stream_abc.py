@@ -7,11 +7,11 @@
 from __future__ import annotations
 
 import abc
-import sys
 from collections.abc import AsyncIterable, Callable, Iterable
 from types import EllipsisType
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import Generic, TypeVar
 
+from ._self import Self
 from ._types import Closeable, PrettyRepr
 from .exceptions import StreamFinishedError
 
@@ -19,13 +19,6 @@ __all__ = ("StreamABC",)
 
 T = TypeVar("T", bound=object)
 V = TypeVar("V")
-
-
-if sys.version_info < (3, 11):  # pragma: no cover
-    if TYPE_CHECKING:
-        from typing_extensions import Self
-else:  # pragma: no cover
-    from typing import Self
 
 
 class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):

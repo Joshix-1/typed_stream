@@ -32,6 +32,7 @@ from ._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
+from ._self import Self
 from ._types import (
     PathLikeType,
     StarCallable,
@@ -73,13 +74,6 @@ SC = TypeVar("SC", bound=SupportsComparison)
 
 
 add: Callable[[SA, SA], SA] = operator.add
-
-
-if sys.version_info < (3, 11):  # pragma: no cover
-    if TYPE_CHECKING:
-        from typing_extensions import Self
-else:  # pragma: no cover
-    from typing import Self
 
 
 class Stream(StreamABC[T], Iterable[T]):
@@ -414,7 +408,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Chunked(self._data, size).stream())
 
-    if sys.version_info >= (3, 12):
+    if sys.version_info >= (3, 12) and hasattr(itertools, "batched"):
 
         def chunk(  # pylint: disable=function-redefined  # noqa: F811
             self, size: int
