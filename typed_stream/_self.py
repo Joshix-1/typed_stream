@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import typing
 
-
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sys
+
     if sys.version_info < (3, 11):
         from typing_extensions import Self
     else:
