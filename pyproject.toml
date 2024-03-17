@@ -74,7 +74,15 @@ enable_error_code = [
 [tool.pytype]
 inputs = ["typed_stream", "tests", "examples"]
 disable = ["not-supported-yet"]
-python_version = "3.10"
+none_is_not_bool = true
+strict_none_binding = true
+keep_going = true
+overriding_renamed_parameter_count_checks = true
+no_return_any = true
+protocols = true
+strict_parameter_checks = true
+strict_undefined_checks = true
+strict_primitive_comparisons = true
 
 [tool.pyright]
 include = ["typed_stream", "tests", "examples"]
