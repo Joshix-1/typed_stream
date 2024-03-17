@@ -6,26 +6,17 @@
 
 from __future__ import annotations
 
-import sys
-from typing import NoReturn
+import typing
 
 
-def _fake_self() -> NoReturn:  # pragma: no cover
-    return ...  # type: ignore[misc]
-
-
-if sys.version_info < (3, 11):  # noqa: C901  # pragma: no cover
-    try:
+if typing.TYPE_CHECKING:  # pragma: no cover
+    import sys
+    if sys.version_info < (3, 11):
         from typing_extensions import Self
-    except ImportError:
-        Self = _fake_self()
+    else:
+        Self = typing.Self
 else:
-    try:
-        from typing import Self
-    except ImportError:  # pragma: no cover
-        try:
-            from typing_extensions import Self
-        except ImportError:
-            Self = _fake_self()
+    Self = getattr(typing, "Self", ...)
+
 
 __all__ = ("Self",)
