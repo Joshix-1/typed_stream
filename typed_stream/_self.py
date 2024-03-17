@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     if sys.version_info < (3, 11):
         from typing_extensions import Self
     else:
-        Self = typing.Self
+        from typing import Self
 else:
     Self = getattr(typing, "Self", ...)
 
