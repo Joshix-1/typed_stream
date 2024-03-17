@@ -88,7 +88,9 @@ def run_program(options: Options) -> str | None:  # noqa: C901
         stream = method(*args)
 
     if isinstance(stream, Stream):
+        # pytype: disable=attribute-error
         stream.for_each(print)
+        # pytype: enable=attribute-error
         code.append(".for_each(print)")
     elif stream:
         print(stream)
