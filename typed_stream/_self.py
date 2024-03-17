@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     else:
         from typing import Self
 else:
-    Self = getattr(typing, "Self", ...)
+    Self = getattr(typing, "Self", ...)  # pylint: disable=invalid-name
 
 
 __all__ = ("Self",)
