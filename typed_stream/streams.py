@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import collections
 import concurrent.futures
 import functools
@@ -52,7 +51,7 @@ from ._utils import (
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import noop
 from .stream_abc import StreamABC
-from .streamable import StreamableSequence, TaskCollection
+from .streamable import StreamableSequence
 
 # pylint: disable=too-many-lines
 __all__ = (
