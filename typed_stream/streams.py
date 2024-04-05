@@ -25,6 +25,7 @@ from ._iteration_utils import (
     IfElseMap,
     IterWithCleanUp,
     Peeker,
+    count,
     sliding_window,
 )
 from ._lazy_file_iterators import (
@@ -49,7 +50,7 @@ from ._utils import (
     NotNoneChecker,
 )
 from .exceptions import StreamEmptyError, StreamIndexError
-from .functions import noop, one
+from .functions import noop
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence, TaskCollection
 
@@ -607,7 +608,22 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream("abcdef").count()
         6
         """
-        return self._finish(sum(map(one, self._data)), close_source=True)
+        return self._finish(count(self._data), close_source=True)
+
+    def counted_groups(
+        self: Stream[T], key: Callable[[T], object] | None = None
+    ) -> Stream[tuple[T, int]]:
+        """Group the stream by a key and count the items in the group.
+
+        >>> Stream([*(["abc"] * 10), *(["def"] * 7)]).counted_groups().starmap(print).for_each()
+        abc 10
+        def 7
+        """
+
+        def _map(k: object, g: Iterator[T]) -> tuple[T, int]:
+            return (next(g), 1 + count(g))
+
+        return Stream(itertools.starmap(_map, itertools.groupby(self, key)))
 
     def dedup(self, *, key: None | Callable[[T], object] = None) -> Self:
         """Remove consecutive equal values.

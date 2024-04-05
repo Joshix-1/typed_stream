@@ -13,7 +13,13 @@ from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
-from ._utils import wrap_in_tuple
+from ._utils import (
+    FunctionWrapperIgnoringArgs,
+    IndexValueTuple,
+    count_required_positional_arguments,
+    wrap_in_tuple,
+)
+from .functions import one
 from .streamable import Streamable
 
 __all__ = (
@@ -26,17 +32,16 @@ __all__ = (
     "sliding_window",
 )
 
-from ._utils import (
-    FunctionWrapperIgnoringArgs,
-    IndexValueTuple,
-    count_required_positional_arguments,
-)
-
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
 
 Exc = TypeVar("Exc", bound=BaseException)
+
+
+def count(it: Iterable[object]) -> int:
+    """Count the number of items in the iterable."""
+    return sum(map(one, it))
 
 
 class Chunked(
