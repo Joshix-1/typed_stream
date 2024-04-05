@@ -40,7 +40,7 @@ from ._types import (
     SupportsComparison,
     TypeGuardingCallable,
 )
-from ._typing import Self, TypeVarTuple
+from ._typing import Self, TypeVarTuple, Unpack
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
 from ._utils import (
@@ -837,11 +837,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def flat_map(
-        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: *Tvt
+        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: Unpack[Tvt]
     ) -> Stream[K]: ...
 
     def flat_map(
-        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: *Tvt
+        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: Unpack[Tvt]
     ) -> Stream[K]:
         """Map each value to another.
 
@@ -901,13 +901,12 @@ class Stream(StreamABC[T], Iterable[T]):
     def map(self, fun: Callable[[T], K], /) -> Stream[K]: ...
 
     @overload
-    def map(self, fun: Callable[[T, *Tvt], K], /, *args: *Tvt) -> Stream[K]: ...
+    def map(
+        self, fun: Callable[[T, *Tvt], K], /, *args: Unpack[Tvt]
+    ) -> Stream[K]: ...
 
     def map(
-        self,
-        fun: Callable[[T, *Tvt], K],
-        /,
-        *args: *Tvt,
+        self, fun: Callable[[T, *Tvt], K], /, *args: Unpack[Tvt]
     ) -> Stream[K]:
         """Map each value to another.
 
