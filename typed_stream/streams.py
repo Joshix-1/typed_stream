@@ -837,11 +837,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def flat_map(
-        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: Unpack[Tvt]
+        self, fun: Callable[[T, Unpack[Tvt]], Iterable[K]], /, *args: Unpack[Tvt]
     ) -> Stream[K]: ...
 
     def flat_map(
-        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: Unpack[Tvt]
+        self, fun: Callable[[T, Unpack[Tvt]], Iterable[K]], /, *args: Unpack[Tvt]
     ) -> Stream[K]:
         """Map each value to another.
 
@@ -902,11 +902,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def map(
-        self, fun: Callable[[T, *Tvt], K], /, *args: Unpack[Tvt]
+        self, fun: Callable[[T, Unpack[Tvt]], K], /, *args: Unpack[Tvt]
     ) -> Stream[K]: ...
 
     def map(
-        self, fun: Callable[[T, *Tvt], K], /, *args: Unpack[Tvt]
+        self, fun: Callable[[T, Unpack[Tvt]], K], /, *args: Unpack[Tvt]
     ) -> Stream[K]:
         """Map each value to another.
 
@@ -1163,11 +1163,11 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def starmap(
-        self: Stream[tuple[*Tvt]], fun: Callable[[*Tvt], U], /  # noqa: W504
+        self: Stream[tuple[Unpack[Tvt]]], fun: Callable[[Unpack[Tvt]], U], /  # noqa: W504
     ) -> Stream[U]: ...
 
     def starmap(
-        self: Stream[tuple[*Tvt]], fun: Callable[[*Tvt], U], /  # noqa: W504
+        self: Stream[tuple[Unpack[Tvt]]], fun: Callable[[Unpack[Tvt]], U], /  # noqa: W504
     ) -> Stream[U]:
         """Map each value to another.
 
