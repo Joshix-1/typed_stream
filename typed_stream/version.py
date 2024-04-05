@@ -8,7 +8,7 @@ To get the current version run this script.
 
 from __future__ import annotations
 
-VERSION = "0.69.0"
+VERSION = "0.100.0"
 
 if __name__ == "__main__":  # pragma: no cover
     print(VERSION)
