@@ -65,8 +65,6 @@ K = TypeVar("K")
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
-W = TypeVar("W")
-X = TypeVar("X")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 Exc = TypeVar("Exc", bound=BaseException)
 
@@ -834,57 +832,16 @@ class Stream(StreamABC[T], Iterable[T]):
             self._finish(None, close_source=True)
         return first
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
-        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
-        @overload
-        def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> Stream[K]: ...
+    @overload
+    def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> Stream[K]: ...
 
-        @overload
-        def flat_map(
-            self, fun: Callable[[T, U], Iterable[K]], arg0: U, /  # noqa: W504
-        ) -> Stream[K]: ...
-
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V, W], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def flat_map(
-            self,
-            fun: Callable[[T, U, V, W, X], Iterable[K]],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            arg3: X,
-            /,
-        ) -> Stream[K]: ...
+    @overload
+    def flat_map(
+        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: *Tvt
+    ) -> Stream[K]: ...
 
     def flat_map(
-        self,
-        fun: (
-            Callable[[T], Iterable[K]]
-            | Callable[[T, U], Iterable[K]]
-            | Callable[[T, U, V], Iterable[K]]
-            | Callable[[T, U, V, W], Iterable[K]]
-            | Callable[[T, U, V, W, X], Iterable[K]]
-        ),
-        /,
-        *args: object,
+        self, fun: Callable[[T, *Tvt], Iterable[K]], /, *args: *Tvt
     ) -> Stream[K]:
         """Map each value to another.
 
