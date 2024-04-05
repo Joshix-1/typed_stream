@@ -62,6 +62,7 @@ disallow_any_explicit = true
 disallow_any_decorated = true
 implicit_reexport = false
 enable_error_code = [
+  "explicit-override",
   "ignore-without-code",
   "possibly-undefined",
   "redundant-expr",

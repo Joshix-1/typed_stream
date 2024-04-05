@@ -13,6 +13,7 @@ from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
+from ._typing import override
 from ._utils import (
     FunctionWrapperIgnoringArgs,
     IndexValueTuple,
@@ -66,12 +67,14 @@ class Chunked(
         super().__init__(iterable)
         self.chunk_size = chunk_size
 
+    @override
     def __next__(self) -> tuple[T, ...]:
         """Get the next chunk."""
         if chunk := tuple(itertools.islice(self._iterator, self.chunk_size)):
             return chunk
         raise StopIteration()
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self.chunk_size
@@ -89,12 +92,14 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
         super().__init__(iterable)
         self._curr_idx = start_index
 
-    def __next__(self: "Enumerator[T]") -> IndexValueTuple[T]:
+    @override
+    def __next__(self: Enumerator[T]) -> IndexValueTuple[T]:
         """Return the next IndexValueTuple."""
         tuple_: tuple[int, T] = (self._curr_idx, next(self._iterator))
         self._curr_idx += 1
         return IndexValueTuple(tuple_)
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self._curr_idx
@@ -137,7 +142,8 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         else:
             self._default_fun = None
 
-    def __next__(self: "ExceptionHandler[T, U, Exc]") -> T | U:  # noqa: C901
+    @override
+    def __next__(self: ExceptionHandler[T, U, Exc]) -> T | U:  # noqa: C901
         """Return the next value."""
         while True:  # pylint: disable=while-used
             try:
@@ -153,6 +159,7 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
             else:
                 return value
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (
@@ -195,6 +202,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
         self._if_fun = if_
         self._else_fun = else_
 
+    @override
     def __next__(self: "IfElseMap[T, U, V]") -> U | V:
         """Return the next value."""
         while True:  # pylint: disable=while-used
@@ -205,6 +213,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
                 return self._else_fun(value)
             # just return the next element
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (
@@ -231,6 +240,7 @@ class Peeker(Generic[T], PrettyRepr):
         self.fun(value)
         return value
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (self.fun,)
@@ -262,10 +272,12 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
         super().__init__(cleanup_fun)
         self.iterator = iter(iterable)
 
+    @override
     def __iter__(self: V) -> V:
         """Return self."""
         return self
 
+    @override
     def __next__(self) -> T:
         """Return the next element if available else run close."""
         if self.iterator is None:
@@ -278,10 +290,12 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
                 self.close()
             raise
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self.iterator
 
+    @override
     def close(self) -> None:
         """Run clean-up if not run yet."""
         super().close()
@@ -307,6 +321,7 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         super().__init__(iterable)
         self._window = collections.deque((), maxlen=size)
 
+    @override
     def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
         """Return the next n item tuple."""
         if window_space_left := self.size - len(self._window):
@@ -324,6 +339,7 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
                 raise
         return tuple(self._window)
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return *super()._get_args(), self.size

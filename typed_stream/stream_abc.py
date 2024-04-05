@@ -12,7 +12,7 @@ from types import EllipsisType
 from typing import Generic, TypeVar
 
 from ._types import Closeable, PrettyRepr
-from ._typing import Self
+from ._typing import Self, override
 from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)
@@ -80,6 +80,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         self.__data = None
         return ret
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         data: object = self.__data or ...
@@ -87,6 +88,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
             return (data,)
         return data, self._close_source_callable
 
+    @override
     def close(self) -> None:
         """Close this stream cleanly.
 

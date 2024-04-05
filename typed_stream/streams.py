@@ -40,7 +40,7 @@ from ._types import (
     SupportsComparison,
     TypeGuardingCallable,
 )
-from ._typing import Self, TypeVarTuple, Unpack
+from ._typing import Self, TypeVarTuple, Unpack, override
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
 from ._utils import (
@@ -141,6 +141,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return self.nth(item)
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
 
+    @override
     def __iter__(self) -> IterWithCleanUp[T]:
         """Iterate over the values of this Stream. This finishes the Stream.
 
@@ -654,6 +655,7 @@ class Stream(StreamABC[T], Iterable[T]):
         )
         return self
 
+    @override
     def distinct(self, *, use_set: bool = True) -> Self:
         """Remove duplicate values.
 
@@ -683,6 +685,7 @@ class Stream(StreamABC[T], Iterable[T]):
         )
         return self
 
+    @override
     def drop(self, count: int) -> Self:
         """Drop the first count values.
 
@@ -757,6 +760,7 @@ class Stream(StreamABC[T], Iterable[T]):
             self: Stream[T], fun: Callable[[T], object]
         ) -> Stream[T]: ...
 
+    @override
     def exclude(self, fun: Callable[[T], object]) -> object:
         """Exclude values if the function returns a truthy value.
 
@@ -893,6 +897,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return tail[-1]
         raise StreamEmptyError()
 
+    @override
     def limit(self, count: int) -> Self:
         """Stop the Stream after count values.
 
@@ -1113,6 +1118,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Stream(sliding_window(self._data, size)))
 
+    @override
     def peek(self, fun: Callable[[T], object]) -> Self:
         """Peek at every value, without modifying the values in the Stream.
 
@@ -1254,6 +1260,7 @@ class FileStreamBase(Stream[AnyStr]):
         self._file_iterator.close()
         self._file_iterator = None
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         if not self._file_iterator:

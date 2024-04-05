@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import typing
 
+from .functions import return_arg
+
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sys
 
@@ -15,11 +17,15 @@ if typing.TYPE_CHECKING:  # pragma: no cover
         from typing_extensions import Self, TypeVarTuple, Unpack
     else:
         from typing import Self, TypeVarTuple, Unpack
+
+    if sys.version_info < (3, 12):
+        from typing_extensions import override
+    else:
+        from typing import override
 else:
     Self = getattr(typing, "Self", ...)  # pylint: disable=invalid-name
-    TypeVarTuple = getattr(
-        typing, "TypeVarTuple", lambda _: _
-    )
+    TypeVarTuple = getattr(typing, "TypeVarTuple", return_arg)
     Unpack = getattr(typing, "Unpack", ...)  # pylint: disable=invalid-name
+    override = getattr(typing, "override", return_arg)
 
-__all__ = ("Self", "TypeVarTuple", "Unpack")
+__all__ = ("Self", "TypeVarTuple", "Unpack", "override")

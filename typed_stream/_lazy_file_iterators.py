@@ -20,6 +20,7 @@ from typing import (
 )
 
 from ._types import Closeable, PathLikeType, PrettyRepr
+from ._typing import override
 
 __all__ = (
     "LazyFileIterator",
@@ -90,10 +91,12 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
         self._iterator = None
         self._file_object = None
 
+    @override
     def __iter__(self) -> Iterator[AnyStr]:
         """Return self."""
         return self
 
+    @override
     def __next__(self: "LazyFileIterator[AnyStr]") -> AnyStr:
         """Get the next line."""
         if self._iterator is None:
@@ -107,9 +110,11 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
                 self.close()
             raise
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         return self.path, self.encoding
 
+    @override
     def close(self) -> None:
         """Close the underlying file."""
         if self._file_object:
@@ -139,6 +144,7 @@ class LazyFileIteratorRemovingEndsStr(LazyFileIterator[str]):
 
     __slots__ = ()
 
+    @override
     def __next__(self) -> str:
         r"""Return the next line without '\n' in the end."""
         return super().__next__().removesuffix("\n")
@@ -149,6 +155,7 @@ class LazyFileIteratorRemovingEndsBytes(LazyFileIterator[bytes]):
 
     __slots__ = ()
 
+    @override
     def __next__(self) -> bytes:
         r"""Return the next line without '\n' in the end."""
         return super().__next__().removesuffix(b"\n")

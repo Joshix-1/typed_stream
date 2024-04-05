@@ -12,6 +12,8 @@ from collections.abc import Callable, Iterable, Iterator
 from os import PathLike
 from typing import Generic, Protocol, TypeAlias, TypeGuard, TypeVar
 
+from ._typing import override
+
 __all__ = (
     "ClassWithCleanUp",
     "Closeable",
@@ -110,6 +112,7 @@ class PrettyRepr(abc.ABC):
 
     __slots__ = ()
 
+    @override
     def __repr__(self) -> str:
         """Return the string representation of self."""
         args = ",".join(
@@ -135,10 +138,12 @@ class ClassWithCleanUp(Closeable, PrettyRepr):
         """Initialize this class."""
         self.cleanup_fun = cleanup_fun
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (self.cleanup_fun,)
 
+    @override
     def close(self) -> None:
         """Run clean-up if not run yet."""
         if self.cleanup_fun:
@@ -156,14 +161,17 @@ class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
         """Init self."""
         self._iterator = iter(iterable)
 
+    @override
     def __iter__(self) -> Iterator[V]:
         """Return self."""
         return self
 
+    @override
     @abc.abstractmethod
     def __next__(self) -> V:
         """Return the next element."""
 
+    @override
     def _get_args(self) -> tuple[object, ...]:
         """Return the args used to initializing self."""
         return (self._iterator,)

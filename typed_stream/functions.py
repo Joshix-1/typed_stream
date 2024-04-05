@@ -9,7 +9,7 @@ from __future__ import annotations
 import operator
 from collections.abc import Callable
 from numbers import Number, Real
-from typing import Literal
+from typing import Literal, TypeVar
 
 from ._utils import InstanceChecker, NoneChecker, NotNoneChecker
 
@@ -32,7 +32,7 @@ __all__ = (
     "noop",
     "one",
 )
-
+T = TypeVar("T")
 
 is_truthy: Callable[[object], bool] = operator.truth
 """Check whether a value is truthy."""
@@ -41,13 +41,18 @@ is_falsy: Callable[[object], bool] = operator.not_
 """Check whether a value is falsy."""
 
 
-def noop(*args: object) -> None:  # pylint: disable=unused-argument
+def noop(*_: object) -> None:
     """Do nothing."""
 
 
-def one(*args: object) -> Literal[1]:  # pylint: disable=unused-argument
+def one(*_: object) -> Literal[1]:
     """Return the smallest positive odd number."""
     return 1
+
+
+def return_arg(arg: T, /) -> T:
+    """Return the argument."""
+    return arg
 
 
 def is_even(number: int) -> bool:
