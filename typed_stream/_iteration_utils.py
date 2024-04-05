@@ -235,7 +235,7 @@ class Peeker(Generic[T], PrettyRepr):
         """Initialize this class."""
         self.fun = fun
 
-    def __call__(self, value: T) -> T:
+    def __call__(self, value: T, /) -> T:
         """Call fun with value as argument and return value."""
         self.fun(value)
         return value

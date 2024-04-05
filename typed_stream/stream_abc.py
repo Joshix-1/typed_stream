@@ -126,7 +126,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         # pytype: enable=attribute-error
 
     @abc.abstractmethod
-    def limit(self, count: int) -> Self:
+    def limit(self, count: int, /) -> Self:
         """Stop the Stream after count values.
 
         Example:
@@ -134,11 +134,11 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         """
 
     @abc.abstractmethod
-    def drop(self, count: int) -> Self:
+    def drop(self, count: int, /) -> Self:
         """Drop the first count values."""
 
     @abc.abstractmethod
-    def peek(self, fun: Callable[[T], object]) -> Self:
+    def peek(self, fun: Callable[[T], object], /) -> Self:
         """Peek at every value, without modifying the values in the Stream.
 
         Example:
@@ -146,5 +146,5 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         """
 
     @abc.abstractmethod
-    def exclude(self, fun: Callable[[T], object]) -> Self:
+    def exclude(self, fun: Callable[[T], object], /) -> Self:
         """Exclude values from the Stream if fun returns a truthy value."""
