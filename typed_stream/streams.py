@@ -16,7 +16,7 @@ import sys
 from collections.abc import Awaitable, Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
-from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, Union, overload
+from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, overload
 
 from ._iteration_utils import (
     Chunked,
@@ -614,9 +614,10 @@ class Stream(StreamABC[T], Iterable[T]):
     ) -> Stream[tuple[T, int]]:
         """Group the stream by a key and count the items in the group.
 
-        >>> Stream([*(["abc"] * 10), *(["def"] * 7)]).counted_groups().starmap(print).for_each()
-        abc 10
-        def 7
+        >>> Stream("aaabbbbc").counted_groups().starmap(print).for_each()
+        a 3
+        b 4
+        c 1
         """
 
         def _map(k: object, g: Iterator[T]) -> tuple[T, int]:
@@ -837,11 +838,17 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def flat_map(
-        self, fun: Callable[[T, Unpack[Tvt]], Iterable[K]], /, *args: Unpack[Tvt]
+        self,
+        fun: Callable[[T, Unpack[Tvt]], Iterable[K]],
+        /,
+        *args: Unpack[Tvt],
     ) -> Stream[K]: ...
 
     def flat_map(
-        self, fun: Callable[[T, Unpack[Tvt]], Iterable[K]], /, *args: Unpack[Tvt]
+        self,
+        fun: Callable[[T, Unpack[Tvt]], Iterable[K]],
+        /,
+        *args: Unpack[Tvt],
     ) -> Stream[K]:
         """Map each value to another.
 
@@ -1158,16 +1165,22 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def starmap(
-        self: Stream[IndexValueTuple[K]], fun: Callable[[int, K], U], /
+        self: Stream[IndexValueTuple[K]],
+        fun: Callable[[int, K], U],
+        /,
     ) -> Stream[U]: ...
 
     @overload
     def starmap(
-        self: Stream[tuple[Unpack[Tvt]]], fun: Callable[[Unpack[Tvt]], U], /  # noqa: W504
+        self: Stream[tuple[Unpack[Tvt]]],
+        fun: Callable[[Unpack[Tvt]], U],
+        /,
     ) -> Stream[U]: ...
 
     def starmap(
-        self: Stream[tuple[Unpack[Tvt]]], fun: Callable[[Unpack[Tvt]], U], /  # noqa: W504
+        self: Stream[tuple[Unpack[Tvt]]],
+        fun: Callable[[Unpack[Tvt]], U],
+        /,
     ) -> Stream[U]:
         """Map each value to another.
 
