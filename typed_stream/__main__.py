@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import dataclasses
 import operator
 import sys
@@ -71,6 +72,9 @@ def run_program(options: Options) -> str | None:  # noqa: C901
             if action in functions.__all__:
                 args.append(getattr(functions, action))
                 full_action_qual = f"typed_stream.functions.{action}"
+            elif action in collections.__all__:
+                args.append(getattr(collections, action))
+                full_action_qual = f"collections.{action}"
             elif action in operator.__all__:
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
