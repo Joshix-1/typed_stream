@@ -546,26 +546,6 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(count(self._data), close_source=True)
 
-    def counted_groups(
-        self: Stream[T], key: Callable[[T], object] | None = None
-    ) -> Stream[tuple[T, int]]:
-        """Group the stream by a key and count the items in the group.
-
-        >>> Stream("abba").counted_groups().starmap(print).for_each()
-        a 1
-        b 2
-        a 1
-        >>> Stream("aaabbbbc").counted_groups(ord).starmap(print).for_each()
-        a 3
-        b 4
-        c 1
-        """
-
-        def _map(_: object, g: Iterator[T]) -> tuple[T, int]:
-            return (next(g), 1 + count(g))
-
-        return Stream(itertools.starmap(_map, itertools.groupby(self, key)))
-
     def dedup(self, *, key: None | Callable[[T], object] = None) -> Self:
         """Remove consecutive equal values.
 
@@ -594,6 +574,25 @@ class Stream(StreamABC[T], Iterable[T]):
             ),
         )
         return self
+
+    def dedup_counting(self) -> Stream[tuple[T, int]]:
+        """Group the stream and count the items in the group.
+
+        >>> Stream("abba").dedup_counting().starmap(print).for_each()
+        a 1
+        b 2
+        a 1
+        >>> Stream("AaaaBBcccc").dedup_counting().starmap(print).for_each()
+        A 1
+        a 3
+        B 2
+        c 4
+        """
+
+        def _map(k: T, g: Iterator[T]) -> tuple[T, int]:
+            return (k, count(g))
+
+        return Stream(itertools.starmap(_map, itertools.groupby(self)))
 
     @override
     def distinct(self, *, use_set: bool = True) -> Self:
