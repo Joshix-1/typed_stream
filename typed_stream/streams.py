@@ -940,52 +940,17 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.islice(self._data, count)
         return self
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
-        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
-        @overload
-        def map(self, fun: Callable[[T], K], /) -> Stream[K]: ...
+    @overload
+    def map(self, fun: Callable[[T], K], /) -> Stream[K]: ...
 
-        @overload
-        def map(self, fun: Callable[[T, U], K], arg0: U, /) -> Stream[K]: ...
-
-        @overload
-        def map(
-            self, fun: Callable[[T, U, V], K], arg0: U, arg1: V, /  # noqa: W504
-        ) -> Stream[K]: ...
-
-        @overload
-        def map(
-            self,
-            fun: Callable[[T, U, V, W], K],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def map(
-            self,
-            fun: Callable[[T, U, V, W, X], K],
-            arg0: U,
-            arg1: V,
-            arg2: W,
-            arg3: X,
-            /,
-        ) -> Stream[K]:  # pragma: no cover
-            ...
+    @overload
+    def map(self, fun: Callable[[T, *Tvt], K], /, *args: *Tvt) -> Stream[K]: ...
 
     def map(
         self,
-        fun: (
-            Callable[[T], K]
-            | Callable[[T, U], K]
-            | Callable[[T, U, V], K]
-            | Callable[[T, U, V, W], K]
-            | Callable[[T, U, V, W, X], K]
-        ),
+        fun: Callable[[T, *Tvt], K],
         /,
-        *args: object,
+        *args: *Tvt,
     ) -> Stream[K]:
         """Map each value to another.
 
