@@ -19,7 +19,7 @@ else:
     Self = getattr(typing, "Self", ...)  # pylint: disable=invalid-name
     TypeVarTuple = getattr(
         typing, "TypeVarTuple", lambda _: _
-    )  # pylint: disable=invalid-name
+    )
     Unpack = getattr(typing, "Unpack", ...)  # pylint: disable=invalid-name
 
 __all__ = ("Self", "TypeVarTuple", "Unpack")
