@@ -11,8 +11,8 @@ from collections.abc import AsyncIterable, Callable, Iterable
 from types import EllipsisType
 from typing import Generic, TypeVar
 
-from ._self import Self
 from ._types import Closeable, PrettyRepr
+from ._typing import Self
 from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)

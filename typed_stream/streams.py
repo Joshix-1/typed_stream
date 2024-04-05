@@ -33,7 +33,6 @@ from ._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
-from ._self import Self
 from ._types import (
     PathLikeType,
     StarCallable,
@@ -41,6 +40,7 @@ from ._types import (
     SupportsComparison,
     TypeGuardingCallable,
 )
+from ._typing import Self, TypeVarTuple
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
 from ._utils import (
@@ -73,6 +73,7 @@ Exc = TypeVar("Exc", bound=BaseException)
 SA = TypeVar("SA", bound=SupportsAdd)
 SC = TypeVar("SC", bound=SupportsComparison)
 
+Tvt = TypeVarTuple("Tvt")
 
 add: Callable[[SA, SA], SA] = operator.add
 
@@ -1234,67 +1235,19 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(fun(*self._data), close_source=True)
 
-    if TYPE_CHECKING:  # pragma: no cover  # noqa: C901
-        # 3.11: https://docs.python.org/3/library/typing.html#typing.TypeVarTuple
-        @overload
-        def starmap(
-            self: Stream[tuple[T]], fun: Callable[[T], K], /  # noqa: W504
-        ) -> Stream[K]: ...
+    @overload
+    def starmap(
+        self: Stream[IndexValueTuple[K]], fun: Callable[[int, K], U], /
+    ) -> Stream[U]: ...
 
-        @overload
-        def starmap(
-            self: Stream[IndexValueTuple[U]],
-            fun: Callable[[int, U], K],
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def starmap(
-            self: Stream[tuple[T, U]],
-            fun: Callable[[T, U], K],
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def starmap(
-            self: Stream[tuple[T, U, V]],
-            fun: Callable[[T, U, V], K],
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def starmap(
-            self: Stream[tuple[T, U, V, W]],
-            fun: Callable[[T, U, V, W], K],
-            /,
-        ) -> Stream[K]: ...
-
-        @overload
-        def starmap(
-            self: Stream[tuple[T, U, V, W, X]],
-            fun: Callable[[T, U, V, W, X], K],
-            /,
-        ) -> Stream[K]: ...
+    @overload
+    def starmap(
+        self: Stream[tuple[*Tvt]], fun: Callable[[*Tvt], U], /  # noqa: W504
+    ) -> Stream[U]: ...
 
     def starmap(
-        self: Union[  # pylint: disable=consider-alternative-union-syntax
-            Stream[tuple[T, U, V, W, X]],
-            Stream[tuple[T, U, V, W]],
-            Stream[tuple[T, U, V]],
-            Stream[tuple[T, U]],
-            Stream[IndexValueTuple[U]],
-            Stream[tuple[T]],
-        ],
-        fun: (
-            Callable[[T], K]
-            | Callable[[T, U], K]
-            | Callable[[int, U], K]
-            | Callable[[T, U, V], K]
-            | Callable[[T, U, V, W], K]
-            | Callable[[T, U, V, W, X], K]
-        ),
-        /,
-    ) -> Stream[K]:
+        self: Stream[tuple[*Tvt]], fun: Callable[[*Tvt], U], /  # noqa: W504
+    ) -> Stream[U]:
         """Map each value to another.
 
         This lazily finishes the current Stream and creates a new one.
