@@ -1,5 +1,5 @@
 build:
-	env SOURCE_DATE_EPOCH="$(git show -s --format=%ct)" python3 -m build
+	env SOURCE_DATE_EPOCH="$$(git show -s --format=%ct)" python3 -m build
 
 check:
 	./check.sh
