@@ -1,3 +1,6 @@
+# building
+build==1.2.1
+
 # formatting and fixing
 autoflake==2.*
 black==24.*
