@@ -31,6 +31,9 @@ dynamic = ["version", "description"]
 [project.urls]
 Home = "https://github.com/Joshix-1/typed_stream"
 
+[project.scripts]
+typed_stream = "typed_stream.__main__:main"
+
 [tool.bandit]
 skips = ["B311"]
 

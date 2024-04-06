@@ -128,4 +128,5 @@ def main() -> str | None:
     return run_program(options)
 
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
