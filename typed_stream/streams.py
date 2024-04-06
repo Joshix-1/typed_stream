@@ -431,7 +431,7 @@ class Stream(StreamABC[T], Iterable[T]):
             )
 
     @overload
-    def collect(self) -> StreamableSequence[T]: ...
+    def collect(self, /) -> StreamableSequence[T]: ...
 
     @overload
     def collect(
@@ -487,7 +487,8 @@ class Stream(StreamABC[T], Iterable[T]):
 
     def collect(
         self: Stream[U],
-        _: Callable[[Iterable[U]], object] = StreamableSequence,
+        fun: Callable[[Iterable[U]], object] = StreamableSequence,
+        /,
     ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
 
@@ -500,7 +501,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([(1, 2), (3, 4)]).collect(dict)
         {1: 2, 3: 4}
         """
-        return self._finish(_(self._data), close_source=True)
+        return self._finish(fun(self._data), close_source=True)
 
     def concurrent_map(
         self, fun: Callable[[T], K], /, max_workers: int | None = None
