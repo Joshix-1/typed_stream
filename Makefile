@@ -6,4 +6,4 @@ check:
 
 test:
 	python3 -m tests
-	python -m examples.test
+	python3 -m examples.test
