@@ -130,7 +130,9 @@ def main() -> str | None:
             arg_parser.parse_args([sys.argv[0], "--help"])
         for method in methods:
             print(f"Stream.{method}:")
-            print(f"\t{getattr(getattr(Stream, method, None), '__doc__', None)}")
+            print(
+                f"\t{getattr(getattr(Stream, method, None), '__doc__', None)}"
+            )
         return None
 
     return run_program(options)
