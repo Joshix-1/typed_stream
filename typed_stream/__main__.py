@@ -117,7 +117,7 @@ def dedent_docstring(string: str) -> str:
     'a'
     >>> dedent_docstring((" " * 5) + "a")
     'a'
-    >>> (" " * 2) in dedent_docstring.__doc__
+    >>> (" " * 2) in dedent_docstring.__doc__ or sys.version_info >= (3, 13)
     True
     >>> (" " * 2) in dedent_docstring(dedent_docstring.__doc__)
     False
