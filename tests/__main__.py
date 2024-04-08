@@ -59,8 +59,6 @@ def run_doc_tests() -> None:  # noqa: C901
     dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
     acc_fails, acc_tests = 0, 0
     for path in dir_.rglob("*.py"):
-        if path.name == "__main__.py":
-            continue
         mod = (
             path.relative_to(dir_)
             .as_posix()

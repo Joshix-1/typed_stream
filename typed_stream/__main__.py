@@ -11,7 +11,9 @@ import collections
 import dataclasses
 import operator
 import sys
+import textwrap
 from collections.abc import Callable
+from typing import cast
 
 from . import Stream, functions
 from ._utils import count_required_positional_arguments
@@ -106,6 +108,30 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     return None
 
 
+def dedent_docstring(string: str) -> str:
+    """Detend a docstring.
+
+    >>> dedent_docstring("")
+    ''
+    >>> dedent_docstring("a")
+    'a'
+    >>> dedent_docstring((" " * 5) + "a")
+    'a'
+    >>> (" " * 2) in dedent_docstring.__doc__
+    True
+    >>> (" " * 2) in dedent_docstring(dedent_docstring.__doc__)
+    False
+    >>> dedent_docstring(dedent_docstring.__doc__).endswith("True\\n")
+    True
+    """
+    string = string.removeprefix("\n")
+    if string.startswith((" ", "\t")):
+        return textwrap.dedent(string)
+    split = string.split("\n")
+    end = textwrap.dedent("\n".join(split[1:]))
+    return "\n".join([*split[:1], *([end] if end else ())])
+
+
 def main() -> str | None:
     """Parse arguments and then run the program."""
     arg_parser = argparse.ArgumentParser(
@@ -128,11 +154,19 @@ def main() -> str | None:
     if options.actions and options.actions[0] == "help":
         if not (methods := options.actions[1:]):
             arg_parser.parse_args([sys.argv[0], "--help"])
-        for method in methods:
-            print(f"Stream.{method}:")
-            print(
-                f"\t{getattr(getattr(Stream, method, None), '__doc__', None)}"
-            )
+
+        for i, name in enumerate(methods):
+            if i:
+                print()
+            print(f"Stream.{name}:")
+            if not (method := getattr(Stream, name, None)):
+                to_print = "Does not exist."
+            elif not (doc := cast(str, getattr(method, "__doc__", ""))):
+                to_print = "No docs."
+            else:
+                to_print = dedent_docstring(doc).strip()
+
+            print(textwrap.indent(to_print, " " * 4))
         return None
 
     return run_program(options)
