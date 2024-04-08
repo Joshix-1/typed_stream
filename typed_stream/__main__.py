@@ -125,6 +125,14 @@ def main() -> str | None:
         keep_ends=bool(args.keep_ends),
         actions=tuple(map(str, args.actions)),
     )
+    if options.actions and options.actions[0] == "help":
+        if not (methods := options.actions[1:]):
+            arg_parser.parse_args([sys.argv[0], "--help"])
+        for method in methods:
+            print(f"Stream.{method}:")
+            print(f"\t{getattr(getattr(Stream, method, None), '__doc__', None)}")
+        return None
+
     return run_program(options)
 
 
