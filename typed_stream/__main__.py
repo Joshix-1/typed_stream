@@ -123,7 +123,7 @@ def dedent_docstring(string: str) -> str:
     False
     >>> dedent_docstring(dedent_docstring.__doc__).endswith("True\\n")
     True
-    """   # noqa: D301
+    """  # noqa: D301
     string = string.removeprefix("\n")
     if string.startswith((" ", "\t")):
         return textwrap.dedent(string)
