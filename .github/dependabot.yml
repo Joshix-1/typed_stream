@@ -7,9 +7,16 @@ version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/" # Location of package manifests
+    rebase-strategy: "auto"
     schedule:
       interval: "daily"
-      time: "18:00"
-    rebase-strategy: "auto"
+      time: "17:00"
     target-branch: "main"
     versioning-strategy: increase
+  - package-ecosystem: github-actions
+    directory: "/"
+    rebase-strategy: "auto"
+    schedule:
+      interval: "daily"
+      time: "17:00"
+    target-branch: "main"
