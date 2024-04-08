@@ -123,7 +123,7 @@ def dedent_docstring(string: str) -> str:
     False
     >>> dedent_docstring(dedent_docstring.__doc__).endswith("True\\n")
     True
-    """
+    """   # noqa: D301
     string = string.removeprefix("\n")
     if string.startswith((" ", "\t")):
         return textwrap.dedent(string)
@@ -132,7 +132,7 @@ def dedent_docstring(string: str) -> str:
     return "\n".join([*split[:1], *([end] if end else ())])
 
 
-def main() -> str | None:
+def main() -> str | None:  # noqa: C901
     """Parse arguments and then run the program."""
     arg_parser = argparse.ArgumentParser(
         prog="typed_stream",
