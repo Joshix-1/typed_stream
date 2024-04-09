@@ -229,7 +229,7 @@ jobs:
           ./generate-badge.sh > github-pages/coverage/badge.svg
           rm github-pages/coverage/.gitignore
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: github-pages
       - name: Deploy GitHub Pages site
