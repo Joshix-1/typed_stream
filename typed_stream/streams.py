@@ -15,7 +15,7 @@ import sys
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
-from typing import TYPE_CHECKING, AnyStr, Literal, TypeVar, overload
+from typing import AnyStr, Literal, TypeVar, overload
 
 from ._iteration_utils import (
     Chunked,
@@ -118,15 +118,13 @@ class Stream(StreamABC[T], Iterable[T]):
                 return self._finish(True, close_source=True)
         return self._finish(False, close_source=True)
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __getitem__(self, item: int, /) -> T:
+        """Nobody inspects the spammish repetition."""
 
-        @overload
-        def __getitem__(self, item: int, /) -> T:
-            """Nobody inspects the spammish repetition."""
-
-        @overload
-        def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
-            """Nobody inspects the spammish repetition."""
+    @overload
+    def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
+        """Nobody inspects the spammish repetition."""
 
     def __getitem__(self, item: slice | int, /) -> StreamableSequence[T] | T:
         """Finish the stream by collecting.
@@ -227,45 +225,41 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return Stream(itertools.repeat(value))
 
-    if (  # pylint: disable=too-complex  # noqa: C901
-        TYPE_CHECKING
-    ):  # pragma: no cover
+    @overload
+    @staticmethod
+    def range(stop: int, /) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(stop: int, /) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(*, stop: int) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(*, stop: int) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(*, start: int, stop: int) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(*, start: int, stop: int) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(start: int, stop: int, /) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(start: int, stop: int, /) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(start: int, /, *, stop: int) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(start: int, /, *, stop: int) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(start: int, stop: int, /, *, step: int) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(start: int, stop: int, /, *, step: int) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(start: int, stop: int, step: int, /) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(start: int, stop: int, step: int, /) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(start: int, /, *, stop: int, step: int) -> Stream[int]: ...
 
-        @overload
-        @staticmethod
-        def range(start: int, /, *, stop: int, step: int) -> Stream[int]: ...
-
-        @overload
-        @staticmethod
-        def range(*, start: int, stop: int, step: int) -> Stream[int]: ...
+    @overload
+    @staticmethod
+    def range(*, start: int, stop: int, step: int) -> Stream[int]: ...
 
     @staticmethod
     def range(  # noqa: C901
@@ -331,35 +325,33 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(all(self._data), close_source=True)
 
-    if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
+    @overload
+    def catch(
+        self,
+        *exception_class: type[Exc],
+    ) -> Self: ...
 
-        @overload
-        def catch(
-            self,
-            *exception_class: type[Exc],
-        ) -> Self: ...
+    @overload
+    def catch(
+        self,
+        *exception_class: type[Exc],
+        handler: Callable[[Exc], object],
+    ) -> Self: ...
 
-        @overload
-        def catch(
-            self,
-            *exception_class: type[Exc],
-            handler: Callable[[Exc], object],
-        ) -> Self: ...
+    @overload
+    def catch(
+        self,
+        *exception_class: type[Exc],
+        default: Callable[[Exc], K] | Callable[[], K],
+    ) -> Stream[T | K]: ...
 
-        @overload
-        def catch(
-            self,
-            *exception_class: type[Exc],
-            default: Callable[[Exc], K] | Callable[[], K],
-        ) -> Stream[T | K]: ...
-
-        @overload
-        def catch(
-            self,
-            *exception_class: type[Exc],
-            handler: Callable[[Exc], object],
-            default: Callable[[Exc], K] | Callable[[], K],
-        ) -> Stream[T | K]: ...
+    @overload
+    def catch(
+        self,
+        *exception_class: type[Exc],
+        handler: Callable[[Exc], object],
+        default: Callable[[Exc], K] | Callable[[], K],
+    ) -> Stream[T | K]: ...
 
     def catch(
         self,
@@ -674,33 +666,31 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(Stream(Enumerator(self._data, start_index)))
 
-    if TYPE_CHECKING:  # noqa: C901  # pragma: no cover
+    @overload
+    def exclude(
+        self: Stream[K | Prim], fun: InstanceChecker[Prim], /  # noqa: W504
+    ) -> Stream[K]: ...
 
-        @overload
-        def exclude(
-            self: Stream[K | Prim], fun: InstanceChecker[Prim], /  # noqa: W504
-        ) -> Stream[K]: ...
+    @overload
+    def exclude(
+        self: Stream[K | U], fun: InstanceChecker[U], /  # noqa: W504
+    ) -> Stream[K]: ...
 
-        @overload
-        def exclude(
-            self: Stream[K | U], fun: InstanceChecker[U], /  # noqa: W504
-        ) -> Stream[K]: ...
+    @overload
+    def exclude(
+        self: Stream[K | None], fun: NoneChecker, /  # noqa: W504
+    ) -> Stream[K]: ...
 
-        @overload
-        def exclude(
-            self: Stream[K | None], fun: NoneChecker, /  # noqa: W504
-        ) -> Stream[K]: ...
+    # @overload
+    # def exclude(
+    #     self: Stream[K | U], fun: TypeGuardingCallable[U, K | U]
+    # ) -> Stream[K]:
+    #     ...
 
-        # @overload
-        # def exclude(
-        #     self: Stream[K | U], fun: TypeGuardingCallable[U, K | U]
-        # ) -> Stream[K]:
-        #     ...
-
-        @overload
-        def exclude(
-            self: Stream[T], fun: Callable[[T], object], /  # noqa: W504
-        ) -> Stream[T]: ...
+    @overload
+    def exclude(
+        self: Stream[T], fun: Callable[[T], object], /  # noqa: W504
+    ) -> Stream[T]: ...
 
     @override
     def exclude(self, fun: Callable[[T], object], /) -> object:
