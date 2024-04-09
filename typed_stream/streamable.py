@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 from ._typing import override
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .streams import Stream
+    from typed_stream import Stream
 
 __all__ = ("Streamable", "StreamableSequence")
 
@@ -28,7 +28,9 @@ class Streamable(Iterable[T], ABC):
 
     def stream(self) -> Stream[T]:
         """Return Stream(self)."""
-        from .streams import Stream  # pylint: disable=import-outside-toplevel
+        from typed_stream import (  # pylint: disable=import-outside-toplevel
+            Stream,
+        )
 
         return Stream(self)
 
@@ -38,17 +40,15 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __add__(self, other: tuple[T, ...], /) -> StreamableSequence[T]:
+        """Nobody inspects the spammish repetition."""
 
-        @overload
-        def __add__(self, other: tuple[T, ...], /) -> StreamableSequence[T]:
-            """Nobody inspects the spammish repetition."""
-
-        @overload
-        def __add__(
-            self, other: tuple[V, ...], /  # noqa: W504
-        ) -> StreamableSequence[T | V]:
-            """Nobody inspects the spammish repetition."""
+    @overload
+    def __add__(
+        self, other: tuple[V, ...], /  # noqa: W504
+    ) -> StreamableSequence[T | V]:
+        """Nobody inspects the spammish repetition."""
 
     @override
     def __add__(
@@ -71,15 +71,13 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         """Repeat self."""
         return StreamableSequence(super().__rmul__(other))
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __getitem__(self, item: SupportsIndex, /) -> T:
+        """Nobody inspects the spammish repetition."""
 
-        @overload
-        def __getitem__(self, item: SupportsIndex, /) -> T:
-            """Nobody inspects the spammish repetition."""
-
-        @overload
-        def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
-            """Nobody inspects the spammish repetition."""
+    @overload
+    def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
+        """Nobody inspects the spammish repetition."""
 
     @override
     def __getitem__(

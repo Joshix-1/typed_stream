@@ -203,7 +203,7 @@ class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
         self._else_fun = else_
 
     @override
-    def __next__(self: "IfElseMap[T, U, V]") -> U | V:
+    def __next__(self: IfElseMap[T, U, V]) -> U | V:
         """Return the next value."""
         while True:  # pylint: disable=while-used
             value: T = next(self._iterator)
@@ -322,7 +322,7 @@ class SlidingWindow(IteratorProxy[tuple[T, ...], T], Generic[T]):
         self._window = collections.deque((), maxlen=size)
 
     @override
-    def __next__(self: "SlidingWindow[T]") -> tuple[T, ...]:
+    def __next__(self: SlidingWindow[T]) -> tuple[T, ...]:
         """Return the next n item tuple."""
         if window_space_left := self.size - len(self._window):
             self._window.extend(

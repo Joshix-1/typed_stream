@@ -9,15 +9,7 @@ from __future__ import annotations
 import contextlib
 from collections.abc import Iterator
 from io import BytesIO
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    AnyStr,
-    TextIO,
-    TypeGuard,
-    TypeVar,
-    overload,
-)
+from typing import IO, AnyStr, TextIO, TypeGuard, TypeVar, overload
 
 from ._types import Closeable, PathLikeType, PrettyRepr
 from ._typing import override
@@ -32,8 +24,12 @@ LFI = TypeVar("LFI", "LazyFileIterator[str]", "LazyFileIterator[bytes]")
 
 
 def _is_bytes(
-    lfi: "LazyFileIterator[AnyStr] | LazyFileIterator[bytes] | LazyFileIterator[str]",
-) -> "TypeGuard[LazyFileIterator[bytes]]":
+    lfi: (
+        LazyFileIterator[AnyStr]
+        | LazyFileIterator[bytes]
+        | LazyFileIterator[str]
+    ),
+) -> TypeGuard[LazyFileIterator[bytes]]:
     """Return True if the lfi is LazyFileIterator[bytes]."""
     return lfi.encoding is None
 
@@ -55,30 +51,28 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
 
     __slots__ = ("path", "encoding", "_iterator", "_file_object")
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __init__(
+        self: LazyFileIterator[str],
+        path: PathLikeType,
+        encoding: str,
+    ) -> None:
+        """Nobody inspects the spammish repetition."""
 
-        @overload
-        def __init__(
-            self: "LazyFileIterator[str]",
-            path: PathLikeType,
-            encoding: str,
-        ) -> None:
-            """Nobody inspects the spammish repetition."""
+    @overload
+    def __init__(
+        self: LazyFileIterator[bytes],
+        path: PathLikeType,
+    ) -> None:
+        """Nobody inspects the spammish repetition."""
 
-        @overload
-        def __init__(
-            self: "LazyFileIterator[bytes]",
-            path: PathLikeType,
-        ) -> None:
-            """Nobody inspects the spammish repetition."""
-
-        @overload
-        def __init__(
-            self: "LazyFileIterator[bytes]",
-            path: PathLikeType,
-            encoding: None = None,
-        ) -> None:
-            """Nobody inspects the spammish repetition."""
+    @overload
+    def __init__(
+        self: LazyFileIterator[bytes],
+        path: PathLikeType,
+        encoding: None = None,
+    ) -> None:
+        """Nobody inspects the spammish repetition."""
 
     def __init__(
         self,
@@ -97,7 +91,7 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
         return self
 
     @override
-    def __next__(self: "LazyFileIterator[AnyStr]") -> AnyStr:
+    def __next__(self: LazyFileIterator[AnyStr]) -> AnyStr:
         """Get the next line."""
         if self._iterator is None:
             self._file_object = self._open_file()
@@ -122,16 +116,14 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
             self._file_object = None
             self._iterator = None
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def _open_file(self: LazyFileIterator[bytes]) -> BytesIO: ...
 
-        @overload
-        def _open_file(self: "LazyFileIterator[bytes]") -> BytesIO: ...
-
-        @overload
-        def _open_file(self: "LazyFileIterator[str]") -> TextIO: ...
+    @overload
+    def _open_file(self: LazyFileIterator[str]) -> TextIO: ...
 
     def _open_file(
-        self: "LazyFileIterator[str] | LazyFileIterator[bytes]",
+        self: LazyFileIterator[str] | LazyFileIterator[bytes],
     ) -> IO[str] | IO[bytes]:
         """Open the underlying file."""
         if _is_bytes(self):

@@ -9,7 +9,6 @@ from __future__ import annotations
 import inspect
 from collections.abc import Callable
 from typing import (
-    TYPE_CHECKING,
     Final,
     Generic,
     Literal,
@@ -101,13 +100,11 @@ class NoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __call__(self, value: None) -> Literal[True]: ...
 
-        @overload
-        def __call__(self, value: None) -> Literal[True]: ...
-
-        @overload
-        def __call__(self, value: object | None) -> TypeGuard[None]: ...
+    @overload
+    def __call__(self, value: object | None) -> TypeGuard[None]: ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is None."""
@@ -120,13 +117,11 @@ class NotNoneChecker:
 
     __slots__ = ()
 
-    if TYPE_CHECKING:  # pragma: no cover
+    @overload
+    def __call__(self, value: None) -> Literal[False]: ...
 
-        @overload
-        def __call__(self, value: None) -> Literal[False]: ...
-
-        @overload
-        def __call__(self, value: object) -> bool: ...
+    @overload
+    def __call__(self, value: object) -> bool: ...
 
     def __call__(self, value: object | None) -> bool:
         """Return True if the value is not None."""
