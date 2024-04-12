@@ -1,7 +1,11 @@
 name: Check
 on:
+  pull_request:
+    branches:
+      - "*"
   push:
-    branches: [ main ]
+    branches:
+      - "*"
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: yes
 
@@ -193,6 +197,7 @@ jobs:
 
   github-pages:
     name: GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
