@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: .coverage
-          name: coverage
+          name: coverage-${{ matrix.python-version }}
 
   test-rustpython:
     name: Test RustPython
@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: .coverage
-          name: coverage
+          name: coverage-rustpython
 
   mypy:
     name: mypy
