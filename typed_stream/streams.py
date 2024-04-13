@@ -388,24 +388,12 @@ class Stream(StreamABC[T], Iterable[T]):
         self._data = itertools.chain(self._data, iterable)
         return self
 
-    def chunk(self, size: int) -> Stream[tuple[T, ...]]:
-        """Split stream into chunks of the specified size.
-
-        >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
-        ((1, 2), (3, 4), (5, 6))
-        >>> Stream([1, 2, 3, 4, 5, 6]).chunk(3).collect()
-        ((1, 2, 3), (4, 5, 6))
-        >>> Stream([1, 2, 3, 4, 5, 6, 7]).chunk(3).collect()
-        ((1, 2, 3), (4, 5, 6), (7,))
-        """
-        return self._finish(Chunked(self._data, size).stream())
-
     if sys.version_info >= (3, 12) and hasattr(itertools, "batched"):
 
-        def chunk(  # pylint: disable=function-redefined  # noqa: F811
-            self, size: int
-        ) -> Stream[tuple[T, ...]]:
-            """Split stream into chunks of the specified size.
+        def chunk(self, size: int) -> Stream[tuple[T, ...]]:
+            """Split the stream into chunks of the specified size.
+
+            The last chunk may be shorter.
 
             >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
             ((1, 2), (3, 4), (5, 6))
@@ -421,6 +409,22 @@ class Stream(StreamABC[T], Iterable[T]):
                     ),
                 )
             )
+
+    else:  # pragma: no cover
+
+        def chunk(self, size: int) -> Stream[tuple[T, ...]]:
+            """Split the stream into chunks of the specified size.
+
+            The last chunk may be shorter.
+
+            >>> Stream([1, 2, 3, 4, 5, 6]).chunk(2).collect()
+            ((1, 2), (3, 4), (5, 6))
+            >>> Stream([1, 2, 3, 4, 5, 6]).chunk(3).collect()
+            ((1, 2, 3), (4, 5, 6))
+            >>> Stream([1, 2, 3, 4, 5, 6, 7]).chunk(3).collect()
+            ((1, 2, 3), (4, 5, 6), (7,))
+            """
+            return self._finish(Chunked(self._data, size).stream())
 
     @overload
     def collect(self, /) -> StreamableSequence[T]: ...

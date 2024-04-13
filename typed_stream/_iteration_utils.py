@@ -54,6 +54,12 @@ class Chunked(
 
     Inspired by batched from:
     https://docs.python.org/3/library/itertools.html?highlight=callable#itertools-recipes
+
+    >>> chunks = Chunked("abcd", 2)
+    >>> assert "Chunked" in repr(chunks)
+    >>> assert "2" in repr(chunks)
+    >>> list(chunks)
+    [('a', 'b'), ('c', 'd')]
     """
 
     chunk_size: int

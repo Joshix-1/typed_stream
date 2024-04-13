@@ -475,7 +475,6 @@ assert (
     == create_int_stream().sum()
     == create_int_stream().collect(lambda x: sum(x))
     == create_int_stream().collect(sum)
-    # == create_int_stream().chunk(2).starmap(add).sum()
 )
 
 max_: int = Stream([1, 2, 3, -1]).max()
@@ -559,6 +558,15 @@ assert Stream.range(10).tail(5) == (5, 6, 7, 8, 9)
 str_stream: Stream[str] = Stream([None, "1", "2", "3", 4, 0, 23]).filter(is_str)
 assert str_stream.collect(list) == ["1", "2", "3"]
 
+assert (
+    repr(FileStream("file.txt", "Utf-8", False))
+    == "typed_stream.streams.FileStream('file.txt','Utf-8',False)"
+)
+assert (
+    repr(FileStream("file.txt", "Utf-8", True))
+    == "typed_stream.streams.FileStream('file.txt','Utf-8',True)"
+)
+
 INPUT_TXT = Path(__file__).parent / "input.txt"
 
 assert (
@@ -576,6 +584,8 @@ assert FileStream(INPUT_TXT, keep_line_ends=True).map(
 
 fs = FileStream(INPUT_TXT)
 assert fs.chain(" ").last() == " "
+assert fs._file_iterator is None
+fs.close()  # closing twice shouldn't fail
 assert fs._file_iterator is None
 
 fs = FileStream(INPUT_TXT, keep_line_ends=True)
