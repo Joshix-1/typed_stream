@@ -31,7 +31,36 @@ class Options:
 
 def run_program(options: Options) -> str | None:  # noqa: C901
     # pylint: disable=too-complex, too-many-branches, too-many-statements
-    """Run the program with the options."""
+    """Run the program with the options.
+
+    >>> import contextlib, io
+    >>> in_ = sys.stdin
+    >>> sys.stdin = io.StringIO("200\\n1000\\n30\\n4")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         actions=("map", "int", "sum")
+    ...     ))
+    1234
+    >>> print(err.getvalue())
+    print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).sum())
+    <BLANKLINE>
+    >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"200\\n1000\\n30\\n4"))
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     run_program(Options(
+    ...         debug=True,
+    ...         bytes=True,
+    ...         keep_ends=True,
+    ...         actions=("flat_map", "iter", "map", "hex", "collect", "Counter")
+    ...     ))
+    Counter({'0x30': 6, '0xa': 3, '0x32': 1, '0x31': 1, '0x33': 1, '0x34': 1})
+    >>> print(err.getvalue())
+    print(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))
+    <BLANKLINE>
+    >>> sys.stdin = in_
+    """  # noqa: D301
     code: list[str]
     stream: Stream[bytes] | Stream[str] | object
     if options.bytes:
@@ -103,8 +132,10 @@ def run_program(options: Options) -> str | None:  # noqa: C901
         code.insert(0, "print(")
         code.append(")")
 
+    sys.stdout.flush()
+
     if options.debug:
-        print("".join(code), file=sys.stderr)
+        print("".join(code), file=sys.stderr, flush=True)
     return None
 
 
