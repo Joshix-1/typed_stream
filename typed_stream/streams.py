@@ -872,14 +872,12 @@ class Stream(StreamABC[T], Iterable[T]):
         )
 
     @overload
-    def max(self: Stream[SC]) -> SC:  # pragma: no cover
-        ...
+    def max(self: Stream[SC]) -> SC: ...
 
     @overload
     def max(
         self: Stream[SC], default: K | _DefaultValueType = _DEFAULT_VALUE
-    ) -> SC | K:  # pragma: no cover
-        ...
+    ) -> SC | K: ...
 
     @overload
     def max(
@@ -887,8 +885,7 @@ class Stream(StreamABC[T], Iterable[T]):
         default: K | _DefaultValueType = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC],
-    ) -> T | K:  # pragma: no cover
-        ...
+    ) -> T | K: ...
 
     def max(
         self,

@@ -400,21 +400,27 @@ try:
         + "(<bound method StreamABC.close of typed_stream.streams.Stream"
         + "(repeat(69))>,repeat(69))"
     )
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 try:
     assert (
         repr(Peeker(print))
         == "typed_stream._iteration_utils.Peeker(<built-in function print>)"
     )
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 
 
 assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
@@ -593,22 +599,28 @@ for line in fs:
     assert line.endswith("\n")
 try:
     assert fs._file_iterator is None
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 
 fs = FileStream(INPUT_TXT)
 for line in fs:
     assert not line.endswith("\n")
 try:
     assert fs._file_iterator is None
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 
 fs = FileStream(INPUT_TXT)
 assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
@@ -682,11 +694,14 @@ fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
 try:
     assert bfs._file_iterator is None
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 assert fs._file_iterator is None
 
 int_list_begin: list[int] = []
@@ -709,11 +724,14 @@ assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
 try:
     assert repr(int_stream) == "typed_stream.streams.Stream(...)"
-except AssertionError:
+except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
     else:
         raise
+else:  # pragma: no cover
+    if sys.implementation.name == "rustpython":
+        raise AssertionError("Doesn't fail anymore on RustPython")
 
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
