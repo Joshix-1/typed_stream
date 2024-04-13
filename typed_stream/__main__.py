@@ -59,6 +59,21 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
     print(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))
     <BLANKLINE>
+    >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"1\\n2\\n3\\n4"))
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=True,
+    ...         actions=("map", "int", "filter", "is_even", "map", "mul", "10")
+    ...     ))
+    20
+    40
+    >>> f"\\n{err.getvalue()}".endswith(
+    ...     "Stream(sys.stdin).map(int).filter(typed_stream.functions.is_even)"
+    ...     ".map(operator.mul,10).for_each(print)\\n"
+    ... )
+    True
     >>> sys.stdin = in_
     """  # noqa: D301
     code: list[str]
