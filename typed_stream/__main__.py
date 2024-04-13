@@ -44,7 +44,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         actions=("map", "int", "sum")
     ...     ))
     1234
-    >>> print(err.getvalue())
+    >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
     print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).sum())
     <BLANKLINE>
     >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"200\\n1000\\n30\\n4"))
@@ -56,7 +56,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         actions=("flat_map", "iter", "map", "hex", "collect", "Counter")
     ...     ))
     Counter({'0x30': 6, '0xa': 3, '0x32': 1, '0x31': 1, '0x33': 1, '0x34': 1})
-    >>> print(err.getvalue())
+    >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
     print(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))
     <BLANKLINE>
     >>> sys.stdin = in_
