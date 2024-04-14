@@ -103,7 +103,7 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
     def distinct(self, *, use_set: bool = True) -> Self:
         """Remove duplicate values.
 
-        >>> from typed_stream import Stream, StreamABC
+        >>> from typed_stream import Stream
         >>> StreamABC.distinct(Stream([1, 2, 2, 2, 3, 2, 2])).collect()
         (1, 2, 3)
         >>> StreamABC.distinct(Stream([{1}, {2}, {3}, {2}, {2}])).collect()
