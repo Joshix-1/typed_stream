@@ -9,13 +9,13 @@ from __future__ import annotations
 __all__ = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
 
 
-class StreamFinishedError(Exception):
+class StreamFinishedError(ValueError):
     """You cannot perform operations on a finished Stream."""
 
     __slots__ = ()
 
 
-class StreamEmptyError(Exception):
+class StreamEmptyError(ValueError):
     """The Stream is empty."""
 
     __slots__ = ()
