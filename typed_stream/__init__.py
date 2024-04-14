@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 from .exceptions import StreamEmptyError, StreamFinishedError, StreamIndexError
-from .stream_abc import StreamABC
 from .streamable import Streamable, StreamableSequence
 from .streams import BinaryFileStream, FileStream, Stream
 from .version import VERSION
@@ -17,14 +16,11 @@ __all__ = (
     "BinaryFileStream",
     "FileStream",
     "Stream",
-    "StreamABC",
     "StreamEmptyError",
     "StreamFinishedError",
     "StreamIndexError",
     "Streamable",
     "StreamableSequence",
-    "VERSION",
-    "version_info",
 )
 
 version_info: tuple[int, int, int] = __import__("typing").cast(
