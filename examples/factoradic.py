@@ -33,10 +33,10 @@ def int_to_factoradic(num: int) -> str:
 
     start = Stream.counting(1).take_while(lambda n: factorial(n) <= num).last()
 
-    digits: list[int] = [
+    digits = (
         num // f + (num := num % f) // f
         for f in Stream.range(start, stop=0, step=-1).map(factorial)
-    ]
+    )
 
     return Stream(digits).map(DIGITS.__getitem__).collect("".join)
 
