@@ -379,13 +379,17 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
-    def chain(self, iterable: Iterable[T], /) -> Self:
+    def chain(self, *iterables: Iterable[T]) -> Self:
         """Add another iterable to the end of the Stream.
 
         >>> Stream([1, 2, 3]).chain([4, 5, 6]).collect()
         (1, 2, 3, 4, 5, 6)
+        >>> Stream([1, 2, 3]).chain([4, 5, 6], [7, 8, 9]).collect()
+        (1, 2, 3, 4, 5, 6, 7, 8, 9)
+        >>> Stream("abc").chain("def", "ghi", "jkl").collect("".join)
+        'abcdefghijkl'
         """
-        self._data = itertools.chain(self._data, iterable)
+        self._data = itertools.chain(self._data, *iterables)
         return self
 
     if sys.version_info >= (3, 12) and hasattr(itertools, "batched"):
