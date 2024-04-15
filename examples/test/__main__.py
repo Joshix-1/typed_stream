@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from subprocess import run, PIPE
+from subprocess import PIPE, run
 
 from ..factoradic import test
 from ..print_primes import test_prime_stream
