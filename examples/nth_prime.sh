@@ -1,9 +1,13 @@
 #!/bin/sh
+set -e
+
 if [ -z "$1" ]; then
   N="1"
 else
   N="$1"
 fi
+
+set -u
 
 if [ -f "./nth_prime.sh" ]; then
   DIR="."

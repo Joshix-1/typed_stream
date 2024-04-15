@@ -41,7 +41,7 @@ def int_to_factoradic(num: int) -> str:
     return Stream(digits).map(DIGITS.__getitem__).collect("".join)
 
 
-def test() -> None:
+def test() -> int | str:
     """Test this."""
     test_cases: tuple[tuple[int, str], ...] = (
         (1, "1"),
@@ -59,8 +59,12 @@ def test() -> None:
     )
 
     for i, f in test_cases:
-        assert (_ := factoradic_to_int(f)) == i, f"{_!r} != {i!r}"
-        assert (_ := int_to_factoradic(i)) == f, f"{_!r} != {f!r}"
+        if (_ := factoradic_to_int(f)) != i:
+            return f"{_!r} != {i!r}"
+        if (_ := int_to_factoradic(i)) != f:
+            return f"{_!r} != {f!r}"
+
+    return 0
 
 
 if __name__ == "__main__":
