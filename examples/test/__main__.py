@@ -8,7 +8,7 @@ from subprocess import PIPE, run  # nosec
 from ..factoradic import test
 from ..print_primes import test_prime_stream
 
-TS_DIR = Path(__file__).parent.parent.parent
+EXAMPLES_DIR = Path(__file__).parent.parent
 
 test_prime_stream()
 test()
@@ -18,11 +18,12 @@ def _get_nth_prime(num: int) -> int:
     """Run nth_prime.sh."""
     return int(
         run(  # nosec
-            ["./examples/nth_prime.sh", str(num)],
+            ["./nth_prime.sh", str(num)],
             check=True,
             stdout=PIPE,
             shell=False,
-            cwd=TS_DIR,
+            cwd=EXAMPLES_DIR,
+            env={"PYTHONPATH": EXAMPLES_DIR.parent},
         ).stdout
     )
 
