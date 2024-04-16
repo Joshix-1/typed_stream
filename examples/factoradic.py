@@ -16,6 +16,8 @@ DIGITS = string.digits + string.ascii_letters
 
 def factoradic_to_int(num: str) -> int:
     """Convert a factoradic to an int."""
+    if num.startswith("-"):
+        return -factoradic_to_int(num[1:])
     return (
         Stream(reversed(num))
         .enumerate(1)
@@ -28,22 +30,31 @@ def int_to_factoradic(num: int) -> str:
     """Convert an int to a factoradic."""
     if num < 0:
         return f"-{int_to_factoradic(abs(num))}"
-    if num < 2:
-        return str(num)
 
-    start = Stream.counting(1).take_while(lambda n: factorial(n) <= num).last()
-
-    digits = (
-        num // f + (num := num % f) // f
-        for f in Stream.range(start, stop=0, step=-1).map(factorial)
+    start = (
+        Stream.counting(1)
+        .take_while(lambda n: factorial(n) <= num)
+        .nth(-1, default=1)
     )
 
-    return Stream(digits).map(DIGITS.__getitem__).collect("".join)
+    def _divide_num(divisor: int) -> int:
+        nonlocal num
+        result, num = divmod(num, divisor)
+        return result
+
+    return (
+        Stream.range(start, 0, -1)
+        .map(factorial)
+        .map(_divide_num)
+        .map(DIGITS.__getitem__)
+        .collect("".join)
+    )
 
 
 def test() -> int | str:
     """Test this."""
-    test_cases: tuple[tuple[int, str], ...] = (
+    test_cases: list[tuple[int, str]] = [
+        (0, "0"),
         (1, "1"),
         (2, "10"),
         (7, "101"),
@@ -55,8 +66,11 @@ def test() -> int | str:
         (5039, "654321"),
         (5040, "1000000"),
         (1_000_001, "266251221"),
-        (36287999, "9987654321"),
-    )
+        (3_628_799, "987654321"),
+        (36_287_999, "9987654321"),
+    ]
+
+    test_cases.extend([(-i, f"-{f}") for i, f in test_cases if i])
 
     for i, f in test_cases:
         if (_ := factoradic_to_int(f)) != i:
