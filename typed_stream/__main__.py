@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import collections
 import dataclasses
+import inspect
 import operator
 import sys
 import textwrap
@@ -154,30 +155,6 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     return None
 
 
-def dedent_docstring(string: str) -> str:
-    """Detend a docstring.
-
-    >>> dedent_docstring("")
-    ''
-    >>> dedent_docstring("a")
-    'a'
-    >>> dedent_docstring((" " * 5) + "a")
-    'a'
-    >>> (" " * 2) in dedent_docstring.__doc__ or sys.version_info >= (3, 13)
-    True
-    >>> (" " * 2) in dedent_docstring(dedent_docstring.__doc__)
-    False
-    >>> dedent_docstring(dedent_docstring.__doc__).endswith("True\\n")
-    True
-    """  # noqa: D301
-    string = string.removeprefix("\n")
-    if string.startswith((" ", "\t")):
-        return textwrap.dedent(string)
-    split = string.split("\n")
-    end = textwrap.dedent("\n".join(split[1:]))
-    return "\n".join([*split[:1], *([end] if end else ())])
-
-
 def main() -> str | None:  # noqa: C901
     """Parse arguments and then run the program."""
     arg_parser = argparse.ArgumentParser(
@@ -210,7 +187,7 @@ def main() -> str | None:  # noqa: C901
             elif not (doc := cast(str, getattr(method, "__doc__", ""))):
                 to_print = "No docs."
             else:
-                to_print = dedent_docstring(doc).strip()
+                to_print = inspect.cleandoc(doc)
 
             print(textwrap.indent(to_print, " " * 4))
         return None
