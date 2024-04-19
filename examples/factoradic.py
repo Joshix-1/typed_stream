@@ -11,6 +11,9 @@ from math import factorial
 
 from typed_stream import Stream
 
+
+__all__ = ("factoradic_to_int", "int_to_factoradic")
+
 DIGITS = string.digits + string.ascii_letters
 
 
