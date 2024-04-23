@@ -142,7 +142,8 @@ assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum() == 45
 assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
 
-assert Stream("abbccc122333").collect(Counter) == {
+counted_letters: Counter[str] = Stream("abbccc122333").collect(Counter)
+assert counted_letters == {
     "a": 1,
     "b": 2,
     "c": 3,
