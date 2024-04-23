@@ -30,6 +30,7 @@ from ._iteration_utils import (
 from ._types import (
     StarCallable,
     SupportsAdd,
+    SupportsAverage,
     SupportsComparison,
     TypeGuardingCallable,
 )
@@ -314,6 +315,30 @@ class Stream(StreamABC[T], Iterable[T]):
         True
         """
         return self._finish(all(self._data), close_source=True)
+
+    def avg(self: Stream[SupportsAverage[K]]) -> K:
+        """Calculate the average of the elements in self.
+
+        Raises StreamEmptyError if the stream is empty.
+
+        >>> Stream(data := range(1, 5)).avg()
+        2.5
+        >>> Stream(data).map(int).avg()
+        2.5
+        >>> Stream(data).map(float).avg()
+        2.5
+        >>> Stream(data).map(__import__("decimal").Decimal).avg()
+        Decimal('2.5')
+        >>> Stream(data).map(__import__("fractions").Fraction).avg()
+        Fraction(5, 2)
+        >>> Stream([]).avg()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
+        """
+        counter = itertools.count()
+
+        return self.peek(lambda _: next(counter)).sum() / next(counter)
 
     @overload
     def catch(
