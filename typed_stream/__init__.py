@@ -8,14 +8,20 @@ from __future__ import annotations
 
 from typing import cast
 
-from . import exceptions, streamable, streams
+from . import exceptions, file_streams, streamable, streams
 from .exceptions import *  # noqa: F401, F403
+from .file_streams import *  # noqa: F401, F403
 from .streamable import *  # noqa: F401, F403
 from .streams import *  # noqa: F401, F403
 from .version import VERSION
 
 __version__ = VERSION
-__all__ = streams.__all__ + streamable.__all__ + exceptions.__all__
+__all__ = (
+    streams.__all__
+    + streamable.__all__
+    + exceptions.__all__
+    + file_streams.__all__
+)
 
 version_info: tuple[int, int, int] = cast(
     tuple[int, int, int], tuple(map(int, VERSION.split(".")))

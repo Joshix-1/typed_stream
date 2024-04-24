@@ -426,7 +426,7 @@ else:  # pragma: no cover
 
 assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
 assert repr(Stream(...)) == "typed_stream.streams.Stream(...)"
-assert repr(FileStream(...)) == "typed_stream.streams.FileStream(...)"
+assert repr(FileStream(...)) == "typed_stream.file_streams.FileStream(...)"
 
 assert_raises(StreamFinishedError, lambda: Stream(...)._data)
 assert_raises(StreamFinishedError, lambda: BinaryFileStream(...)._data)
@@ -567,11 +567,11 @@ assert str_stream.collect(list) == ["1", "2", "3"]
 
 assert (
     repr(FileStream("file.txt", "Utf-8", False))
-    == "typed_stream.streams.FileStream('file.txt','Utf-8',False)"
+    == "typed_stream.file_streams.FileStream('file.txt','Utf-8',False)"
 )
 assert (
     repr(FileStream("file.txt", "Utf-8", True))
-    == "typed_stream.streams.FileStream('file.txt','Utf-8',True)"
+    == "typed_stream.file_streams.FileStream('file.txt','Utf-8',True)"
 )
 
 INPUT_TXT = Path(__file__).parent / "input.txt"
