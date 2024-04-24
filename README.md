@@ -1,4 +1,4 @@
-# typed_stream
+# Typed Stream
 ![License](https://img.shields.io/pypi/l/typed-stream?label=License)
 ![Python](https://img.shields.io/pypi/pyversions/typed-stream?label=Python)
 ![Implementation](https://img.shields.io/pypi/implementation/typed-stream?label=Implementation)
@@ -12,16 +12,45 @@
 [![Downloads](https://pepy.tech/badge/typed-stream/month)](https://pepy.tech/project/typed-stream)
 [![Downloads](https://pepy.tech/badge/typed-stream/week)](https://pepy.tech/project/typed-stream)
 
-Java-like typed Stream for Python
+
+The Stream class is an [iterable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable) with utility methods for transforming it.
 
 This library heavily uses itertools for great performance and simple code.
 
 ## Examples
-In [examples](./examples) are cool examples using Streams.
+
+```py
+from typed_stream import FileStream, Stream
+
+# Get sum of 10 squares
+print(Stream.range(stop=10).map(lambda x: x * x).sum())
+# same as above
+print(sum(Stream.counting().limit(10).map(pow, 2)))
+
+# sum first 100 odd numbers
+Stream.counting(start=1, step=2).limit(100).sum()
+
+# Get all the package names from requirements-dev.txt
+package_names = FileStream("requirements-dev.txt")\
+    .filter()\
+    .exclude(lambda line: line.startswith("#"))\
+    .map(str.split, "==")\
+    .map(list.__getitem__, 0)\
+    .collect()
+print(package_names)
+```
+
+In [examples](./examples) are more complex examples using Streams.
 
 ## Not yet asked questions
 
 I'll try to answer questions that could occur.
+
+### What do the versions mean?
+
+I try to follow something similar to sem-ver. For versions before 1.0.0 this means the format is `0.<major>.<patch>`.
+Any change that could be considered a breaking-change (adding things is not a breaking change) increases the `major` part. If only `patch` has changed, there was no breaking-change.
+I try to avoid changes that break my own code, so even if `major` has been changed, it should probably be safe to upgrade.
 
 ### Why are there no changelogs?
 

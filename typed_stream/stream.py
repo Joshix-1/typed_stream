@@ -2,7 +2,28 @@
 # You may obtain a copy of the licence in all the official languages of the
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 
-"""Java-like typed Stream classes for easier handling of generators."""
+"""Typed Stream class for easier handling of iterables.
+
+Examples:
+>>> from typed_stream import FileStream, Stream
+>>> # Get sum of 10 squares
+>>> Stream.range(stop=10).map(lambda x: x * x).sum()
+285
+>>> # same as above
+>>> sum(Stream.counting().limit(10).map(pow, 2))
+285
+>>> # sum first 100 odd numbers
+>>> Stream.counting(start=1, step=2).limit(100).sum()
+10000
+>>> # Get the longest package name from requirements-dev.txt
+>>> (FileStream("requirements-dev.txt")
+...     .filter()
+...     .exclude(lambda line: line.startswith("#"))
+...     .map(str.split, "==")
+...     .map(list.__getitem__, 0)
+...     .max(key=len))
+'flake8-no-implicit-concat'
+"""
 
 from __future__ import annotations
 
@@ -66,7 +87,7 @@ add: Callable[[SA, SA], SA] = operator.add
 
 
 class Stream(StreamABC[T], Iterable[T]):
-    """Stream class providing an interface similar to Stream in Java.
+    """Typed Stream class for easier handling of iterables.
 
     It is not recommended to store Stream instances in variables,
     instead use method chaining to handle the values and collect them when finished.
