@@ -16,7 +16,7 @@ from ._lazy_file_iterators import (
 )
 from ._types import PathLikeType
 from ._typing import override
-from .streams import Stream
+from .stream import Stream
 
 __all__ = (
     "BinaryFileStream",

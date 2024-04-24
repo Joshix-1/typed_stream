@@ -398,7 +398,7 @@ try:
     assert (
         repr(iter(Stream.from_value(69)))
         == "typed_stream._iteration_utils.IterWithCleanUp"
-        + "(<bound method StreamABC.close of typed_stream.streams.Stream"
+        + "(<bound method StreamABC.close of typed_stream.stream.Stream"
         + "(repeat(69))>,repeat(69))"
     )
 except AssertionError:  # pragma: no cover
@@ -424,8 +424,8 @@ else:  # pragma: no cover
         raise AssertionError("Doesn't fail anymore on RustPython")
 
 
-assert str(Stream(...)) == "typed_stream.streams.Stream(...)"
-assert repr(Stream(...)) == "typed_stream.streams.Stream(...)"
+assert str(Stream(...)) == "typed_stream.stream.Stream(...)"
+assert repr(Stream(...)) == "typed_stream.stream.Stream(...)"
 assert repr(FileStream(...)) == "typed_stream.file_streams.FileStream(...)"
 
 assert_raises(StreamFinishedError, lambda: Stream(...)._data)
@@ -724,7 +724,7 @@ assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
 try:
-    assert repr(int_stream) == "typed_stream.streams.Stream(...)"
+    assert repr(int_stream) == "typed_stream.stream.Stream(...)"
 except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()

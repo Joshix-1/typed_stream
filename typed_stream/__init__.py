@@ -8,16 +8,16 @@ from __future__ import annotations
 
 from typing import cast
 
-from . import exceptions, file_streams, streamable, streams
+from . import exceptions, file_streams, streamable, stream
 from .exceptions import *  # noqa: F401, F403
 from .file_streams import *  # noqa: F401, F403
 from .streamable import *  # noqa: F401, F403
-from .streams import *  # noqa: F401, F403
+from .stream import *  # noqa: F401, F403
 from .version import VERSION
 
 __version__ = VERSION
 __all__ = (
-    streams.__all__
+    stream.__all__
     + streamable.__all__
     + exceptions.__all__
     + file_streams.__all__
