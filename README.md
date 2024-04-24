@@ -28,14 +28,14 @@ print(Stream.range(stop=10).map(lambda x: x * x).sum())
 print(sum(Stream.counting().limit(10).map(pow, 2)))
 
 # sum first 100 odd numbers
-Stream.counting(start=1, step=2).limit(100).sum()
+print(Stream.counting(start=1, step=2).limit(100).sum())
 
 # Get all the package names from requirements-dev.txt
-package_names = FileStream("requirements-dev.txt")\
+package_names: tuple[str, ...] = FileStream("requirements-dev.txt")\
     .filter()\
     .exclude(lambda line: line.startswith("#"))\
-    .map(str.split, "==")\
-    .map(list.__getitem__, 0)\
+    .map(str.split, "==", 1)\
+    .starmap(lambda name, version = None: name)\
     .collect()
 print(package_names)
 ```
