@@ -195,13 +195,20 @@ jobs:
       - name: Run Bandit
         run: bandit -c pyproject.toml -r typed_stream examples
 
+  is_on_main:
+    name: Run this if on main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
+
   github-pages:
     name: GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
       - test
+      - is_on_main
     permissions:
       contents: read
       id-token: write
@@ -240,3 +247,110 @@ jobs:
       - name: Deploy GitHub Pages site
         id: deployment
         uses: actions/deploy-pages@v4
+
+  get_version:
+    name: Get version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      latest_version: ${{ steps.version.outputs.latest_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          filter: blob:none
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Get current version
+        id: version
+        run: |
+          echo -n "version=" >> $GITHUB_OUTPUT
+          ./typed_stream/version.py >> $GITHUB_OUTPUT
+      - name: Get latest version
+        id: latest_version
+        run: |
+          echo -n "latest_version=" >> $GITHUB_OUTPUT
+          git describe --tags --abbrev=0 >> $GITHUB_OUTPUT
+
+  build_release:
+    name: Build release
+    runs-on: ubuntu-latest
+    if: needs.get_version.outputs.version != needs.get_version.outputs.latest_version
+    needs:
+      - fix_stupid_mistakes
+      - test
+      - test-rustpython
+      - mypy
+      - pytype
+      - flake8
+      - pylint
+      - bandit
+      - is_on_main
+      - get_version
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install build frontend
+        run: grep "^build==" requirements-dev.txt | xargs pip install
+      - name: Build
+        run: make build
+      - name: Upload as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release_build
+          path: dist
+
+  pypi:
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    needs:
+      - build_release
+    permissions: {}
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release_build
+      - name: Install Twine
+        run: pip install "twine==4.*"
+      - name: Run Twine
+        run: |
+          twine check --strict *.tar.gz *.whl
+          twine upload --verbose --disable-progress-bar *.tar.gz *.whl
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - build_release
+      - get_version
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release_build
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.get_version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            *.tar.gz
+            *.whl
