@@ -398,9 +398,7 @@ class Stream(StreamABC[T], Iterable[T]):
             """
             return self._finish(
                 Stream(
-                    itertools.batched(
-                        self._data, size
-                    ),
+                    itertools.batched(self._data, size),
                 )
             )
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from abc import ABC
 from collections.abc import Iterable
-from typing import Literal, TYPE_CHECKING, SupportsIndex, TypeVar, overload
+from typing import TYPE_CHECKING, Literal, SupportsIndex, TypeVar, overload
 
 from ._typing import override
 
