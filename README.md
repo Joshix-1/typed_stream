@@ -20,7 +20,32 @@ This library heavily uses itertools for great performance and simple code.
 ## Examples
 
 <!--- BEGIN EXAMPLE --->
-
+```py
+>>> import typed_stream
+>>> # Get sum of 10 squares
+>>> typed_stream.Stream.range(stop=10).map(lambda x: x * x).sum()
+285
+>>> # same as above
+>>> sum(typed_stream.Stream.counting().limit(10).map(pow, 2))
+285
+>>> # sum first 100 odd numbers
+>>> typed_stream.Stream.counting(start=1, step=2).limit(100).sum()
+10000
+>>> (typed_stream.Stream.counting()
+...     .filter(typed_stream.functions.is_odd).limit(100).sum())
+10000
+>>> (typed_stream.Stream.counting()
+...     .exclude(typed_stream.functions.is_even).limit(100).sum())
+10000
+>>> # Get the longest package name from requirements-dev.txt
+>>> (typed_stream.FileStream("requirements-dev.txt")
+...     .filter()
+...     .exclude(lambda line: line.startswith("#"))
+...     .map(str.split, "==")
+...     .starmap(lambda name, version = None: name)
+...     .max(key=len))
+'flake8-no-implicit-concat'
+```
 <!--- END EXAMPLE --->
 
 In [examples](./examples) are more complex examples using Streams.
