@@ -5,18 +5,24 @@
 """Typed Stream classes for easier handling of iterables.
 
 Examples:
->>> from typed_stream import FileStream, Stream
+>>> import typed_stream
 >>> # Get sum of 10 squares
->>> Stream.range(stop=10).map(lambda x: x * x).sum()
+>>> typed_stream.Stream.range(stop=10).map(lambda x: x * x).sum()
 285
 >>> # same as above
->>> sum(Stream.counting().limit(10).map(pow, 2))
+>>> sum(typed_stream.Stream.counting().limit(10).map(pow, 2))
 285
 >>> # sum first 100 odd numbers
->>> Stream.counting(start=1, step=2).limit(100).sum()
+>>> typed_stream.Stream.counting(start=1, step=2).limit(100).sum()
+10000
+>>> (typed_stream.Stream.counting()
+...     .filter(typed_stream.functions.is_odd).limit(100).sum())
+10000
+>>> (typed_stream.Stream.counting()
+...     .exclude(typed_stream.functions.is_even).limit(100).sum())
 10000
 >>> # Get the longest package name from requirements-dev.txt
->>> (FileStream("requirements-dev.txt")
+>>> (typed_stream.FileStream("requirements-dev.txt")
 ...     .filter()
 ...     .exclude(lambda line: line.startswith("#"))
 ...     .map(str.split, "==")
@@ -24,30 +30,21 @@ Examples:
 ...     .max(key=len))
 'flake8-no-implicit-concat'
 """
+# isort:skip_file
 
-from __future__ import annotations
+from . import _impl, version
+from . import functions  # noqa: F401
+from ._impl.exceptions import *  # noqa: F401, F403
+from ._impl.file_streams import *  # noqa: F401, F403s
+from ._impl.stream import *  # noqa: F401, F403
+from ._impl.streamable import *  # noqa: F401, F403
 
-from typing import cast
+__all__ = _impl.__all__
+__version__ = version.VERSION
 
-from . import exceptions, file_streams, stream, streamable
-from .exceptions import *  # noqa: F401, F403
-from .file_streams import *  # noqa: F401, F403
-from .stream import *  # noqa: F401, F403
-from .streamable import *  # noqa: F401, F403
-from .version import VERSION
-
-__version__ = VERSION
-__all__ = (
-    stream.__all__
-    + streamable.__all__
-    + exceptions.__all__
-    + file_streams.__all__
-)
-
-version_info: tuple[int, int, int] = cast(
-    tuple[int, int, int], tuple(map(int, VERSION.split(".")))
-)
-if len(version_info) != 3:
-    raise AssertionError(f"Invalid version: {VERSION}")
-
-del annotations, cast
+# fmt: off
+(Stream(__all__)  # noqa: F405
+    .map(globals().__getitem__)
+    .map(setattr, "__module__", "typed_stream")
+    .for_each())
+# fmt: on

@@ -36,6 +36,17 @@ jobs:
         run: isort .
       - name: Run Black
         run: black .
+      - name: Update README
+        run: |
+          export TMP_FILE="$(mktemp)"
+          python3 -m typed_stream take_while 'lambda x: x != ("<!--- BEGIN EXAMPLE --->")' < README.md > "${TMP_FILE}"
+          echo '<!--- BEGIN EXAMPLE --->' >> "${TMP_FILE}"
+          echo '```py' >> "${TMP_FILE}"
+          python3 -c 'import typed_stream;print(typed_stream.__doc__.strip())' | python3 -m typed_stream drop_while 'lambda x: not x.startswith(">>>")' >> "${TMP_FILE}"
+          echo '```' >> "${TMP_FILE}"
+          python3 -m typed_stream drop_while 'lambda x: x != ("<!--- END EXAMPLE --->")' < README.md >> "${TMP_FILE}"
+          cat "${TMP_FILE}" > README.md
+          rm "${TMP_FILE}"
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

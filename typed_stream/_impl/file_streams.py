@@ -14,7 +14,7 @@ from ._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
-from ._types import PathLikeType, PrettyRepr
+from ._types import PathLikeType
 from ._typing import override
 from .stream import Stream
 
@@ -67,11 +67,11 @@ class FileStream(FileStreamBase[str]):
         To create a finished FileStream do FileStream(...).
         """
         if isinstance(data, EllipsisType):
-            self._file_iterator = None  # pylint: disable=assigning-non-slot
+            self._file_iterator = None
             super().__init__(...)
             return
 
-        self._file_iterator = (  # pylint: disable=assigning-non-slot
+        self._file_iterator = (
             LazyFileIterator(data, encoding=encoding)
             if keep_line_ends
             else LazyFileIteratorRemovingEndsStr(data, encoding=encoding)
@@ -94,11 +94,11 @@ class BinaryFileStream(FileStreamBase[bytes]):
         To create a finished BinaryFileStream do BinaryFileStream(...).
         """
         if isinstance(data, EllipsisType):
-            self._file_iterator = None  # pylint: disable=assigning-non-slot
+            self._file_iterator = None
             super().__init__(...)
             return
 
-        self._file_iterator = (  # pylint: disable=assigning-non-slot
+        self._file_iterator = (
             LazyFileIterator(data)
             if keep_line_ends
             else LazyFileIteratorRemovingEndsBytes(data)

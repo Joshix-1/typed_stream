@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
 from ._typing import override
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typed_stream import Stream
+    from .stream import Stream
 
 __all__ = ("Streamable", "StreamableSequence")
 
@@ -28,9 +28,7 @@ class Streamable(Iterable[T], ABC):
 
     def stream(self) -> Stream[T]:
         """Return Stream(self)."""
-        from typed_stream import (  # pylint: disable=import-outside-toplevel
-            Stream,
-        )
+        from .stream import Stream  # pylint: disable=import-outside-toplevel
 
         return Stream(self)
 

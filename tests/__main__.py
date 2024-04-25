@@ -25,19 +25,19 @@ from typed_stream import (
     FileStream,
     Stream,
     StreamableSequence,
-)
-from typed_stream._iteration_utils import (
-    IterWithCleanUp,
-    Peeker,
-    sliding_window,
-)
-from typed_stream._lazy_file_iterators import LazyFileIteratorRemovingEndsBytes
-from typed_stream._utils import IndexValueTuple
-from typed_stream.exceptions import (
     StreamEmptyError,
     StreamFinishedError,
     StreamIndexError,
 )
+from typed_stream._impl._iteration_utils import (
+    IterWithCleanUp,
+    Peeker,
+    sliding_window,
+)
+from typed_stream._impl._lazy_file_iterators import (
+    LazyFileIteratorRemovingEndsBytes,
+)
+from typed_stream._impl._utils import IndexValueTuple
 from typed_stream.functions import is_even, is_odd
 
 from .test_functions import (
@@ -397,7 +397,7 @@ assert _stream1.limit(1000).collect() == _stream2.limit(1000).collect()
 try:
     assert (
         repr(iter(Stream.from_value(69)))
-        == "typed_stream._iteration_utils.IterWithCleanUp"
+        == "typed_stream._impl._iteration_utils.IterWithCleanUp"
         + "(<bound method StreamABC.close of typed_stream.Stream"
         + "(repeat(69))>,repeat(69))"
     )
@@ -412,7 +412,7 @@ else:  # pragma: no cover
 try:
     assert (
         repr(Peeker(print))
-        == "typed_stream._iteration_utils.Peeker(<built-in function print>)"
+        == "typed_stream._impl._iteration_utils.Peeker(<built-in function print>)"
     )
 except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":

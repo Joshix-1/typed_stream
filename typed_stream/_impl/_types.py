@@ -9,7 +9,6 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from collections.abc import Callable, Iterable, Iterator
-from importlib import import_module
 from os import PathLike
 from typing import Generic, Protocol, TypeAlias, TypeGuard, TypeVar
 
@@ -124,8 +123,8 @@ class PrettyRepr(abc.ABC):
     @classmethod
     def _full_class_name(cls) -> str:
         """Return the fully qualified name of the class."""
-        if getattr(import_module("typed_stream"), cls.__name__, None) is cls:
-            return f"typed_stream.{cls.__name__}"
+        # if getattr(import_module("typed_stream"), cls.__name__, None) is cls:
+        #     return f"typed_stream.{cls.__name__}"
         return f"{cls.__module__}.{cls.__qualname__}"
 
     @abc.abstractmethod

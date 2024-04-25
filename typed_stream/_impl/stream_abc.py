@@ -53,11 +53,11 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         >>> stream._data
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamFinishedError: Stream is finished.
+        typed_stream.StreamFinishedError: Stream is finished.
         >>> Stream(...)._data
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamFinishedError: Stream is finished.
+        typed_stream.StreamFinishedError: Stream is finished.
         """
         if self.__data is None:
             raise StreamFinishedError("Stream is finished.")

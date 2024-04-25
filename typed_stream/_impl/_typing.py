@@ -23,9 +23,9 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     else:
         from typing import override
 else:
-    Self = getattr(typing, "Self", ...)  # pylint: disable=invalid-name
+    Self = getattr(typing, "Self", ...)
     TypeVarTuple = getattr(typing, "TypeVarTuple", return_arg)
-    Unpack = getattr(typing, "Unpack", ...)  # pylint: disable=invalid-name
+    Unpack = getattr(typing, "Unpack", ...)
     override = getattr(typing, "override", return_arg)
 
 __all__ = ("Self", "TypeVarTuple", "Unpack", "override")

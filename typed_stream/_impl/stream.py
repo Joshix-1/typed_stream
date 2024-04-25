@@ -753,7 +753,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).first()
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamEmptyError
+        typed_stream.StreamEmptyError
         >>> Stream([]).first(default="default")
         'default'
         """
@@ -821,7 +821,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).last()
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamEmptyError
+        typed_stream.StreamEmptyError
         """
         if tail := self.tail(1):
             return tail[-1]
@@ -900,7 +900,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).max()
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamEmptyError
+        typed_stream.StreamEmptyError
         """
         max_ = max(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(max_, _DefaultValueType):
@@ -945,7 +945,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).min()
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamEmptyError
+        typed_stream.StreamEmptyError
         """
         min_ = min(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(min_, _DefaultValueType):
@@ -984,7 +984,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).nth(22)
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamIndexError
+        typed_stream.StreamIndexError
         >>> Stream([]).nth(22, default=42)
         42
         """
@@ -1077,7 +1077,7 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([]).reduce(operator.mul)
         Traceback (most recent call last):
         ...
-        typed_stream.exceptions.StreamEmptyError
+        typed_stream.StreamEmptyError
         """
         iterator = iter(self._data)
         if isinstance(initial, _DefaultValueType):

@@ -19,26 +19,9 @@ This library heavily uses itertools for great performance and simple code.
 
 ## Examples
 
-```py
-from typed_stream import FileStream, Stream
+<!--- BEGIN EXAMPLE --->
 
-# Get sum of 10 squares
-print(Stream.range(stop=10).map(lambda x: x * x).sum())
-# same as above
-print(sum(Stream.counting().limit(10).map(pow, 2)))
-
-# sum first 100 odd numbers
-print(Stream.counting(start=1, step=2).limit(100).sum())
-
-# Get all the package names from requirements-dev.txt
-package_names: tuple[str, ...] = FileStream("requirements-dev.txt")\
-    .filter()\
-    .exclude(lambda line: line.startswith("#"))\
-    .map(str.split, "==", 1)\
-    .starmap(lambda name, version = None: name)\
-    .collect()
-print(package_names)
-```
+<!--- END EXAMPLE --->
 
 In [examples](./examples) are more complex examples using Streams.
 

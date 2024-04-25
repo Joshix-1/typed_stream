@@ -8,7 +8,19 @@ To get the current version run this script.
 
 from __future__ import annotations
 
+import typing
+
+__all__ = ("VERSION", "version_info")
+
 VERSION = "0.121.0"
+
+version_info: tuple[int, int, int] = typing.cast(
+    tuple[int, int, int], tuple(map(int, VERSION.split(".")))
+)
+if len(version_info) != 3:
+    raise AssertionError(f"Invalid version: {VERSION}")
+
+del annotations, typing
 
 if __name__ == "__main__":  # pragma: no cover
     print(VERSION)

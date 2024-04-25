@@ -82,6 +82,7 @@ class InstanceChecker(Generic[T]):
     """Checks whether a value is an instance of a type."""
 
     _type: type[T]
+    __doc__: str | None
 
     __slots__ = ("_type",)
 
