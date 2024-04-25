@@ -30,6 +30,7 @@ __all__ = (
     "IfElseMap",
     "IterWithCleanUp",
     "Peeker",
+    "count",
     "sliding_window",
 )
 
