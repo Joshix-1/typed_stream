@@ -43,7 +43,7 @@ __all__ = _impl.__all__
 __version__ = version.VERSION
 
 # fmt: off
-(Stream(__all__)  # noqa: F405
+(_impl.Stream(__all__)  # noqa: F405
     .map(globals().__getitem__)
     .map(setattr, "__module__", "typed_stream")
     .for_each())
