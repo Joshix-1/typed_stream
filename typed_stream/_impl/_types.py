@@ -118,14 +118,9 @@ class PrettyRepr(abc.ABC):
         args = ",".join(
             [("..." if arg is ... else repr(arg)) for arg in self._get_args()]
         )
-        return f"{self.__class__._full_class_name()}({args})"
-
-    @classmethod
-    def _full_class_name(cls) -> str:
-        """Return the fully qualified name of the class."""
-        # if getattr(import_module("typed_stream"), cls.__name__, None) is cls:
-        #     return f"typed_stream.{cls.__name__}"
-        return f"{cls.__module__}.{cls.__qualname__}"
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__qualname__}({args})"
+        )
 
     @abc.abstractmethod
     def _get_args(self) -> tuple[object, ...]:  # pragma: no cover
