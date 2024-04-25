@@ -14,7 +14,7 @@ from ._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
     LazyFileIteratorRemovingEndsStr,
 )
-from ._types import PathLikeType
+from ._types import PathLikeType, PrettyRepr
 from ._typing import override
 from .stream import Stream
 

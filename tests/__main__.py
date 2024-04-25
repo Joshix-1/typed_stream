@@ -398,7 +398,7 @@ try:
     assert (
         repr(iter(Stream.from_value(69)))
         == "typed_stream._iteration_utils.IterWithCleanUp"
-        + "(<bound method StreamABC.close of typed_stream.stream.Stream"
+        + "(<bound method StreamABC.close of typed_stream.Stream"
         + "(repeat(69))>,repeat(69))"
     )
 except AssertionError:  # pragma: no cover
@@ -424,9 +424,9 @@ else:  # pragma: no cover
         raise AssertionError("Doesn't fail anymore on RustPython")
 
 
-assert str(Stream(...)) == "typed_stream.stream.Stream(...)"
-assert repr(Stream(...)) == "typed_stream.stream.Stream(...)"
-assert repr(FileStream(...)) == "typed_stream.file_streams.FileStream(...)"
+assert str(Stream(...)) == "typed_stream.Stream(...)"
+assert repr(Stream(...)) == "typed_stream.Stream(...)"
+assert repr(FileStream(...)) == "typed_stream.FileStream(...)"
 
 assert_raises(StreamFinishedError, lambda: Stream(...)._data)
 assert_raises(StreamFinishedError, lambda: BinaryFileStream(...)._data)
@@ -567,11 +567,11 @@ assert str_stream.collect(list) == ["1", "2", "3"]
 
 assert (
     repr(FileStream("file.txt", "Utf-8", False))
-    == "typed_stream.file_streams.FileStream('file.txt','Utf-8',False)"
+    == "typed_stream.FileStream('file.txt','Utf-8',False)"
 )
 assert (
     repr(FileStream("file.txt", "Utf-8", True))
-    == "typed_stream.file_streams.FileStream('file.txt','Utf-8',True)"
+    == "typed_stream.FileStream('file.txt','Utf-8',True)"
 )
 
 INPUT_TXT = Path(__file__).parent / "input.txt"
@@ -724,7 +724,7 @@ assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
 try:
-    assert repr(int_stream) == "typed_stream.stream.Stream(...)"
+    assert repr(int_stream) == "typed_stream.Stream(...)"
 except AssertionError:  # pragma: no cover
     if sys.implementation.name == "rustpython":
         traceback.print_exc()
@@ -792,6 +792,7 @@ for name in dir(Stream(...)):  # noqa: C901  # pylint: disable=too-complex
         "_close_source",
         "_data",
         "_finish",
+        "_full_class_name",
         "_get_args",
         "_StreamABC__data",
         "close",
