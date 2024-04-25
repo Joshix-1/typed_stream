@@ -6,7 +6,13 @@
 
 from __future__ import annotations
 
-__all__ = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
+from typing import Literal
+
+__all__: tuple[
+    Literal["StreamEmptyError"],
+    Literal["StreamFinishedError"],
+    Literal["StreamIndexError"],
+] = ("StreamEmptyError", "StreamFinishedError", "StreamIndexError")
 
 
 class StreamFinishedError(ValueError):

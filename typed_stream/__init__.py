@@ -36,7 +36,7 @@ from . import _impl, version
 from . import functions  # noqa: F401
 from ._impl.exceptions import *  # noqa: F401, F403
 from ._impl.file_streams import *  # noqa: F401, F403s
-from ._impl.stream import Stream
+from ._impl.stream import *  # noqa: F401, F403
 from ._impl.streamable import *  # noqa: F401, F403
 
 __all__ = _impl.__all__

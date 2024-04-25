@@ -8,14 +8,17 @@ from __future__ import annotations
 
 from abc import ABC
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, SupportsIndex, TypeVar, overload
+from typing import Literal, TYPE_CHECKING, SupportsIndex, TypeVar, overload
 
 from ._typing import override
 
 if TYPE_CHECKING:  # pragma: no cover
     from .stream import Stream
 
-__all__ = ("Streamable", "StreamableSequence")
+__all__: tuple[Literal["Streamable"], Literal["StreamableSequence"]] = (
+    "Streamable",
+    "StreamableSequence",
+)
 
 T = TypeVar("T")
 V = TypeVar("V")

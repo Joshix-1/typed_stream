@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from types import EllipsisType
-from typing import AnyStr
+from typing import AnyStr, Literal
 
 from ._lazy_file_iterators import (
     LazyFileIterator,
@@ -18,7 +18,7 @@ from ._types import PathLikeType
 from ._typing import override
 from .stream import Stream
 
-__all__ = (
+__all__: tuple[Literal["BinaryFileStream"], Literal["FileStream"]] = (
     "BinaryFileStream",
     "FileStream",
 )

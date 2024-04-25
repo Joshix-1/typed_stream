@@ -48,7 +48,7 @@ from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
 # pylint: disable=too-many-lines
-__all__ = ("Stream",)
+__all__: tuple[Literal["Stream"]] = ("Stream",)
 
 K = TypeVar("K")
 T = TypeVar("T")
@@ -398,7 +398,7 @@ class Stream(StreamABC[T], Iterable[T]):
             """
             return self._finish(
                 Stream(
-                    itertools.batched(  # pylint: disable=no-member
+                    itertools.batched(
                         self._data, size
                     ),
                 )
