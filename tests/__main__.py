@@ -1,7 +1,7 @@
 # Licensed under the EUPL-1.2 or later.
 # You may obtain a copy of the licence in all the official languages of the
 # European Union at https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, unidiomatic-typecheck
 
 """The tests for the Stream."""
 
@@ -14,6 +14,8 @@ import sys
 import traceback
 from collections import Counter
 from collections.abc import Callable
+from decimal import Decimal
+from fractions import Fraction
 from functools import partial
 from numbers import Number, Real
 from operator import add
@@ -128,6 +130,7 @@ def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
 assert_raises(AssertionError, lambda: assert_raises(Exception, lambda: None))
 assert_raises(TypeError, lambda: hash(Stream(...)))
 assert_raises(TypeError, lambda: hash(Stream([0, 1])))
+assert_raises(StreamEmptyError, Stream([]).avg)
 
 assert_raises(ValueError, lambda: sliding_window([], -1))
 assert_raises(ValueError, lambda: sliding_window((), 0))
@@ -224,6 +227,23 @@ assert (
     .sum()
     == sum(range(20)) - 1 - 3 - 5
 )
+
+average = sum(data_to_average := range(10, 100, 7)) / len(data_to_average)
+average_float: float = Stream(data_to_average).avg()
+assert type(average_float) is float
+assert average_float == average
+average_float = Stream(data_to_average).map(int).avg()
+assert type(average_float) is float
+assert average_float == average
+average_float = Stream(data_to_average).map(float).avg()
+assert type(average_float) is float
+assert average_float == average
+average_decimal: Decimal = Stream(data_to_average).map(Decimal).avg()
+assert type(average_decimal) is Decimal
+assert average_decimal == average
+average_fraction: Fraction = Stream(data_to_average).map(Fraction).avg()
+assert type(average_fraction) is Fraction
+assert average_fraction == average
 
 
 errors: list[ValueError] = []
