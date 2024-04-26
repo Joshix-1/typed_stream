@@ -34,39 +34,16 @@ Examples:
 
 from . import _impl, version
 from . import functions  # noqa: F401
+from ._impl.exceptions import *  # noqa: F401, F403
+from ._impl.file_streams import *  # noqa: F401, F403s
+from ._impl.stream import *  # noqa: F401, F403
+from ._impl.streamable import *  # noqa: F401, F403
 
-
-Stream = _impl.stream.Stream
-BinaryFileStream = _impl.file_streams.BinaryFileStream
-FileStream = _impl.file_streams.FileStream
-Streamable = _impl.streamable.Streamable
-StreamableSequence = _impl.streamable.StreamableSequence
-StreamEmptyError = _impl.exceptions.StreamEmptyError
-StreamFinishedError = _impl.exceptions.StreamFinishedError
-StreamIndexError = _impl.exceptions.StreamIndexError
-
-__all__ = (
-    'Stream',
-    'BinaryFileStream',
-    'FileStream',
-    'Streamable',
-    'StreamableSequence',
-    'StreamEmptyError',
-    'StreamFinishedError',
-    'StreamIndexError'
-)
-
-assert __all__ == (
-    *_impl.stream.__all__,
-    *_impl.file_streams.__all__,
-    *_impl.streamable.__all__,
-    *_impl.exceptions.__all__,
-)
-
+__all__ = _impl.__all__
 __version__ = version.VERSION
 
 # fmt: off
-(_impl.stream.Stream(__all__)  # noqa: F405
+(_impl.Stream(__all__)  # noqa: F405
     .map(globals().__getitem__)
     .map(setattr, "__module__", "typed_stream")
     .for_each())
