@@ -16,7 +16,8 @@ import textwrap
 from collections.abc import Callable
 from typing import cast
 
-from ._impl import Stream, functions
+from . import Stream
+from ._impl import functions
 from ._impl._utils import count_required_positional_arguments
 
 
