@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import typing
 
-from .functions import return_arg
-
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sys
 
@@ -23,6 +21,11 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     else:
         from typing import override
 else:
+
+    def return_arg(arg: object, /) -> object:
+        """Return the argument."""
+        return arg
+
     Self = getattr(typing, "Self", ...)
     TypeVarTuple = getattr(typing, "TypeVarTuple", return_arg)
     Unpack = getattr(typing, "Unpack", ...)

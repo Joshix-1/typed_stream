@@ -44,7 +44,7 @@ jobs:
           echo '```py' >> "${TMP_FILE}"
           python3 -c 'import typed_stream;print(typed_stream.__doc__.strip())' | python3 -m typed_stream drop_while 'lambda x: not x.startswith(">>>")' >> "${TMP_FILE}"
           echo '```' >> "${TMP_FILE}"
-          python3 -m typed_stream drop_while '"<!--- END EXAMPLE --->".__neq__' < README.md >> "${TMP_FILE}"
+          python3 -m typed_stream drop_while '"<!--- END EXAMPLE --->".__ne__' < README.md >> "${TMP_FILE}"
           cat "${TMP_FILE}" > README.md
           rm "${TMP_FILE}"
       - name: Push changes

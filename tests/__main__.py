@@ -38,6 +38,7 @@ from typed_stream._impl._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
 )
 from typed_stream._impl._utils import IndexValueTuple
+from typed_stream._impl.functions import startswith
 from typed_stream.functions import is_even, is_odd
 
 from .test_functions import (
@@ -582,6 +583,9 @@ assert (
     .map(int)
     .sum()
     == 7
+)
+assert (
+    FileStream(INPUT_TXT).filter().exclude(startswith("#")).map(int).sum() == 7
 )
 assert FileStream(INPUT_TXT).map(int).catch(ValueError).sum() == 7
 

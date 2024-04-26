@@ -7,10 +7,12 @@
 from __future__ import annotations
 
 import operator
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from numbers import Number, Real
-from typing import Literal, TypeVar
+from typing import Generic, Literal, TypeVar, cast
 
+from ._types import PrettyRepr
+from ._typing import override
 from ._utils import InstanceChecker, NoneChecker, NotNoneChecker
 
 __name__ = "typed_stream.functions"  # pylint: disable=redefined-builtin
@@ -32,8 +34,11 @@ __all__ = (
     "is_truthy",
     "noop",
     "one",
+    "startswith",
+    "string_startswith",
 )
 T = TypeVar("T")
+Seq = TypeVar("Seq", bound=Sequence[object])
 
 is_truthy: Callable[[object], bool] = operator.truth
 """Check whether a value is truthy."""
@@ -49,11 +54,6 @@ def noop(*_: object) -> None:
 def one(*_: object) -> Literal[1]:
     """Return the smallest positive odd number."""
     return 1
-
-
-def return_arg(arg: T, /) -> T:
-    """Return the argument."""
-    return arg
 
 
 def is_even(number: int) -> bool:
@@ -102,3 +102,47 @@ is_not_none: NotNoneChecker = NotNoneChecker()
 """Check whether a value is not None."""
 is_none: NoneChecker = NoneChecker()
 """Check whether a value is None."""
+
+
+class startswith(  # noqa: N801
+    Generic[Seq], PrettyRepr
+):  # pylint: disable=invalid-name
+    """Return a Callable that checks if a sequence starts with the given one."""
+
+    _start: tuple[Seq, ...]
+
+    __slots__ = ("_start",)
+
+    def __new__(cls, /, *start: Seq) -> startswith[Seq]:
+        """Create a Callable that checks if sequence starts with another."""
+        # pylint: disable-next=unidiomatic-typecheck
+        if start and all(type(_) is str for _ in start) and cls == startswith:
+            return cast(
+                startswith[Seq],
+                string_startswith(*cast(tuple[str, ...], start)),
+            )
+        return super().__new__(cls)
+
+    def __init__(self, /, *start: Seq) -> None:
+        """Initialize self."""
+        self._start = start
+
+    def __call__(self, sequence: Seq, /) -> bool:
+        """Return true if sequence starts with self._start."""
+        return any(s == sequence[: len(s)] for s in self._start)
+
+    @override
+    def _get_args(self) -> tuple[object, ...]:
+        """Return the args used to initializing self."""
+        return self._start
+
+
+class string_startswith(  # noqa: N801
+    startswith[str]
+):  # pylint: disable=invalid-name
+    """Return a Callable that checks if a string starts with the given one."""
+
+    @override
+    def __call__(self, sequence: str, /) -> bool:
+        """Return true if sequence starts with self._start."""
+        return sequence.startswith(self._start)

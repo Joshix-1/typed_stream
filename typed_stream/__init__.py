@@ -24,7 +24,7 @@ Examples:
 >>> # Get the longest package name from requirements-dev.txt
 >>> (typed_stream.FileStream("requirements-dev.txt")
 ...     .filter()
-...     .exclude(lambda line: line.startswith("#"))
+...     .exclude(typed_stream.functions.startswith("#"))
 ...     .map(str.split, "==")
 ...     .starmap(lambda name, version = None: name)
 ...     .max(key=len))
