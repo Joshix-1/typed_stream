@@ -18,9 +18,9 @@ from numbers import Number, Real
 from types import EllipsisType
 
 from . import _iteration_utils, exceptions, functions, stream_abc, streamable
-from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
+from ._typing import Self, TypeVarTuple, Unpack, override
 
 # pylint: disable=too-many-lines
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
