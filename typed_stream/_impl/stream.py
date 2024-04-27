@@ -12,18 +12,13 @@ import functools
 import itertools
 import operator
 import sys
+import typing
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 from typing import Literal, TypeVar, overload
 
 from . import _iteration_utils
-from ._types import (
-    StarCallable,
-    SupportsAdd,
-    SupportsComparison,
-    TypeGuardingCallable,
-)
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._utils import DefaultValueType as _DefaultValueType
@@ -41,6 +36,9 @@ from .streamable import StreamableSequence
 # pylint: disable=too-many-lines
 __all__: tuple[Literal["Stream"]] = ("Stream",)
 
+if typing.TYPE_CHECKING:
+    from . import _types
+
 K = TypeVar("K")
 T = TypeVar("T")
 U = TypeVar("U")
@@ -48,8 +46,8 @@ V = TypeVar("V")
 Prim = TypeVar("Prim", int, str, bool, complex, Number, Real)
 Exc = TypeVar("Exc", bound=BaseException)
 
-SA = TypeVar("SA", bound=SupportsAdd)
-SC = TypeVar("SC", bound=SupportsComparison)
+SA = TypeVar("SA", bound="_types.SupportsAdd")
+SC = TypeVar("SC", bound="_types.SupportsComparison")
 
 Tvt = TypeVarTuple("Tvt")
 
@@ -725,7 +723,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @overload
     def filter(
-        self, fun: TypeGuardingCallable[K, T]
+        self, fun: _types.TypeGuardingCallable[K, T]
     ) -> Stream[K]:  # pragma: no cover
         ...
 
@@ -1090,7 +1088,7 @@ class Stream(StreamABC[T], Iterable[T]):
                 raise StreamEmptyError() from None
         return self._finish(functools.reduce(fun, iterator, initial), True)
 
-    def starcollect(self, fun: StarCallable[T, K]) -> K:
+    def starcollect(self, fun: _types.StarCallable[T, K]) -> K:
         """Collect the values of this Stream. This finishes the Stream.
 
         >>> Stream([1, 2, 3]).starcollect(lambda *args: args)
