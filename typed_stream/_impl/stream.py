@@ -17,11 +17,10 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 
-from . import _iteration_utils, exceptions, functions
+from . import _iteration_utils, exceptions, functions, stream_abc
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
-from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
 # pylint: disable=too-many-lines
@@ -45,7 +44,7 @@ Tvt = TypeVarTuple("Tvt")
 add: Callable[[SA, SA], SA] = operator.add
 
 
-class Stream(StreamABC[T], Iterable[T]):
+class Stream(stream_abc.StreamABC[T], Iterable[T]):
     """Typed Stream class for easier handling of iterables.
 
     It is not recommended to store Stream instances in variables,
