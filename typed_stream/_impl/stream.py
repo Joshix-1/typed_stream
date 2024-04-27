@@ -17,11 +17,10 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 
-from . import _iteration_utils, exceptions, functions, stream_abc
+from . import _iteration_utils, exceptions, functions, stream_abc, streamable
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
-from .streamable import StreamableSequence
 
 # pylint: disable=too-many-lines
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
@@ -92,10 +91,12 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """Nobody inspects the spammish repetition."""
 
     @typing.overload
-    def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
+    def __getitem__(self, item: slice, /) -> streamable.StreamableSequence[T]:
         """Nobody inspects the spammish repetition."""
 
-    def __getitem__(self, item: slice | int, /) -> StreamableSequence[T] | T:
+    def __getitem__(
+        self, item: slice | int, /
+    ) -> streamable.StreamableSequence[T] | T:
         """Finish the stream by collecting.
 
         >>> Stream((1, 2, 3))[1]
@@ -150,7 +151,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         start: int | None = None,
         stop: int | None = None,
         step: int | None = None,
-    ) -> StreamableSequence[T]:
+    ) -> streamable.StreamableSequence[T]:
         """Implement __getitem__ with slices."""
         if start is stop is step is None:
             return self.collect()
@@ -160,7 +161,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
             and (stop is None or stop >= 0)
         ):
             return self._finish(
-                StreamableSequence(
+                streamable.StreamableSequence(
                     itertools.islice(self._data, start, stop, step)
                 ),
                 close_source=True,
@@ -402,7 +403,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
             )
 
     @typing.overload
-    def collect(self, /) -> StreamableSequence[T]: ...
+    def collect(self, /) -> streamable.StreamableSequence[T]: ...
 
     @typing.overload
     def collect(
@@ -412,9 +413,9 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
     @typing.overload
     def collect(
         self,
-        fun: Callable[[Iterable[T]], StreamableSequence[T]],
+        fun: Callable[[Iterable[T]], streamable.StreamableSequence[T]],
         /,
-    ) -> StreamableSequence[T]: ...
+    ) -> streamable.StreamableSequence[T]: ...
 
     @typing.overload
     def collect(
@@ -458,7 +459,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
 
     def collect(
         self: Stream[U],
-        fun: Callable[[Iterable[U]], object] = StreamableSequence,
+        fun: Callable[[Iterable[U]], object] = streamable.StreamableSequence,
         /,
     ) -> object:
         """Collect the values of this Stream. This finishes the Stream.
@@ -637,7 +638,9 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
             return True
         return False
 
-    def enumerate(self, start_index: int = 0, /) -> Stream[_utils.IndexValueTuple[T]]:
+    def enumerate(
+        self, start_index: int = 0, /
+    ) -> Stream[_utils.IndexValueTuple[T]]:
         """Map the values to a tuple of index and value.
 
         >>> Stream([1, 2, 3]).enumerate().collect()
@@ -655,7 +658,9 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
 
     @typing.overload
     def exclude(
-        self: Stream[K | Prim], fun: _utils.InstanceChecker[Prim], /  # noqa: W504
+        self: Stream[K | Prim],
+        fun: _utils.InstanceChecker[Prim],
+        /,  # noqa: W504
     ) -> Stream[K]: ...
 
     @typing.overload
@@ -708,7 +713,9 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         ...
 
     @typing.overload
-    def filter(self, fun: _utils.InstanceChecker[K]) -> Stream[K]:  # pragma: no cover
+    def filter(
+        self, fun: _utils.InstanceChecker[K]
+    ) -> Stream[K]:  # pragma: no cover
         ...
 
     @typing.overload
@@ -1139,7 +1146,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """
         return self.reduce(add)
 
-    def tail(self, c: int, /) -> StreamableSequence[T]:
+    def tail(self, c: int, /) -> streamable.StreamableSequence[T]:
         """Return a Sequence with the last count items.
 
         >>> Stream([1, 2, 3]).tail(2)
@@ -1148,7 +1155,9 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         (90, 91, 92, 93, 94, 95, 96, 97, 98, 99)
         """
         return self._finish(
-            StreamableSequence(collections.deque(self._data, maxlen=c)),
+            streamable.StreamableSequence(
+                collections.deque(self._data, maxlen=c)
+            ),
             close_source=True,
         )
 
