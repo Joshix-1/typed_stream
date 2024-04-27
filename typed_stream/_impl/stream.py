@@ -129,7 +129,7 @@ class Stream(StreamABC[T], Iterable[T]):
         return self._get_slice(start=item.start, stop=item.stop, step=item.step)
 
     @override
-    def __iter__(self) -> IterWithCleanUp[T]:
+    def __iter__(self) -> Iterator[T]:
         """Iterate over the values of this Stream. This finishes the Stream.
 
         >>> for value in Stream((1, 2, 3)):
