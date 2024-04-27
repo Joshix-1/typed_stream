@@ -17,11 +17,10 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 
-from . import _iteration_utils
+from . import _iteration_utils, exceptions
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
-from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import noop
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
@@ -636,7 +635,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         try:
             self.first()
-        except StreamEmptyError:
+        except exceptions.StreamEmptyError:
             return True
         return False
 
@@ -754,7 +753,7 @@ class Stream(StreamABC[T], Iterable[T]):
         except StopIteration:
             if not isinstance(default, _DefaultValueType):
                 return default
-            raise StreamEmptyError() from None
+            raise exceptions.StreamEmptyError() from None
         finally:
             self._finish(None, close_source=True)
         return first
@@ -817,7 +816,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         if tail := self.tail(1):
             return tail[-1]
-        raise StreamEmptyError()
+        raise exceptions.StreamEmptyError()
 
     @override
     def limit(self, c: int, /) -> Self:
@@ -896,7 +895,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         max_ = max(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(max_, _DefaultValueType):
-            raise StreamEmptyError() from None
+            raise exceptions.StreamEmptyError() from None
         return self._finish(max_, close_source=True)
 
     @typing.overload
@@ -941,7 +940,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         min_ = min(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(min_, _DefaultValueType):
-            raise StreamEmptyError() from None
+            raise exceptions.StreamEmptyError() from None
         return self._finish(min_, close_source=True)
 
     @typing.overload
@@ -987,14 +986,14 @@ class Stream(StreamABC[T], Iterable[T]):
         else:  # value >= 0
             try:
                 value = self.drop(index).first()
-            except StreamEmptyError:
+            except exceptions.StreamEmptyError:
                 value = _DEFAULT_VALUE
 
         if not isinstance(value, _DefaultValueType):
             return value
 
         if isinstance(default, _DefaultValueType):
-            raise StreamIndexError()
+            raise exceptions.StreamIndexError()
 
         return default
 
@@ -1078,7 +1077,7 @@ class Stream(StreamABC[T], Iterable[T]):
             try:
                 initial = next(iterator)
             except StopIteration:
-                raise StreamEmptyError() from None
+                raise exceptions.StreamEmptyError() from None
         return self._finish(functools.reduce(fun, iterator, initial), True)
 
     def starcollect(self, fun: _types.StarCallable[T, K]) -> K:
