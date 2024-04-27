@@ -17,11 +17,10 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 
-from . import _iteration_utils, exceptions
+from . import _iteration_utils, exceptions, functions
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
-from .functions import noop
 from .stream_abc import StreamABC
 from .streamable import StreamableSequence
 
@@ -790,7 +789,7 @@ class Stream(StreamABC[T], Iterable[T]):
             )
         )
 
-    def for_each(self, fun: Callable[[T], object] = noop, /) -> None:
+    def for_each(self, fun: Callable[[T], object] = functions.noop, /) -> None:
         """Consume all the values of the Stream with the callable.
 
         >>> Stream([1, 2, 3]).for_each(print)
