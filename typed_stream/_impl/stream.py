@@ -21,12 +21,6 @@ from . import _iteration_utils
 from ._typing import Self, TypeVarTuple, Unpack, override
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
-from ._utils import (
-    IndexValueTuple,
-    InstanceChecker,
-    NoneChecker,
-    NotNoneChecker,
-)
 from .exceptions import StreamEmptyError, StreamIndexError
 from .functions import noop
 from .stream_abc import StreamABC
@@ -36,7 +30,7 @@ from .streamable import StreamableSequence
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
 
 if typing.TYPE_CHECKING:
-    from . import _types
+    from . import _types, _utils
 
 K = typing.TypeVar("K")
 T = typing.TypeVar("T")
@@ -646,7 +640,7 @@ class Stream(StreamABC[T], Iterable[T]):
             return True
         return False
 
-    def enumerate(self, start_index: int = 0, /) -> Stream[IndexValueTuple[T]]:
+    def enumerate(self, start_index: int = 0, /) -> Stream[_utils.IndexValueTuple[T]]:
         """Map the values to a tuple of index and value.
 
         >>> Stream([1, 2, 3]).enumerate().collect()
@@ -664,17 +658,17 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @typing.overload
     def exclude(
-        self: Stream[K | Prim], fun: InstanceChecker[Prim], /  # noqa: W504
+        self: Stream[K | Prim], fun: _utils.InstanceChecker[Prim], /  # noqa: W504
     ) -> Stream[K]: ...
 
     @typing.overload
     def exclude(
-        self: Stream[K | U], fun: InstanceChecker[U], /  # noqa: W504
+        self: Stream[K | U], fun: _utils.InstanceChecker[U], /  # noqa: W504
     ) -> Stream[K]: ...
 
     @typing.overload
     def exclude(
-        self: Stream[K | None], fun: NoneChecker, /  # noqa: W504
+        self: Stream[K | None], fun: _utils.NoneChecker, /  # noqa: W504
     ) -> Stream[K]: ...
 
     # @typing.overload
@@ -704,7 +698,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @typing.overload
     def filter(
-        self: Stream[K | None], fun: NotNoneChecker
+        self: Stream[K | None], fun: _utils.NotNoneChecker
     ) -> Stream[K]:  # pragma: no cover
         ...
 
@@ -717,7 +711,7 @@ class Stream(StreamABC[T], Iterable[T]):
         ...
 
     @typing.overload
-    def filter(self, fun: InstanceChecker[K]) -> Stream[K]:  # pragma: no cover
+    def filter(self, fun: _utils.InstanceChecker[K]) -> Stream[K]:  # pragma: no cover
         ...
 
     @typing.overload
@@ -1099,7 +1093,7 @@ class Stream(StreamABC[T], Iterable[T]):
 
     @typing.overload
     def starmap(
-        self: Stream[IndexValueTuple[K]],
+        self: Stream[_utils.IndexValueTuple[K]],
         fun: Callable[[int, K], U],
         /,
     ) -> Stream[U]: ...
