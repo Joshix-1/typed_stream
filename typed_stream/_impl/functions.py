@@ -37,6 +37,7 @@ __all__ = (
     "startswith",
     "string_startswith",
 )
+
 T = TypeVar("T")
 Seq = TypeVar("Seq", bound=Sequence[object])
 
@@ -111,6 +112,7 @@ class startswith(  # noqa: N801
 
     _start: tuple[Seq, ...]
 
+
     __slots__ = ("_start",)
 
     def __new__(cls, /, *start: Seq) -> startswith[Seq]:
@@ -141,6 +143,8 @@ class string_startswith(  # noqa: N801
     startswith[str]
 ):  # pylint: disable=invalid-name
     """Return a Callable that checks if a string starts with the given one."""
+
+    __slots__ = ()
 
     @override
     def __call__(self, sequence: str, /) -> bool:
