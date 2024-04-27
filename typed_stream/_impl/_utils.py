@@ -9,7 +9,6 @@ from __future__ import annotations
 import inspect
 from collections.abc import Callable
 from typing import (
-    Final,
     Generic,
     Literal,
     NoReturn,
@@ -20,8 +19,6 @@ from typing import (
 )
 
 __all__ = (
-    "DEFAULT_VALUE",
-    "DefaultValueType",
     "FunctionWrapperIgnoringArgs",
     "IndexValueTuple",
     "InstanceChecker",
@@ -34,15 +31,6 @@ __all__ = (
 
 
 T = TypeVar("T")
-
-
-class DefaultValueType:
-    """Class to use as default when None is a valid value."""
-
-    __slots__ = ()
-
-
-DEFAULT_VALUE: Final[DefaultValueType] = DefaultValueType()
 
 
 class FunctionWrapperIgnoringArgs(Generic[T]):

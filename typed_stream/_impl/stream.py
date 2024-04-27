@@ -19,8 +19,8 @@ from types import EllipsisType
 
 from . import _iteration_utils
 from ._typing import Self, TypeVarTuple, Unpack, override
-from ._utils import DEFAULT_VALUE as _DEFAULT_VALUE
-from ._utils import DefaultValueType as _DefaultValueType
+from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
+from ._default_value import DefaultValueType as _DefaultValueType
 from ._utils import (
     IndexValueTuple,
     InstanceChecker,
