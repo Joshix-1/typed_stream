@@ -112,7 +112,6 @@ class startswith(  # noqa: N801
 
     _start: tuple[Seq, ...]
 
-
     __slots__ = ("_start",)
 
     def __new__(cls, /, *start: Seq) -> startswith[Seq]:
