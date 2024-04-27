@@ -17,16 +17,7 @@ from numbers import Number, Real
 from types import EllipsisType
 from typing import Literal, TypeVar, overload
 
-from ._iteration_utils import (
-    Chunked,
-    Enumerator,
-    ExceptionHandler,
-    IfElseMap,
-    IterWithCleanUp,
-    Peeker,
-    count,
-    sliding_window,
-)
+from . import _iteration_utils
 from ._types import (
     StarCallable,
     SupportsAdd,
@@ -138,7 +129,7 @@ class Stream(StreamABC[T], Iterable[T]):
         2
         3
         """
-        return IterWithCleanUp(self._data, self.close)
+        return _iteration_utils.IterWithCleanUp(self._data, self.close)
 
     def __length_hint__(self) -> int:
         """Return an estimated length for this Stream.
@@ -365,7 +356,9 @@ class Stream(StreamABC[T], Iterable[T]):
         """
         return self._finish(
             Stream(
-                ExceptionHandler(self._data, exception_class, handler, default)
+                _iteration_utils.ExceptionHandler(
+                    self._data, exception_class, handler, default
+                )
             )
         )
 
@@ -416,7 +409,9 @@ class Stream(StreamABC[T], Iterable[T]):
             >>> Stream([1, 2, 3, 4, 5, 6, 7]).chunk(3).collect()
             ((1, 2, 3), (4, 5, 6), (7,))
             """
-            return self._finish(Chunked(self._data, size).stream())
+            return self._finish(
+                _iteration_utils.Chunked(self._data, size).stream()
+            )
 
     @overload
     def collect(self, /) -> StreamableSequence[T]: ...
@@ -520,7 +515,11 @@ class Stream(StreamABC[T], Iterable[T]):
         (1, 120, 2, 120, 3, 120)
         """
         return self._finish(
-            Stream(IfElseMap(self._data, condition, if_true, if_false))
+            Stream(
+                _iteration_utils.IfElseMap(
+                    self._data, condition, if_true, if_false
+                )
+            )
         )
 
     def count(self) -> int:
@@ -533,7 +532,9 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream("abcdef").count()
         6
         """
-        return self._finish(count(self._data), close_source=True)
+        return self._finish(
+            _iteration_utils.count(self._data), close_source=True
+        )
 
     def dedup(self, *, key: None | Callable[[T], object] = None) -> Self:
         """Remove consecutive equal values.
@@ -579,7 +580,7 @@ class Stream(StreamABC[T], Iterable[T]):
         """
 
         def _map(k: T, g: Iterator[T]) -> tuple[T, int]:
-            return (k, count(g))
+            return (k, _iteration_utils.count(g))
 
         return Stream(itertools.starmap(_map, itertools.groupby(self)))
 
@@ -608,7 +609,7 @@ class Stream(StreamABC[T], Iterable[T]):
             peek_fun = encountered.append
 
         self._data = map(
-            Peeker(peek_fun),
+            _iteration_utils.Peeker(peek_fun),
             itertools.filterfalse(encountered.__contains__, self._data),
         )
         return self
@@ -660,7 +661,9 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream("abc").enumerate().map(lambda el: {el.idx: el.val}).collect()
         ({0: 'a'}, {1: 'b'}, {2: 'c'})
         """
-        return self._finish(Stream(Enumerator(self._data, start_index)))
+        return self._finish(
+            Stream(_iteration_utils.Enumerator(self._data, start_index))
+        )
 
     @overload
     def exclude(
@@ -1042,7 +1045,9 @@ class Stream(StreamABC[T], Iterable[T]):
         >>> Stream([1, 2, 3, 4, 5]).nwise(4).collect()
         ((1, 2, 3, 4), (2, 3, 4, 5))
         """
-        return self._finish(Stream(sliding_window(self._data, size)))
+        return self._finish(
+            Stream(_iteration_utils.sliding_window(self._data, size))
+        )
 
     @override
     def peek(self, fun: Callable[[T], object], /) -> Self:
@@ -1055,7 +1060,7 @@ class Stream(StreamABC[T], Iterable[T]):
         3
         ('1', '2', '3')
         """
-        self._data = map(Peeker(fun), self._data)
+        self._data = map(_iteration_utils.Peeker(fun), self._data)
         return self
 
     def reduce(
