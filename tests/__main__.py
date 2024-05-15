@@ -38,7 +38,7 @@ from typed_stream._impl._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
 )
 from typed_stream._impl._utils import IndexValueTuple
-from typed_stream._impl.functions import startswith
+from typed_stream._impl.functions import method_partial
 from typed_stream.functions import is_even, is_odd
 
 from .test_functions import (
@@ -109,7 +109,7 @@ def typed_nwise_stuff() -> None:
 typed_nwise_stuff()
 
 
-# pylint: disable=unnecessary-lambda, unsubscriptable-object, protected-access
+# pylint: disable=unnecessary-lambda, protected-access
 
 
 def assert_raises(exc: type[BaseException], fun: Callable[[], object]) -> None:
@@ -344,7 +344,6 @@ assert Stream("AB").nwise(3).collect() == ()
 assert Stream("ABC").nwise(4).collect() == ()
 assert Stream("ABCDEFG").nwise(8).collect() == ()
 
-# pylint: disable=unsupported-membership-test
 assert 0 in Stream.counting()
 assert 1 in Stream([1])
 assert 2 not in Stream.range(1, 100, 2)
@@ -585,7 +584,12 @@ assert (
     == 7
 )
 assert (
-    FileStream(INPUT_TXT).filter().exclude(startswith("#")).map(int).sum() == 7
+    FileStream(INPUT_TXT)
+    .filter()
+    .exclude(method_partial(str.startswith, "#"))
+    .map(int)
+    .sum()
+    == 7
 )
 assert FileStream(INPUT_TXT).map(int).catch(ValueError).sum() == 7
 
@@ -883,7 +887,6 @@ assert Stream.range(1000)[90:100:2] == tuple(range(90, 100, 2))
 
 assert Stream.range(1000)[20:44:5] == tuple(range(20, 44, 5))
 
-# pylint: disable=positional-only-arguments-expected, redundant-keyword-arg
 assert list(Stream.range(10)) == list(range(10))
 assert list(Stream.range(stop=10)) == list(range(10))
 assert list(Stream.range(0, 20)) == list(range(0, 20))

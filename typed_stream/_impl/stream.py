@@ -143,7 +143,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> "".join(reversed(Stream("abc")))
         'cba'
         """
-        return reversed(self.collect())  # pylint: disable=bad-reversed-sequence
+        return reversed(self.collect())
 
     def _get_slice(  # noqa: C901
         self,

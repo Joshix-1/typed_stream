@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import operator
 
-from typed_stream._impl.functions import startswith, string_startswith
 from typed_stream.functions import (
     is_bool,
     is_complex,
@@ -104,20 +103,3 @@ assert is_none(None)
 assert not is_not_none(None)
 assert not is_none(1)
 assert is_not_none(1)
-
-assert isinstance(startswith(""), string_startswith)
-assert isinstance(startswith("", "", ""), string_startswith)
-assert not isinstance(startswith("", "", "", [""]), string_startswith)
-
-
-assert startswith("#")("# ")
-assert not startswith("#")("")
-assert startswith("#", "A")("###")
-assert startswith("#", "A")("A ")
-assert not startswith("#", "A")("    ")
-
-assert startswith([1])([1, 2, 3])
-assert startswith([1], [2])([1, 2, 3])
-assert startswith([1], [2])([2, 3, 4])
-assert startswith([1], [2])([1])
-assert not startswith([1], [2])([3, 4, 5, 6])

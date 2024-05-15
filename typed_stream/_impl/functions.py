@@ -9,10 +9,8 @@ from __future__ import annotations
 import operator
 from collections.abc import Callable, Sequence
 from numbers import Number, Real
-from typing import Generic, Literal, TypeVar, cast
+from typing import Concatenate, Generic, Literal, ParamSpec, TypeVar
 
-from ._types import PrettyRepr
-from ._typing import override
 from ._utils import InstanceChecker, NoneChecker, NotNoneChecker
 
 __name__ = "typed_stream.functions"  # pylint: disable=redefined-builtin
@@ -34,8 +32,7 @@ __all__ = (
     "is_truthy",
     "noop",
     "one",
-    "startswith",
-    "string_startswith",
+    "method_partial",
 )
 
 T = TypeVar("T")
@@ -105,47 +102,51 @@ is_none: NoneChecker = NoneChecker()
 """Check whether a value is None."""
 
 
-class startswith(  # noqa: N801
-    Generic[Seq], PrettyRepr
-):  # pylint: disable=invalid-name
-    """Return a Callable that checks if a sequence starts with the given one."""
+TArg = TypeVar("TArg")  # pylint: disable=invalid-name
+TRet = TypeVar("TRet")  # pylint: disable=invalid-name
+PApplied = ParamSpec("PApplied")
 
-    _start: tuple[Seq, ...]
 
-    __slots__ = ("_start",)
+# pylint: disable-next=invalid-name
+class method_partial(Generic[TArg, TRet, PApplied]):  # noqa: N801,D301
+    """Pre-apply arguments to methods.
 
-    def __new__(cls, /, *start: Seq) -> startswith[Seq]:
-        """Create a Callable that checks if sequence starts with another."""
-        # pylint: disable-next=unidiomatic-typecheck
-        if start and all(type(_) is str for _ in start) and cls == startswith:
-            return cast(
-                startswith[Seq],
-                string_startswith(*cast(tuple[str, ...], start)),
-            )
-        return super().__new__(cls)
+    This is similar to functools.partial, but the returned callable just accepts
+    one argument which gets provided first positional argument to the wrapped
+    function.
+    It has similarities to operator.methodcaller, but it's type-safe.
+    This is intended to be used with methods that don't support keyword args.
 
-    def __init__(self, /, *start: Seq) -> None:
+    >>> from typed_stream import Stream
+    >>> from operator import mod
+    >>> d = "abc\\n# comment, please ignore\\nxyz".split("\\n")
+    >>> Stream(d).exclude(method_partial(str.startswith, "#")).for_each(print)
+    abc
+    xyz
+    >>> Stream.range(10).exclude(method_partial(int.__mod__, 3)).collect()
+    (0, 3, 6, 9)
+    >>> Stream.range(10).exclude(method_partial(mod, 3)).collect()
+    (0, 3, 6, 9)
+    """
+
+    _fun: Callable[Concatenate[TArg, PApplied], TRet]
+    _args: PApplied.args
+    _kwargs: PApplied.kwargs
+
+    __slots__ = ("_fun", "_args", "_kwargs")
+
+    def __init__(
+        self,
+        fun: Callable[Concatenate[TArg, PApplied], TRet],
+        /,
+        *args: PApplied.args,
+        **kwargs: PApplied.kwargs,
+    ) -> None:
         """Initialize self."""
-        self._start = start
+        self._fun = fun
+        self._args = args
+        self._kwargs = kwargs
 
-    def __call__(self, sequence: Seq, /) -> bool:
-        """Return true if sequence starts with self._start."""
-        return any(s == sequence[: len(s)] for s in self._start)
-
-    @override
-    def _get_args(self) -> tuple[object, ...]:
-        """Return the args used to initializing self."""
-        return self._start
-
-
-class string_startswith(  # noqa: N801
-    startswith[str]
-):  # pylint: disable=invalid-name
-    """Return a Callable that checks if a string starts with the given one."""
-
-    __slots__ = ()
-
-    @override
-    def __call__(self, sequence: str, /) -> bool:
-        """Return true if sequence starts with self._start."""
-        return sequence.startswith(self._start)
+    def __call__(self, arg: TArg, /) -> TRet:
+        """Call the wrapped function."""
+        return self._fun(arg, *self._args, **self._kwargs)
