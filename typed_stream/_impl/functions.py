@@ -109,7 +109,7 @@ PApplied = ParamSpec("PApplied")
 
 # pylint: disable-next=invalid-name
 class method_partial(Generic[TArg, TRet, PApplied]):  # noqa: N801,D301
-    """Pre-apply arguments to methods.
+    r"""Pre-apply arguments to methods.
 
     This is similar to functools.partial, but the returned callable just accepts
     one argument which gets provided first positional argument to the wrapped
@@ -119,7 +119,7 @@ class method_partial(Generic[TArg, TRet, PApplied]):  # noqa: N801,D301
 
     >>> from typed_stream import Stream
     >>> from operator import mod
-    >>> d = "abc\\n# comment, please ignore\\nxyz".split("\\n")
+    >>> d = "abc\n# comment, please ignore\nxyz".split("\n")
     >>> Stream(d).exclude(method_partial(str.startswith, "#")).for_each(print)
     abc
     xyz
