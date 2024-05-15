@@ -95,7 +95,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """Nobody inspects the spammish repetition."""
 
     def __getitem__(
-        self, item: slice | int, /
+        self, item: slice | int, /  # noqa: W504
     ) -> streamable.StreamableSequence[T] | T:
         """Finish the stream by collecting.
 
@@ -197,39 +197,47 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
 
     @typing.overload
     @staticmethod
-    def range(stop: int, /) -> Stream[int]: ...
+    def range(stop: int, /) -> Stream[int]: ...  # noqa: D102
 
     @typing.overload
     @staticmethod
-    def range(*, stop: int) -> Stream[int]: ...
+    def range(*, stop: int) -> Stream[int]: ...  # noqa: D102
 
     @typing.overload
     @staticmethod
-    def range(*, start: int, stop: int) -> Stream[int]: ...
+    def range(*, start: int, stop: int) -> Stream[int]: ...  # noqa: D102
 
     @typing.overload
     @staticmethod
-    def range(start: int, stop: int, /) -> Stream[int]: ...
+    def range(start: int, stop: int, /) -> Stream[int]: ...  # noqa: D102
 
     @typing.overload
     @staticmethod
-    def range(start: int, /, *, stop: int) -> Stream[int]: ...
+    def range(start: int, /, *, stop: int) -> Stream[int]: ...  # noqa: D102
 
     @typing.overload
     @staticmethod
-    def range(start: int, stop: int, /, *, step: int) -> Stream[int]: ...
+    def range(  # noqa: D102
+        start: int, stop: int, /, *, step: int
+    ) -> Stream[int]: ...
 
     @typing.overload
     @staticmethod
-    def range(start: int, stop: int, step: int, /) -> Stream[int]: ...
+    def range(  # noqa: D102
+        start: int, stop: int, step: int, /  # noqa: W504
+    ) -> Stream[int]: ...
 
     @typing.overload
     @staticmethod
-    def range(start: int, /, *, stop: int, step: int) -> Stream[int]: ...
+    def range(  # noqa: D102
+        start: int, /, *, stop: int, step: int
+    ) -> Stream[int]: ...
 
     @typing.overload
     @staticmethod
-    def range(*, start: int, stop: int, step: int) -> Stream[int]: ...
+    def range(  # noqa: D102
+        *, start: int, stop: int, step: int
+    ) -> Stream[int]: ...
 
     @staticmethod
     def range(  # noqa: C901
@@ -296,27 +304,27 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self._finish(all(self._data), close_source=True)
 
     @typing.overload
-    def catch(
+    def catch(  # noqa: D102
         self,
         *exception_class: type[Exc],
     ) -> Self: ...
 
     @typing.overload
-    def catch(
+    def catch(  # noqa: D102
         self,
         *exception_class: type[Exc],
         handler: Callable[[Exc], object],
     ) -> Self: ...
 
     @typing.overload
-    def catch(
+    def catch(  # noqa: D102
         self,
         *exception_class: type[Exc],
         default: Callable[[Exc], K] | Callable[[], K],
     ) -> Stream[T | K]: ...
 
     @typing.overload
-    def catch(
+    def catch(  # noqa: D102
         self,
         *exception_class: type[Exc],
         handler: Callable[[Exc], object],
@@ -403,59 +411,65 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
             )
 
     @typing.overload
-    def collect(self, /) -> streamable.StreamableSequence[T]: ...
+    def collect(self, /) -> streamable.StreamableSequence[T]: ...  # noqa: D102
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self: Stream[SA], fun: Callable[[Iterable[SA]], SA], /  # noqa: W504
     ) -> SA: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self,
         fun: Callable[[Iterable[T]], streamable.StreamableSequence[T]],
         /,
     ) -> streamable.StreamableSequence[T]: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self,
         fun: type[collections.Counter[T]],
         /,
     ) -> collections.Counter[T]: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self, fun: Callable[[Iterable[T]], tuple[T, ...]], /  # noqa: W504
     ) -> tuple[T, ...]: ...
 
     @typing.overload
-    def collect(self, fun: Callable[[Iterable[T]], set[T]], /) -> set[T]: ...
+    def collect(  # noqa: D102
+        self, fun: Callable[[Iterable[T]], set[T]], /  # noqa: W504
+    ) -> set[T]: ...
 
     @typing.overload
-    def collect(self, fun: Callable[[Iterable[T]], list[T]], /) -> list[T]: ...
+    def collect(  # noqa: D102
+        self, fun: Callable[[Iterable[T]], list[T]], /  # noqa: W504
+    ) -> list[T]: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self, fun: Callable[[Iterable[T]], frozenset[T]], /  # noqa: W504
     ) -> frozenset[T]: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self: Stream[tuple[K, V]],
         fun: Callable[[Iterable[tuple[K, V]]], dict[K, V]],
         /,
     ) -> dict[K, V]: ...
 
     @typing.overload
-    def collect(
+    def collect(  # noqa: D102
         self: Stream[tuple[K, V]],
         fun: Callable[[Iterable[tuple[K, V]]], Mapping[K, V]],
         /,
     ) -> Mapping[K, V]: ...
 
     @typing.overload
-    def collect(self, fun: Callable[[Iterable[T]], K], /) -> K: ...
+    def collect(  # noqa: D102
+        self, fun: Callable[[Iterable[T]], K], /  # noqa: W504
+    ) -> K: ...
 
     def collect(
         self: Stream[U],
@@ -639,7 +653,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return False
 
     def enumerate(
-        self, start_index: int = 0, /
+        self, start_index: int = 0, /  # noqa: W504
     ) -> Stream[_utils.IndexValueTuple[T]]:
         """Map the values to a tuple of index and value.
 
@@ -657,30 +671,30 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         )
 
     @typing.overload
-    def exclude(
+    def exclude(  # noqa: D102
         self: Stream[K | Prim],
         fun: _utils.InstanceChecker[Prim],
         /,  # noqa: W504
     ) -> Stream[K]: ...
 
     @typing.overload
-    def exclude(
+    def exclude(  # noqa: D102
         self: Stream[K | U], fun: _utils.InstanceChecker[U], /  # noqa: W504
     ) -> Stream[K]: ...
 
     @typing.overload
-    def exclude(
+    def exclude(  # noqa: D102
         self: Stream[K | None], fun: _utils.NoneChecker, /  # noqa: W504
     ) -> Stream[K]: ...
 
     # @typing.overload
-    # def exclude(
+    # def exclude(  # noqa: D102
     #     self: Stream[K | U], fun: TypeGuardingCallable[U, K | U]
     # ) -> Stream[K]:
     #     ...
 
     @typing.overload
-    def exclude(
+    def exclude(  # noqa: D102
         self: Stream[T], fun: Callable[[T], object], /  # noqa: W504
     ) -> Stream[T]: ...
 
@@ -699,36 +713,32 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self
 
     @typing.overload
-    def filter(
+    def filter(  # noqa: D102
         self: Stream[K | None], fun: _utils.NotNoneChecker
-    ) -> Stream[K]:  # pragma: no cover
-        ...
+    ) -> Stream[K]: ...
 
     @typing.overload
-    def filter(self: Stream[K | None]) -> Stream[K]:  # pragma: no cover
-        ...
+    def filter(self: Stream[K | None]) -> Stream[K]: ...  # noqa: D102
 
     @typing.overload
-    def filter(self: Stream[T]) -> Stream[T]:  # pragma: no cover
-        ...
+    def filter(self: Stream[T]) -> Stream[T]: ...  # noqa: D102
 
     @typing.overload
-    def filter(
+    def filter(  # noqa: D102
         self, fun: _utils.InstanceChecker[K]
     ) -> Stream[K]:  # pragma: no cover
         ...
 
     @typing.overload
-    def filter(
+    def filter(  # noqa: D102
         self, fun: _types.TypeGuardingCallable[K, T]
     ) -> Stream[K]:  # pragma: no cover
         ...
 
     @typing.overload
-    def filter(
+    def filter(  # noqa: D102
         self: Stream[T], fun: Callable[[T], object]
-    ) -> Stream[T]:  # pragma: no cover
-        ...
+    ) -> Stream[T]: ...
 
     def filter(self, fun: Callable[[T], object] | None = None) -> object:
         """Use built-in filter to filter values.
@@ -764,10 +774,12 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return first
 
     @typing.overload
-    def flat_map(self, fun: Callable[[T], Iterable[K]], /) -> Stream[K]: ...
+    def flat_map(  # noqa: D102
+        self, fun: Callable[[T], Iterable[K]], /  # noqa: W504
+    ) -> Stream[K]: ...
 
     @typing.overload
-    def flat_map(
+    def flat_map(  # noqa: D102
         self,
         fun: Callable[[T, Unpack[Tvt]], Iterable[K]],
         /,
@@ -836,10 +848,10 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self
 
     @typing.overload
-    def map(self, fun: Callable[[T], K], /) -> Stream[K]: ...
+    def map(self, fun: Callable[[T], K], /) -> Stream[K]: ...  # noqa: D102
 
     @typing.overload
-    def map(
+    def map(  # noqa: D102
         self, fun: Callable[[T, Unpack[Tvt]], K], /, *args: Unpack[Tvt]
     ) -> Stream[K]: ...
 
@@ -862,15 +874,15 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         )
 
     @typing.overload
-    def max(self: Stream[SC]) -> SC: ...
+    def max(self: Stream[SC]) -> SC: ...  # noqa: D102
 
     @typing.overload
-    def max(
+    def max(  # noqa: D102
         self: Stream[SC], default: K | _DefaultValueType = _DEFAULT_VALUE
     ) -> SC | K: ...
 
     @typing.overload
-    def max(
+    def max(  # noqa: D102
         self,
         default: K | _DefaultValueType = _DEFAULT_VALUE,
         *,
@@ -904,23 +916,20 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self._finish(max_, close_source=True)
 
     @typing.overload
-    def min(self: Stream[SC]) -> SC:  # pragma: no cover
-        ...
+    def min(self: Stream[SC]) -> SC: ...  # noqa: D102
 
     @typing.overload
-    def min(
+    def min(  # noqa: D102
         self: Stream[SC], default: K | _DefaultValueType = _DEFAULT_VALUE
-    ) -> SC | K:  # pragma: no cover
-        ...
+    ) -> SC | K: ...
 
     @typing.overload
-    def min(
+    def min(  # noqa: D102
         self,
         default: K | _DefaultValueType = _DEFAULT_VALUE,
         *,
         key: Callable[[T], SC],
-    ) -> T | K:  # pragma: no cover
-        ...
+    ) -> T | K: ...
 
     def min(
         self,
@@ -949,16 +958,13 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self._finish(min_, close_source=True)
 
     @typing.overload
-    def nth(self, index: int, /) -> T:  # pragma: no cover
-        ...
+    def nth(self, index: int, /) -> T: ...  # noqa: D102
 
     @typing.overload
-    def nth(self, index: int, /, default: T) -> T:  # pragma: no cover
-        ...
+    def nth(self, index: int, /, default: T) -> T: ...  # noqa: D102
 
     @typing.overload
-    def nth(self, index: int, /, default: K) -> T | K:  # pragma: no cover
-        ...
+    def nth(self, index: int, /, default: K) -> T | K: ...  # noqa: D102
 
     def nth(  # noqa: C901
         self,
@@ -1003,22 +1009,19 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return default
 
     @typing.overload
-    def nwise(  # type: ignore[overload-overlap]
+    def nwise(  # type: ignore[overload-overlap]  # noqa: D102
         self, size: typing.Literal[1], /  # noqa: W504
-    ) -> Stream[tuple[T]]:  # pragma: no cover
-        ...
+    ) -> Stream[tuple[T]]: ...
 
     @typing.overload
-    def nwise(  # type: ignore[overload-overlap]
+    def nwise(  # type: ignore[overload-overlap]  # noqa: D102
         self, size: typing.Literal[2], /  # noqa: W504
-    ) -> Stream[tuple[T, T]]:  # pragma: no cover
-        ...
+    ) -> Stream[tuple[T, T]]: ...
 
     @typing.overload
-    def nwise(
+    def nwise(  # noqa: D102
         self, size: int, /  # noqa: W504
-    ) -> Stream[tuple[T, ...]]:  # pragma: no cover
-        ...
+    ) -> Stream[tuple[T, ...]]: ...
 
     def nwise(
         self, size: int, /  # noqa: W504
@@ -1096,20 +1099,20 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return self._finish(fun(*self._data), close_source=True)
 
     @typing.overload
-    def starmap(
+    def starmap(  # noqa: D102
         self: Stream[_utils.IndexValueTuple[K]],
         fun: Callable[[int, K], U],
         /,
     ) -> Stream[U]: ...
 
     @typing.overload
-    def starmap(
+    def starmap(  # noqa: D102
         self: Stream[tuple[Unpack[Tvt]]],
         fun: Callable[[Unpack[Tvt]], U],
         /,
     ) -> Stream[U]: ...
 
-    def starmap(
+    def starmap(  # noqa: D102
         self: Stream[tuple[Unpack[Tvt]]],
         fun: Callable[[Unpack[Tvt]], U],
         /,
