@@ -61,6 +61,7 @@ disallow_any_unimported = true
 warn_no_return = true
 show_column_numbers = true
 disallow_any_explicit = true
+local_partial_types = true
 # disallow_any_expr = true
 disallow_any_decorated = true
 implicit_reexport = false
