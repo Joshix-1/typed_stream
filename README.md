@@ -37,10 +37,11 @@ This library heavily uses itertools for great performance and simple code.
 >>> (typed_stream.Stream.counting()
 ...     .exclude(typed_stream.functions.is_even).limit(100).sum())
 10000
+>>> import typed_stream.functions
 >>> # Get the longest package name from requirements-dev.txt
 >>> (typed_stream.FileStream("requirements-dev.txt")
 ...     .filter()
-...     .exclude(typed_stream.functions.startswith("#"))
+...     .exclude(typed_stream.functions.method_partial(str.startswith, "#"))
 ...     .map(str.split, "==")
 ...     .starmap(lambda name, version = None: name)
 ...     .max(key=len))
