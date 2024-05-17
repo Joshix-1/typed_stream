@@ -29,7 +29,7 @@ flake8-scream==0.1.*
 flake8-simplify==0.21.*
 flake8-return==1.2.*
 flake8-no-implicit-concat==0.3.*
-pep8-naming==0.13.*
+pep8-naming==0.14.*
 # flake8-rst-docstrings==0.3.*
 # flake8-slots==0.1.*
 # flake8-function-order==0.0.5
