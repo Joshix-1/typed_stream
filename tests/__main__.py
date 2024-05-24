@@ -37,6 +37,7 @@ from typed_stream._impl._iteration_utils import (
 from typed_stream._impl._lazy_file_iterators import (
     LazyFileIteratorRemovingEndsBytes,
 )
+from typed_stream._impl._typing import assert_type
 from typed_stream._impl._utils import IndexValueTuple
 from typed_stream._impl.functions import method_partial
 from typed_stream.functions import is_even, is_odd
@@ -354,33 +355,28 @@ assert "1" in Stream([1]).map(str)
 assert "2" not in Stream.range(1, 100, 2).map(str)
 assert "3" not in Stream.range(3).map(str)
 
-assert "".join(reversed(Stream("abc"))) == "cba"
+assert assert_type("".join(reversed(Stream("abc"))), str) == "cba"
 assert tuple(reversed(Stream([1, 2, 3, 4]))) == (4, 3, 2, 1)
 
-tpl: tuple[int, ...] = Stream([1, 2, 3]).collect(tuple)
-assert tpl == (1, 2, 3)
-_set: set[int] = Stream([1, 2, 3]).collect(set)
-assert _set == {1, 2, 3}
+assert assert_type(Stream([1, 2, 3]).collect(tuple), tuple[int, ...]) == (
+    1,
+    2,
+    3,
+)
+assert assert_type(Stream([1, 2, 3]).collect(set), set[int]) == {1, 2, 3}
 mapping: dict[int, str] = (
     Stream([1, 2, 3]).map(lambda x: (x, str(x))).collect(dict)
 )
 assert mapping == {1: "1", 2: "2", 3: "3"}
 
-# pylint: disable=invalid-name
-assert Stream([1, 2, 3]).sum() == 6
-int_var: int = Stream([1, 2, 3]).max()
-assert int_var == 3
-int_var = Stream([1, 2, 3]).min()
-assert int_var == 1
-int_var = Stream([1, 2, 3]).min(default=0)
-assert int_var == 1
+assert assert_type(Stream([1, 2, 3]).sum(), int) == 6
+assert assert_type(Stream([1, 2, 3]).max(), int) == 3
+assert assert_type(Stream([1, 2, 3]).min(), int) == 1
+assert assert_type(Stream([1, 2, 3]).min(default=0), int) == 1
 
-str_var: str = Stream(["1", "2", "3"]).max()
-assert str_var == "3"
-str_var = Stream(["1", "2", "3"]).min()
-assert str_var == "1"
-str_var = Stream(["1", "2", "3"]).min(default="a")
-assert str_var == "1"
+assert assert_type(Stream(["1", "2", "3"]).max(), str) == "3"
+assert assert_type(Stream(["1", "2", "3"]).max(), str) == "1"
+assert assert_type(Stream(["1", "2", "3"]).min(default="a"), str) == "1"
 
 _stream1 = Stream.from_value(69).enumerate().nwise(3).catch()
 assert isinstance(
@@ -432,7 +428,9 @@ assert_raises(StreamFinishedError, lambda: Stream(...)._data)
 assert_raises(StreamFinishedError, lambda: BinaryFileStream(...)._data)
 assert_raises(StreamFinishedError, lambda: FileStream(...)._data)
 
-assert Stream.range(5).map(str).enumerate().collect(tuple) == (
+assert assert_type(
+    Stream.range(5).map(str).enumerate(), Stream[IndexValueTuple[str]]
+).collect(tuple) == (
     (0, "0"),
     (1, "1"),
     (2, "2"),
@@ -440,31 +438,53 @@ assert Stream.range(5).map(str).enumerate().collect(tuple) == (
     (4, "4"),
 )
 
-indices: list[int] = (
-    Stream.range(5).map(str).enumerate().map(lambda x: x.idx).collect(list)
-)
-assert indices == list(range(5))
-enumeration_stream: Stream[IndexValueTuple[str]] = (
-    Stream.range(5).map(str).enumerate()
-)
-values: list[str] = enumeration_stream.map(lambda x: x.val).collect(list)
-assert values == list(map(str, range(5)))
-values = Stream.range(5).map(str).enumerate().map(lambda x: x.val).collect(list)
-assert values == list(map(str, range(5)))
-key_value_dict: dict[int, str] = (
-    Stream.range(5).map(str).enumerate().collect(dict)
-)
-assert key_value_dict == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
-assert list(Stream.range(999).enumerate().starmap(operator.eq).distinct()) == [
-    True
-]
-assert Stream.range(10).nwise(1).starmap(str).sum() == "0123456789"
-assert Stream.range(6).nwise(2).starmap(operator.mul).sum() == 40
+assert assert_type(
+    Stream.range(5).map(str).enumerate().map(lambda x: x.idx).collect(list),
+    list[int],
+) == list(range(5))
+enumeration_stream = assert_type(
+    Stream.range(5).map(str).enumerate(), Stream[IndexValueTuple[str]]
+)
+assert assert_type(
+    enumeration_stream.map(lambda x: x.val).collect(list), list[str]
+) == list(map(str, range(5)))
+assert assert_type(
+    Stream.range(5).map(str).enumerate().map(lambda x: x.val).collect(list),
+    list[str],
+) == list(map(str, range(5)))
+assert assert_type(
+    Stream.range(5).map(str).enumerate().collect(dict), dict[int, str]
+) == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
+
+assert assert_type(
+    list(Stream.range(999).enumerate().starmap(int.__eq__).distinct()),
+    list[bool],
+) == [True]
+assert assert_type(
+    list(Stream.range(999).enumerate().starmap(operator.eq).distinct()),
+    list[Any],
+) == [True]
+assert (
+    assert_type(Stream.range(10).nwise(1).starmap(str).sum(), str)
+    == "0123456789"
+)
+assert (
+    assert_type(Stream.range(6).nwise(2).starmap(int.__mul__).sum(), int) == 40
+)
+assert (
+    assert_type(Stream.range(6).nwise(2).starmap(operator.mul).sum(), Any) == 40
+)
 
 STRING = "pjwa  nsvoidnvifbp  s,cpvmodo nngfibogfmjv in"
-assert Stream(STRING).distinct().collect("".join) == "pjwa nsvoidfb,cmg"
-assert Stream(STRING).distinct(use_set=False).sum() == "pjwa nsvoidfb,cmg"
+assert (
+    assert_type(Stream(STRING).distinct().collect("".join), str)
+    == "pjwa nsvoidfb,cmg"
+)
+assert (
+    assert_type(Stream(STRING).distinct(use_set=False).sum(), str)
+    == "pjwa nsvoidfb,cmg"
+)
 
 
 def create_int_stream() -> Stream[int]:
@@ -474,37 +494,44 @@ def create_int_stream() -> Stream[int]:
 
 assert (
     333283335000
-    == sum(create_int_stream())
-    == create_int_stream().reduce(lambda x, y: x + y)
-    == create_int_stream().reduce(int.__add__)
-    == create_int_stream().reduce(add, 0)
-    == create_int_stream().reduce(add)
-    == create_int_stream().sum()
-    == create_int_stream().collect(lambda x: sum(x))
-    == create_int_stream().collect(sum)
+    == assert_type(sum(create_int_stream()), int)
+    == assert_type(create_int_stream().reduce(lambda x, y: x + y), int)
+    == assert_type(create_int_stream().reduce(int.__add__), int)
+    == assert_type(create_int_stream().reduce(add, 0), int)
+    == assert_type(create_int_stream().reduce(add), int)
+    == assert_type(create_int_stream().sum(), int)
+    == assert_type(create_int_stream().collect(lambda x: sum(x)), int)
+    == assert_type(create_int_stream().collect(sum), int)
 )
 
-max_: int = Stream([1, 2, 3, -1]).max()
-assert max_ == 3
-max_set_: set[int] = Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).max(key=len)
-assert max_set_ == {3, 4, 5}
-min_: int = Stream([1, 2, -1, 3]).min()
-assert min_ == -1
-min_set_: set[int] = Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).min(key=len)
-assert min_set_ == {2}
+assert assert_type(Stream([1, 2, 3, -1]).max(), int) == 3
+assert assert_type(
+    Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).max(key=len), set[int]
+) == {3, 4, 5}
+assert assert_type(Stream([1, 2, -1, 3]).min(), int) == -1
+assert assert_type(
+    Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).min(key=len), set[int]
+) == {2}
 
-optional_int: None | int = Stream([1, 2, 3]).max(default=None)
-assert optional_int == 3
-optional_int = Stream([]).max(default=None)
-assert not optional_int
-optional_int = Stream([1, 2, 3]).first(default=None)
-assert optional_int == 1
-optional_int = Stream([]).first(default=None)
-assert not optional_int
-optional_int = Stream([1, 2, 3]).min(default=None)
-assert optional_int == 1
-optional_int = Stream([]).min(default=None)
-assert not optional_int
+assert assert_type(Stream([1, 2, 3]).max(default=None), None | int) == 3
+assert not assert_type(Stream([1]).limit(0).max(default=None), None | int)
+assert assert_type(Stream([1, 2, 3]).first(default=None), None | int) == 1
+assert not assert_type(Stream([1]).limit(0).first(default=None), None | int)
+assert assert_type(Stream([1, 2, 3]).min(default=None), None | int) == 1
+assert not assert_type(Stream([1]).limit(0).min(default=None), None | int)
+
+assert assert_type(Stream([1, 2, 3]).max(default="None"), str | int) == 3
+assert (
+    assert_type(Stream([1]).limit(0).max(default="None"), str | int) == "None"
+)
+assert assert_type(Stream([1, 2, 3]).first(default="None"), str | int) == 1
+assert (
+    assert_type(Stream([1]).limit(0).first(default="None"), str | int) == "None"
+)
+assert assert_type(Stream([1, 2, 3]).min(default="None"), str | int) == 1
+assert (
+    assert_type(Stream([1]).limit(0).min(default="None"), str | int) == "None"
+)
 
 assert Stream((1,)).drop(100).reduce(add, 1) == 1
 assert Stream("").reduce(add, "x") == "x"
@@ -913,60 +940,70 @@ source: list[str | int | float | complex | bool | None] = [
     4.2,
     5j,
 ]
-strs: list[str] = Stream(source).filter(is_str).collect(list)
-assert strs == ["2"]
-ints: list[int] = Stream(source).filter(is_int).collect(list)
-assert ints == [True, 3]
-floats: list[float] = Stream(source).filter(is_float).collect(list)
-assert floats == [4.2]
-complexs: list[complex] = Stream(source).filter(is_complex).collect(list)
-assert complexs == [5j]
-bools: list[bool] = Stream(source).filter(is_bool).collect(list)
-assert bools == [True]
-numbers: list[Number] = Stream(source).filter(is_number).collect(list)
-assert numbers == [True, 3, 4.2, 5j]
-real_numbers: list[Real] = Stream(source).filter(is_real_number).collect(list)
-assert real_numbers == [True, 3, 4.2]
-nones: list[None] = Stream(source).filter(is_none).collect(list)
-assert nones == [None]
-nnones: list[str | int | float | complex | bool] = (
-    Stream(source).filter(is_not_none).collect(list)
-)
-assert nnones == [True, "2", 3, 4.2, 5j]
+assert assert_type(Stream(source).filter(is_str).collect(list), list[str]) == [
+    "2"
+]
+assert assert_type(Stream(source).filter(is_int).collect(list), list[int]) == [
+    True,
+    3,
+]
+assert assert_type(
+    Stream(source).filter(is_float).collect(list), list[float]
+) == [4.2]
+assert assert_type(
+    Stream(source).filter(is_complex).collect(list), list[complex]
+) == [5j]
+assert assert_type(
+    Stream(source).filter(is_bool).collect(list), list[bool]
+) == [True]
+assert assert_type(
+    Stream(source).filter(is_number).collect(list), list[Number]
+) == [True, 3, 4.2, 5j]
+assert assert_type(
+    Stream(source).filter(is_real_number).collect(list), list[Real]
+) == [True, 3, 4.2]
+assert assert_type(
+    Stream(source).filter(is_none).collect(list), list[None]
+) == [None]
+assert assert_type(
+    Stream(source).filter(is_not_none).collect(list),
+    list[str | int | float | complex | bool],
+) == [True, "2", 3, 4.2, 5j]
 
-not_strs: list[int | float | complex | bool | None] = (
-    Stream(source).exclude(is_str).collect(list)
-)
-assert not_strs == [None, True, 3, 4.2, 5j]
-not_ints: list[str | float | complex | bool | None] = (
-    Stream(source).exclude(is_int).collect(list)
-)
-assert not_ints == [None, "2", 4.2, 5j]
-not_floats: list[str | int | complex | bool | None] = (
-    Stream(source).exclude(is_float).collect(list)
-)
-assert not_floats == [None, True, "2", 3, 5j]
-not_complexs: list[str | int | float | bool | None] = (
-    Stream(source).exclude(is_complex).collect(list)
-)
-assert not_complexs == [None, True, "2", 3, 4.2]
-not_bools: list[str | int | float | complex | None] = (
-    Stream(source).exclude(is_bool).collect(list)
-)
-assert not_bools == [None, "2", 3, 4.2, 5j]
-not_numbers: list[str | None] = Stream(source).exclude(is_number).collect(list)
-assert not_numbers == [None, "2"]
-not_real_numbers: list[str | None | complex] = list(
-    Stream(source).exclude(is_real_number)
-)
-assert not_real_numbers == [None, "2", 5j]
-not_nones: list[str | int | float | complex | bool] = (
-    Stream(source).exclude(is_none).collect(list)
-)
-assert not_nones == [True, "2", 3, 4.2, 5j]
 
-not_nnones: list[None] = Stream(source).exclude(is_not_none).collect(list)
-assert not_nnones == [None]
+assert assert_type(
+    Stream(source).exclude(is_str).collect(list),
+    list[int | float | complex | bool | None],
+) == [None, True, 3, 4.2, 5j]
+assert assert_type(
+    Stream(source).exclude(is_int).collect(list),
+    list[str | float | complex | bool | None],
+) == [None, "2", 4.2, 5j]
+assert assert_type(
+    Stream(source).exclude(is_float).collect(list),
+    list[str | int | complex | bool | None],
+) == [None, True, "2", 3, 5j]
+assert assert_type(
+    Stream(source).exclude(is_complex).collect(list),
+    list[str | int | float | bool | None],
+) == [None, True, "2", 3, 4.2]
+assert assert_type(
+    Stream(source).exclude(is_bool).collect(list),
+    list[str | int | float | complex | None],
+) == [None, "2", 3, 4.2, 5j]
+assert assert_type(
+    Stream(source).exclude(is_number).collect(list), list[str | None]
+) == [None, "2"]
+assert assert_type(
+    Stream(source).exclude(is_real_number), list[str | None | complex]
+) == [None, "2", 5j]
+assert assert_type(
+    Stream(source).exclude(is_none).collect(list),
+    list[str | int | float | complex | bool],
+) == [True, "2", 3, 4.2, 5j]
+assert assert_type(
+    Stream(source).exclude(is_not_none).collect(list), list[None]
+) == [None]
 
 assert not Stream(()).count()
 assert Stream(range(100)).drop(10).count() == 90
