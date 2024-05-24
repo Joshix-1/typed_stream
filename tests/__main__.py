@@ -375,7 +375,7 @@ assert assert_type(Stream([1, 2, 3]).min(), int) == 1
 assert assert_type(Stream([1, 2, 3]).min(default=0), int) == 1
 
 assert assert_type(Stream(["1", "2", "3"]).max(), str) == "3"
-assert assert_type(Stream(["1", "2", "3"]).max(), str) == "1"
+assert assert_type(Stream(["1", "2", "3"]).min(), str) == "1"
 assert assert_type(Stream(["1", "2", "3"]).min(default="a"), str) == "1"
 
 _stream1 = Stream.from_value(69).enumerate().nwise(3).catch()
@@ -995,7 +995,7 @@ assert assert_type(
     Stream(source).exclude(is_number).collect(list), list[str | None]
 ) == [None, "2"]
 assert assert_type(
-    Stream(source).exclude(is_real_number), list[str | None | complex]
+    Stream(source).exclude(is_real_number).collect(list), list[str | None | complex]
 ) == [None, "2", 5j]
 assert assert_type(
     Stream(source).exclude(is_none).collect(list),
