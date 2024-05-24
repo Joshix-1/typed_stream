@@ -995,7 +995,8 @@ assert assert_type(
     Stream(source).exclude(is_number).collect(list), list[str | None]
 ) == [None, "2"]
 assert assert_type(
-    Stream(source).exclude(is_real_number).collect(list), list[str | None | complex]
+    Stream(source).exclude(is_real_number).collect(list),
+    list[str | None | complex],
 ) == [None, "2", 5j]
 assert assert_type(
     Stream(source).exclude(is_none).collect(list),
