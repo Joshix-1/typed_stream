@@ -18,6 +18,7 @@ from functools import partial
 from numbers import Number, Real
 from operator import add
 from pathlib import Path
+from types import EllipsisType
 from typing import Any
 
 from typed_stream import (
@@ -141,11 +142,10 @@ assert_raises(ValueError, Stream("1a2b3c4d5").map(int).catch(TypeError).sum)
 assert_raises(ValueError, lambda: Stream(()).catch(StopIteration))
 assert_raises(ValueError, lambda: Stream(()).catch(StopIteration, TypeError))
 assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
-assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum() == 45
-assert Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum() == 45
+assert assert_type(Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum(), int) == 45
+assert assert_type(Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum(), int) == 45
 
-counted_letters: Counter[str] = Stream("abbccc122333").collect(Counter)
-assert counted_letters == {
+assert assert_type(Stream("abbccc122333").collect(Counter), Counter[str]) == {
     "a": 1,
     "b": 2,
     "c": 3,
@@ -157,19 +157,28 @@ assert counted_letters == {
 assert Stream.range(10).conditional_map(
     is_even, lambda x: x, lambda x: -x
 ).collect() == (0, -1, 2, -3, 4, -5, 6, -7, 8, -9)
-assert Stream.range(10).conditional_map(
-    is_even, lambda x: x * 2, lambda x: -x
-).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
-assert Stream.range(10).conditional_map(
-    is_odd, lambda x: -x, lambda x: x * 2
+assert assert_type(
+    Stream.range(10)
+    .conditional_map(is_even, lambda x: x * 2, lambda x: -x)
+    .collect(),
+    StreamableSequence[int],
+) == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
+assert assert_type(
+    Stream.range(10).conditional_map(is_odd, lambda x: -x, lambda x: x * 2),
+    Stream[int],
 ).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
 assert (
-    Stream.range(10)
-    .conditional_map(is_even, lambda _: ..., lambda x: None)
-    .collect()
+    assert_type(
+        Stream.range(10)
+        .conditional_map(is_even, lambda _: ..., lambda x: None)
+        .collect(),
+        StreamableSequence[None | EllipsisType],
+    )
     == (..., None) * 5
 )
-assert Stream.range(10).conditional_map(is_odd, lambda x: -x).collect() == (
+assert assert_type(
+    Stream.range(10).conditional_map(is_odd, lambda x: -x), Stream[int]
+).collect() == (
     -1,
     -3,
     -5,
@@ -177,7 +186,10 @@ assert Stream.range(10).conditional_map(is_odd, lambda x: -x).collect() == (
     -9,
 )
 assert (
-    Stream.range(10).conditional_map(is_even, lambda _: ...).collect()
+    assert_type(
+        Stream.range(10).conditional_map(is_even, lambda _: ...).collect(),
+        StreamableSequence[EllipsisType],
+    )
     == (...,) * 5
 )
 
@@ -193,60 +205,96 @@ def raise_exceptions(number: int) -> int:
     return number
 
 
-assert Stream.range(6).map(raise_exceptions).catch(
-    ValueError, TypeError, ZeroDivisionError, default=lambda: -1
-).collect() == (0, -1, 2, -1, 4, -1)
+assert assert_type(
+    Stream.range(6)
+    .map(raise_exceptions)
+    .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: -1)
+    .collect(),
+    StreamableSequence[int],
+) == (0, -1, 2, -1, 4, -1)
 
-assert Stream.range(6).map(raise_exceptions).catch(
-    ValueError, TypeError, ZeroDivisionError
-).collect() == (0, 2, 4)
-
-assert Stream.range(6).map(raise_exceptions).map(str).catch(
-    ValueError, TypeError, ZeroDivisionError, default=lambda _: f"E{_.args[0]}"
-).collect() == ("0", "E1", "2", "E3", "4", "E5")
-
-assert (
-    Stream.range(20)
+assert assert_type(
+    Stream.range(6)
     .map(raise_exceptions)
     .catch(ValueError, TypeError, ZeroDivisionError)
-    .sum()
+    .collect(),
+    StreamableSequence[int],
+) == (0, 2, 4)
+
+assert assert_type(
+    Stream.range(6)
+    .map(raise_exceptions)
+    .map(str)
+    .catch(
+        ValueError,
+        TypeError,
+        ZeroDivisionError,
+        default=lambda _: f"E{_.args[0]}",
+    )
+    .collect(),
+    StreamableSequence[str],
+) == ("0", "E1", "2", "E3", "4", "E5")
+
+assert (
+    assert_type(
+        Stream.range(20)
+        .map(raise_exceptions)
+        .catch(ValueError, TypeError, ZeroDivisionError)
+        .sum(),
+        int,
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 assert (
-    Stream.range(20)
-    .map(raise_exceptions)
-    .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: 0)
-    .sum()
+    assert_type(
+        Stream.range(20)
+        .map(raise_exceptions)
+        .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: 0)
+        .sum(),
+        int,
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 assert (
-    Stream.range(20)
-    .map(raise_exceptions)
-    .catch(ValueError, TypeError, ZeroDivisionError, default=lambda _: 0)
-    .sum()
+    assert_type(
+        Stream.range(20)
+        .map(raise_exceptions)
+        .catch(ValueError, TypeError, ZeroDivisionError, default=lambda _: 0)
+        .sum(),
+        int,
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 
 
 errors: list[ValueError] = []
 assert (
-    Stream("1a2b3c4d5e6f7g8h9")
-    .map(int)
-    .catch(ValueError, handler=errors.append, default=lambda: 100)
-    .sum()
+    assert_type(
+        Stream("1a2b3c4d5e6f7g8h9")
+        .map(int)
+        .catch(ValueError, handler=errors.append, default=lambda: 100)
+        .sum(),
+        int,
+    )
     == 845
 )
-assert Stream(errors).map(type).collect(list) == [ValueError] * 8
+assert (
+    assert_type(Stream(errors).map(type).collect(list), list[type])
+    == [ValueError] * 8
+)
 errors = []
 assert (
-    Stream("1x2x3x4x5x6x7x8x9")
-    .map(int)
-    .catch(
-        ValueError,
-        handler=errors.append,
-        default=lambda _: len(_.args) * 1000,
+    assert_type(
+        Stream("1x2x3x4x5x6x7x8x9")
+        .map(int)
+        .catch(
+            ValueError,
+            handler=errors.append,
+            default=lambda _: len(_.args) * 1000,
+        )
+        .sum(),
+        int,
     )
-    .sum()
     == 8045
 )
 value_error: ValueError
@@ -1061,29 +1109,7 @@ assert_raises(StreamEmptyError, lambda: Stream(()).sum())
 
 int_list = []
 assert (
-    Stream.counting(-100)
-    .drop(100)
-    .drop_while((1000).__gt__)
-    .take_while((100_000).__gt__)
-    .filter(is_odd)
-    .map(operator.pow, 3)
-    .peek(int_list.append)
-    .enumerate()
-    .flat_map(operator.mul, 2)
-    .exclude(is_even)
-    .limit(10_000)
-    .distinct()
-    .chunk(30)
-    .map(sum)
-    .sum()
-    == 432028881523605
-)
-assert sum(int_list) == 432028878744716
-assert len(int_list) - 1 == 3333
-
-try:  # pylint: disable=too-many-try-statements
-    int_list.clear()
-    assert (
+    assert_type(
         Stream.counting(-100)
         .drop(100)
         .drop_while((1000).__gt__)
@@ -1097,8 +1123,36 @@ try:  # pylint: disable=too-many-try-statements
         .limit(10_000)
         .distinct()
         .chunk(30)
-        .concurrent_map(sum)
-        .sum()
+        .map(sum)
+        .sum(),
+        int,
+    )
+    == 432028881523605
+)
+assert sum(int_list) == 432028878744716
+assert len(int_list) - 1 == 3333
+
+try:  # pylint: disable=too-many-try-statements
+    int_list.clear()
+    assert (
+        assert_type(
+            Stream.counting(-100)
+            .drop(100)
+            .drop_while((1000).__gt__)
+            .take_while((100_000).__gt__)
+            .filter(is_odd)
+            .map(operator.pow, 3)
+            .peek(int_list.append)
+            .enumerate()
+            .flat_map(operator.mul, 2)
+            .exclude(is_even)
+            .limit(10_000)
+            .distinct()
+            .chunk(30)
+            .concurrent_map(sum)
+            .sum(),
+            int,
+        )
         == 432028881523605
     )
     assert sum(int_list) == 432028878744716
