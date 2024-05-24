@@ -142,8 +142,18 @@ assert_raises(ValueError, Stream("1a2b3c4d5").map(int).catch(TypeError).sum)
 assert_raises(ValueError, lambda: Stream(()).catch(StopIteration))
 assert_raises(ValueError, lambda: Stream(()).catch(StopIteration, TypeError))
 assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
-assert assert_type(Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum(), int) == 45
-assert assert_type(Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum(), int) == 45
+assert (
+    assert_type(
+        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum(), int
+    )
+    == 45
+)
+assert (
+    assert_type(
+        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum(), int
+    )
+    == 45
+)
 
 assert assert_type(Stream("abbccc122333").collect(Counter), Counter[str]) == {
     "a": 1,
