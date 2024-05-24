@@ -27,6 +27,7 @@ else:
         return arg
 
     def assert_never(arg: object, /) -> typing.Never:
+        """Should never be called."""
         raise AssertionError(f"{arg} was not never")
 
     Self = getattr(typing, "Self", ...)
