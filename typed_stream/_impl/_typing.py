@@ -12,14 +12,20 @@ if typing.TYPE_CHECKING:  # noqa: C901  # pragma: no cover
     import sys
 
     if sys.version_info < (3, 11):
-        from typing_extensions import Self, TypeVarTuple, Unpack
+        from typing_extensions import (
+            Self,
+            TypeVarTuple,
+            Unpack,
+            assert_never,
+            assert_type,
+        )
     else:
-        from typing import Self, TypeVarTuple, Unpack
+        from typing import Self, TypeVarTuple, Unpack, assert_never, assert_type
 
     if sys.version_info < (3, 12):
-        from typing_extensions import assert_never, assert_type, override
+        from typing_extensions import override
     else:
-        from typing import assert_never, assert_type, override
+        from typing import override
 else:
 
     def return_arg(arg: object, *_) -> object:
