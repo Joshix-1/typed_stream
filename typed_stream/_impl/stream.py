@@ -23,6 +23,7 @@ from ._default_value import DefaultValueType as _DefaultValueType
 from ._typing import Self, TypeVarTuple, Unpack, override
 
 # pylint: disable=too-many-lines
+__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
 
 if typing.TYPE_CHECKING:

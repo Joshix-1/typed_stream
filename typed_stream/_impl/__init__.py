@@ -18,3 +18,11 @@ __all__ = (
     *streamable.__all__,
     *exceptions.__all__,
 )
+
+for export in Stream(__all__).map(globals().__getitem__):
+    assert export.__module__ == "typed_stream"
+    del export
+
+for mod in (exceptions, file_streams, stream, streamable):
+    assert mod.__name__ == "typed_stream"
+    del mod

@@ -15,6 +15,7 @@ from ._typing import override
 if TYPE_CHECKING:  # pragma: no cover
     from .stream import Stream
 
+__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[Literal["Streamable"], Literal["StreamableSequence"]] = (
     "Streamable",
     "StreamableSequence",

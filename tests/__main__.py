@@ -12,6 +12,7 @@ import importlib
 import operator
 import sys
 import traceback
+import types
 from collections import Counter
 from collections.abc import Callable
 from functools import partial
@@ -57,24 +58,41 @@ from .test_functions import (
 )
 
 
+def testmod(
+    mod: types.ModuleType,
+    optionflags: int = doctest.DONT_ACCEPT_TRUE_FOR_1,
+) -> tuple[int, int, int]:
+    _mod_saved = sys.modules.get(mod.__name__)
+    sys.modules[mod.__name__] = mod
+    runner = doctest.DocTestRunner(optionflags=optionflags)
+
+    ignored = 0
+    for test in doctest.DocTestFinder().find(mod, mod.__name__, mod):
+        if test.lineno is None:
+            ignored += 1
+            continue
+        runner.run(test)
+    if _mod_saved is None:
+        del sys.modules[mod.__name__]
+    else:
+        sys.modules[mod.__name__] = _mod_saved
+    return runner.failures, runner.tries, ignored
+
+
 def run_doc_tests() -> None:  # noqa: C901
     """Run the doctests in the typed_stream package."""
     dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
     acc_fails, acc_tests = 0, 0
-    for path in dir_.rglob("*.py"):
-        mod = (
-            path.relative_to(dir_)
-            .as_posix()
-            .replace("/", ".")
-            .removesuffix(".py")
-        )
-        full_mod = f"typed_stream.{mod}"
-        fails, tests = doctest.testmod(
-            importlib.import_module(full_mod),
-            exclude_empty=True,
-            raise_on_error=False,
-            optionflags=doctest.DONT_ACCEPT_TRUE_FOR_1,
-        )
+    for path in sorted(
+        Stream(dir_.rglob("*.py")).map(
+            lambda p: p.relative_to(dir_).as_posix()
+        ),
+        key=lambda s: s.count("/"),
+        reverse=True,
+    ):
+        mod = path.replace("/", ".").removesuffix(".py")
+        full_mod = f"typed_stream.{mod}".removesuffix(".__init__")
+        fails, tests, _ = testmod(importlib.import_module(full_mod))
         acc_fails += fails
         acc_tests += tests
         if tests:
@@ -84,7 +102,7 @@ def run_doc_tests() -> None:  # noqa: C901
             )
 
     print(
-        f"typed_stream: {acc_tests - acc_fails} / {acc_tests} doctests successful",
+        f"SUMMARY: {acc_tests - acc_fails} / {acc_tests} doctests successful",
         file=sys.stderr,
     )
     if acc_fails == 1 and sys.implementation.name == "rustpython":

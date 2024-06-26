@@ -18,6 +18,7 @@ from ._types import PathLikeType
 from ._typing import override
 from .stream import Stream
 
+__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[Literal["BinaryFileStream"], Literal["FileStream"]] = (
     "BinaryFileStream",
     "FileStream",
