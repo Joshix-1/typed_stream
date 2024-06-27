@@ -31,8 +31,8 @@ class Streamable(Iterable[T], ABC):
 
     def stream(self) -> Stream[T]:
         """Return Stream(self)."""
-        from ._impl.stream import (
-            Stream,  # pylint: disable=import-outside-toplevel
+        from ._impl.stream import (  # pylint: disable=import-outside-toplevel
+            Stream,
         )
 
         return Stream(self)
