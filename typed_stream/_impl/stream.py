@@ -13,7 +13,7 @@ import itertools
 import operator
 import sys
 import typing
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from numbers import Number, Real
 from types import EllipsisType
 
