@@ -12,6 +12,7 @@ import itertools
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal, TypeVar, cast, overload
 
+from ..streamable import Streamable
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
 from ._typing import override
 from ._utils import (
@@ -21,7 +22,6 @@ from ._utils import (
     wrap_in_tuple,
 )
 from .functions import one
-from .streamable import Streamable
 
 __all__ = (
     "Chunked",

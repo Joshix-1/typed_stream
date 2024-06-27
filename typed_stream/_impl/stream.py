@@ -13,17 +13,17 @@ import itertools
 import operator
 import sys
 import typing
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from numbers import Number, Real
 from types import EllipsisType
 
-from . import _iteration_utils, exceptions, functions, stream_abc, streamable
+from .. import exceptions, streamable
+from . import _iteration_utils, functions, stream_abc
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
 from ._typing import Self, TypeVarTuple, Unpack, override
 
 # pylint: disable=too-many-lines
-__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
 
 if typing.TYPE_CHECKING:
@@ -175,6 +175,13 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         ):
             return self.tail(abs(start))
         return self.collect()[start:stop:step]
+
+    @classmethod
+    @override
+    def _module(cls) -> str:
+        if cls == Stream:
+            return "typed_stream"
+        return cls.__module__
 
     @staticmethod
     def counting(start: int = 0, step: int = 1) -> Stream[int]:
@@ -760,7 +767,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).first()
         Traceback (most recent call last):
         ...
-        typed_stream.StreamEmptyError
+        typed_stream.exceptions.StreamEmptyError
         >>> Stream([]).first(default="default")
         'default'
         """
@@ -830,7 +837,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).last()
         Traceback (most recent call last):
         ...
-        typed_stream.StreamEmptyError
+        typed_stream.exceptions.StreamEmptyError
         """
         if tail := self.tail(1):
             return tail[-1]
@@ -909,7 +916,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).max()
         Traceback (most recent call last):
         ...
-        typed_stream.StreamEmptyError
+        typed_stream.exceptions.StreamEmptyError
         """
         max_ = max(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(max_, _DefaultValueType):
@@ -951,7 +958,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).min()
         Traceback (most recent call last):
         ...
-        typed_stream.StreamEmptyError
+        typed_stream.exceptions.StreamEmptyError
         """
         min_ = min(self._data, default=default, key=key)  # type: ignore[type-var,arg-type]
         if isinstance(min_, _DefaultValueType):
@@ -987,7 +994,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).nth(22)
         Traceback (most recent call last):
         ...
-        typed_stream.StreamIndexError
+        typed_stream.exceptions.StreamIndexError
         >>> Stream([]).nth(22, default=42)
         42
         """
@@ -1079,7 +1086,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream([]).reduce(operator.mul)
         Traceback (most recent call last):
         ...
-        typed_stream.StreamEmptyError
+        typed_stream.exceptions.StreamEmptyError
         """
         iterator = iter(self._data)
         if isinstance(initial, _DefaultValueType):

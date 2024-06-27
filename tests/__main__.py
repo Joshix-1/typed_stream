@@ -61,38 +61,34 @@ from .test_functions import (
 def testmod(
     mod: types.ModuleType,
     optionflags: int = doctest.DONT_ACCEPT_TRUE_FOR_1,
-) -> tuple[int, int, int]:
-    _mod_saved = sys.modules.get(mod.__name__)
-    sys.modules[mod.__name__] = mod
+) -> tuple[int, int]:
+    """Test modules.
+
+    Like doctest.testmod, but smaller.
+    """
     runner = doctest.DocTestRunner(optionflags=optionflags)
 
-    ignored = 0
     for test in doctest.DocTestFinder().find(mod, mod.__name__, mod):
-        if test.lineno is None:
-            ignored += 1
-            continue
         runner.run(test)
-    if _mod_saved is None:
-        del sys.modules[mod.__name__]
-    else:
-        sys.modules[mod.__name__] = _mod_saved
-    return runner.failures, runner.tries, ignored
+
+    return runner.failures, runner.tries
 
 
 def run_doc_tests() -> None:  # noqa: C901
     """Run the doctests in the typed_stream package."""
     dir_ = Path(__file__).resolve().parent.parent / "typed_stream"
     acc_fails, acc_tests = 0, 0
-    for path in sorted(
-        Stream(dir_.rglob("*.py")).map(
-            lambda p: p.relative_to(dir_).as_posix()
-        ),
-        key=lambda s: s.count("/"),
+    for mod in sorted(
+        Stream(dir_.rglob("*.py"))
+        .map(lambda p: p.relative_to(dir_).as_posix())
+        .map(str.removesuffix, "/__init__.py")
+        .map(str.removesuffix, ".py")
+        .map(str.replace, "/", "."),
+        key=lambda s: (s.count("."), len(s)),
         reverse=True,
     ):
-        mod = path.replace("/", ".").removesuffix(".py")
-        full_mod = f"typed_stream.{mod}".removesuffix(".__init__")
-        fails, tests, _ = testmod(importlib.import_module(full_mod))
+        full_mod = f"typed_stream.{mod}" if mod else "typed_stream"
+        fails, tests = testmod(importlib.import_module(full_mod))
         acc_fails += fails
         acc_tests += tests
         if tests:
@@ -905,6 +901,7 @@ for name in dir(Stream(...)):  # noqa: C901  # pylint: disable=too-complex
         "_finish",
         "_full_class_name",
         "_get_args",
+        "_module",
         "_StreamABC__data",
         "close",
         "collect_and_await_all",

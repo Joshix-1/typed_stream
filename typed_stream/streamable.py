@@ -10,12 +10,11 @@ from abc import ABC
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal, SupportsIndex, TypeVar, overload
 
-from ._typing import override
+from ._impl._typing import override
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .stream import Stream
+    from ._impl.stream import Stream
 
-__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[Literal["Streamable"], Literal["StreamableSequence"]] = (
     "Streamable",
     "StreamableSequence",
@@ -32,7 +31,9 @@ class Streamable(Iterable[T], ABC):
 
     def stream(self) -> Stream[T]:
         """Return Stream(self)."""
-        from .stream import Stream  # pylint: disable=import-outside-toplevel
+        from ._impl.stream import (
+            Stream,  # pylint: disable=import-outside-toplevel
+        )
 
         return Stream(self)
 

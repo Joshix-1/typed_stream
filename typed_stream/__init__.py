@@ -33,12 +33,12 @@ Examples:
 """
 # isort:skip_file
 
-from . import _impl, version
+from . import _impl, exceptions, streamable, version
 from . import functions  # noqa: F401
-from ._impl.exceptions import *  # noqa: F401, F403
 from ._impl.file_streams import *  # noqa: F401, F403s
 from ._impl.stream import *  # noqa: F401, F403
-from ._impl.streamable import *  # noqa: F401, F403
+from .exceptions import *  # noqa: F401, F403
+from .streamable import *  # noqa: F401, F403
 
-__all__ = _impl.__all__
+__all__ = (*_impl.__all__, *streamable.__all__, *exceptions.__all__)
 __version__ = version.VERSION

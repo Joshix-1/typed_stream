@@ -18,7 +18,6 @@ from ._types import PathLikeType
 from ._typing import override
 from .stream import Stream
 
-__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[Literal["BinaryFileStream"], Literal["FileStream"]] = (
     "BinaryFileStream",
     "FileStream",
@@ -79,6 +78,13 @@ class FileStream(FileStreamBase[str]):
         )
         super().__init__(self._file_iterator, self._close_source)
 
+    @classmethod
+    @override
+    def _module(cls) -> str:
+        if cls == FileStream:
+            return "typed_stream"
+        return cls.__module__
+
 
 class BinaryFileStream(FileStreamBase[bytes]):
     """Lazily iterate over the lines of a file."""
@@ -105,3 +111,10 @@ class BinaryFileStream(FileStreamBase[bytes]):
             else LazyFileIteratorRemovingEndsBytes(data)
         )
         super().__init__(self._file_iterator, self._close_source)
+
+    @classmethod
+    @override
+    def _module(cls) -> str:
+        if cls == BinaryFileStream:
+            return "typed_stream"
+        return cls.__module__

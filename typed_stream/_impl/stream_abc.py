@@ -11,9 +11,9 @@ from collections.abc import AsyncIterable, Callable, Iterable
 from types import EllipsisType
 from typing import Generic, TypeVar
 
+from ..exceptions import StreamFinishedError
 from ._types import Closeable, PrettyRepr
 from ._typing import Self, override
-from .exceptions import StreamFinishedError
 
 __all__ = ("StreamABC",)
 
@@ -53,11 +53,11 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         >>> stream._data
         Traceback (most recent call last):
         ...
-        typed_stream.StreamFinishedError: Stream is finished.
+        typed_stream.exceptions.StreamFinishedError: Stream is finished.
         >>> Stream(...)._data
         Traceback (most recent call last):
         ...
-        typed_stream.StreamFinishedError: Stream is finished.
+        typed_stream.exceptions.StreamFinishedError: Stream is finished.
         """
         if self.__data is None:
             raise StreamFinishedError("Stream is finished.")

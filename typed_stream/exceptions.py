@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Literal
 
-__name__ = "typed_stream" if __name__ != "__main__" else __name__
 __all__: tuple[
     Literal["StreamEmptyError"],
     Literal["StreamFinishedError"],

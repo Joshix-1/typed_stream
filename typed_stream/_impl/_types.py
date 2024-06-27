@@ -112,6 +112,10 @@ class PrettyRepr(abc.ABC):
 
     __slots__ = ()
 
+    @classmethod
+    def _module(cls) -> str:
+        return cls.__module__
+
     @override
     def __repr__(self) -> str:
         """Return the string representation of self."""
@@ -119,7 +123,7 @@ class PrettyRepr(abc.ABC):
             [("..." if arg is ... else repr(arg)) for arg in self._get_args()]
         )
         return (
-            f"{self.__class__.__module__}.{self.__class__.__qualname__}({args})"
+            f"{self.__class__._module()}.{self.__class__.__qualname__}({args})"
         )
 
     @abc.abstractmethod

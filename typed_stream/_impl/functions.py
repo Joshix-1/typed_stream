@@ -13,7 +13,6 @@ from typing import Concatenate, Generic, Literal, ParamSpec, TypeVar
 
 from ._utils import InstanceChecker, NoneChecker, NotNoneChecker
 
-__name__ = "typed_stream.functions"  # pylint: disable=redefined-builtin
 __all__ = (
     "is_bool",
     "is_complex",
