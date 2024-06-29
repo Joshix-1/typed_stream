@@ -14,8 +14,3 @@ __all__ = (
     *stream.__all__,
     *file_streams.__all__,
 )
-
-for export in Stream(__all__).map(globals().__getitem__):  # noqa: F405
-    # pylint: disable-next=protected-access
-    assert export._module() == "typed_stream", f"{export!r}"  # nosec: B101
-    del export

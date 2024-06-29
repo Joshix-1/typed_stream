@@ -30,6 +30,7 @@ from typed_stream import (
     StreamEmptyError,
     StreamFinishedError,
     StreamIndexError,
+    _impl,
 )
 from typed_stream._impl._iteration_utils import (
     IterWithCleanUp,
@@ -56,6 +57,11 @@ from .test_functions import (
     is_str,
     noop,
 )
+
+for export in Stream(_impl.__all__).map(partial(getattr, _impl)):  # noqa: F405
+    # pylint: disable-next=protected-access
+    assert export._module() == "typed_stream", f"{export!r}"  # nosec: B101
+    del export
 
 
 def testmod(
