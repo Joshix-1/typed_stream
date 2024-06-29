@@ -342,7 +342,7 @@ jobs:
         with:
           name: build
       - name: Install Twine
-        run: pip install "twine==4.*"
+        run: pip install twine
       - name: Run Twine
         run: |
           twine check --strict *.tar.gz *.whl
