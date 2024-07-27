@@ -1022,8 +1022,8 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
     ) -> Stream[tuple[T]]: ...
 
     @typing.overload
-    def nwise(
-        self, size: typing.Literal[2], /
+    def nwise(  # noqa: D102
+        self, size: typing.Literal[2], /  # noqa: W504
     ) -> Stream[tuple[T, T]]: ...  # noqa: D102
 
     @typing.overload
