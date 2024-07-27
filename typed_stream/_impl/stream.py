@@ -423,11 +423,6 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
 
     @typing.overload
     def collect(  # noqa: D102
-        self: Stream[SA], fun: Callable[[Iterable[SA]], SA], /  # noqa: W504
-    ) -> SA: ...
-
-    @typing.overload
-    def collect(  # noqa: D102
         self,
         fun: Callable[[Iterable[T]], streamable.StreamableSequence[T]],
         /,
@@ -447,13 +442,18 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
 
     @typing.overload
     def collect(  # noqa: D102
-        self, fun: Callable[[Iterable[T]], set[T]], /  # noqa: W504
-    ) -> set[T]: ...
+        self, fun: Callable[[Iterable[T]], list[T]], /  # noqa: W504
+    ) -> list[T]: ...
 
     @typing.overload
     def collect(  # noqa: D102
-        self, fun: Callable[[Iterable[T]], list[T]], /  # noqa: W504
-    ) -> list[T]: ...
+        self: Stream[SA], fun: Callable[[Iterable[SA]], SA], /  # noqa: W504
+    ) -> SA: ...
+
+    @typing.overload
+    def collect(  # noqa: D102
+        self, fun: Callable[[Iterable[T]], set[T]], /  # noqa: W504
+    ) -> set[T]: ...
 
     @typing.overload
     def collect(  # noqa: D102
@@ -1017,14 +1017,14 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         return default
 
     @typing.overload
-    def nwise(  # type: ignore[overload-overlap]  # noqa: D102
+    def nwise(  # noqa: D102
         self, size: typing.Literal[1], /  # noqa: W504
     ) -> Stream[tuple[T]]: ...
 
     @typing.overload
-    def nwise(  # type: ignore[overload-overlap]  # noqa: D102
-        self, size: typing.Literal[2], /  # noqa: W504
-    ) -> Stream[tuple[T, T]]: ...
+    def nwise(
+        self, size: typing.Literal[2], /
+    ) -> Stream[tuple[T, T]]: ...  # noqa: D102
 
     @typing.overload
     def nwise(  # noqa: D102
