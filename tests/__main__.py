@@ -468,21 +468,12 @@ assert isinstance(
     Stream,
 )
 assert _stream1.limit(1000).collect() == _stream2.limit(1000).collect()
-try:
-    assert (
-        repr(iter(Stream.from_value(69)))
-        == "typed_stream._impl._iteration_utils.IterWithCleanUp"
-        + "(<bound method StreamABC.close of typed_stream.Stream"
-        + "(repeat(69))>,repeat(69))"
-    )
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
+assert (
+    repr(iter(Stream.from_value(69)))
+    == "typed_stream._impl._iteration_utils.IterWithCleanUp"
+    + "(<bound method StreamABC.close of typed_stream.Stream"
+    + "(repeat(69))>,repeat(69))"
+)
 try:
     assert (
         repr(Peeker(print))
@@ -711,30 +702,13 @@ assert fs._file_iterator is None
 fs = FileStream(INPUT_TXT, keep_line_ends=True)
 for line in fs:
     assert line.endswith("\n")
-try:
-    assert fs._file_iterator is None
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
 
+assert fs._file_iterator is None
 fs = FileStream(INPUT_TXT)
 for line in fs:
     assert not line.endswith("\n")
-try:
-    assert fs._file_iterator is None
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
+
+assert fs._file_iterator is None
 
 fs = FileStream(INPUT_TXT)
 assert fs.map(lambda _: ...).limit(1).collect(list) == [...]
@@ -806,16 +780,7 @@ assert lfireb._file_object is None
 bfs = BinaryFileStream(INPUT_TXT)  # type: ignore[unreachable]
 fs = FileStream(INPUT_TXT)
 assert tuple(bfs) == tuple(fs.map(str.encode, "UTF-8").collect(tuple))
-try:
-    assert bfs._file_iterator is None
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
+assert bfs._file_iterator is None
 assert fs._file_iterator is None
 
 int_list_begin: list[int] = []
@@ -836,16 +801,8 @@ assert not int_list_end
 assert list(int_stream) == int_list_end
 assert int_list_end  # list(int_stream) consumed the stream
 assert len(int_list_begin) == 1000
-try:
-    assert repr(int_stream) == "typed_stream.Stream(...)"
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
+
+assert repr(int_stream) == "typed_stream.Stream(...)"
 
 assert Stream(["abc", "def", "ghijk"]).flat_map(str.encode, "ASCII").map(
     operator.sub, 97
