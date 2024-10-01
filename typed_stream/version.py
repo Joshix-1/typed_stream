@@ -12,7 +12,7 @@ import typing
 
 __all__ = ("VERSION", "version_info")
 
-VERSION = "0.150.0"
+VERSION = "0.150.1"
 
 version_info: tuple[int, int, int] = typing.cast(
     tuple[int, int, int], tuple(map(int, VERSION.split(".")))
