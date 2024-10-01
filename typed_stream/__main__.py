@@ -13,6 +13,7 @@ import inspect
 import operator
 import sys
 import textwrap
+import traceback
 from collections.abc import Callable
 from typing import cast
 
@@ -126,9 +127,14 @@ def run_program(options: Options) -> str | None:  # noqa: C901
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
             else:
-                args.append(
-                    eval(action, {})  # nosec: B307  # pylint: disable=eval-used
-                )
+                try:
+                    # pylint: disable-next=eval-used
+                    arg = eval(action, {})  # nosec: B307
+                    # pylint: disable-next=broad-except
+                except BaseException as exc:  # noqa: B036
+                    err = traceback.format_exception_only(exc)[-1].strip()
+                    return f"Failed to evaluate {action!r}: {err}"
+                args.append(arg)
                 full_action_qual = action
             code.extend((full_action_qual, ","))
     if method:
