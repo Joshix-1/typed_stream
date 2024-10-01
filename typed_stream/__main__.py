@@ -38,6 +38,7 @@ class Options:
     debug: bool
     bytes: bool
     keep_ends: bool
+    no_eval: bool
     actions: tuple[str, ...]
 
 
@@ -53,7 +54,8 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=False,
-    ...         actions=("map", "int", "sum")
+    ...         no_eval=False,
+    ...         actions=("map", "int", "sum"),
     ...     ))
     1234
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
@@ -65,6 +67,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=False,
+    ...         no_eval=False,
     ...         actions=("map", "int", "collect", "builtins.sum")
     ...     ))
     1324
@@ -77,6 +80,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=False,
+    ...         no_eval=False,
     ...         actions=("map", "int", "(°_°)")
     ...     ))
     >>> assert not err.getvalue()
@@ -89,6 +93,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=False,
+    ...         no_eval=False,
     ...         actions=("map", "xxx")
     ...     ))
     >>> assert not err.getvalue()
@@ -101,6 +106,19 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=False,
+    ...         no_eval=True,
+    ...         actions=("map", "xxx")
+    ...     ))
+    >>> assert not err.getvalue()
+    >>> print(ret)
+    Can't parse 'xxx' without eval.
+    >>> sys.stdin = io.StringIO("")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     ret = run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         no_eval=True,
     ...         actions=("map", "int", "collect", "sum")
     ...     ))
     >>> assert not err.getvalue()
@@ -113,6 +131,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     ...         debug=True,
     ...         bytes=True,
     ...         keep_ends=True,
+    ...         no_eval=True,
     ...         actions=("flat_map", "iter", "map", "hex", "collect", "Counter")
     ...     ))
     Counter({'0x30': 6, '0xa': 3, '0x32': 1, '0x31': 1, '0x33': 1, '0x34': 1})
@@ -125,6 +144,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=True,
+    ...         no_eval=False,
     ...         actions=("map", "int", "filter", "is_even", "map", "mul", "10")
     ...     ))
     20
@@ -203,6 +223,11 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
             elif action in operator.__all__:
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
+            elif hasattr(builtins, action):
+                args.append(getattr(builtins, action))
+                full_action_qual = f"{action}"
+            elif options.no_eval:
+                return f"Can't parse {action!r} without eval."
             else:
                 try:
                     # pylint: disable-next=eval-used
@@ -247,7 +272,8 @@ def main() -> str | None:  # noqa: C901
     )
     arg_parser.add_argument("--debug", action="store_true")
     arg_parser.add_argument("--bytes", action="store_true")
-    arg_parser.add_argument("--keep_ends", action="store_true")
+    arg_parser.add_argument("--keep-ends", action="store_true")
+    arg_parser.add_argument("--no-eval", action="store_true")
     arg_parser.add_argument("actions", nargs="+")
 
     args = arg_parser.parse_args()
@@ -255,6 +281,7 @@ def main() -> str | None:  # noqa: C901
         debug=bool(args.debug),
         bytes=bool(args.bytes),
         keep_ends=bool(args.keep_ends),
+        no_eval=bool(args.no_eval),
         actions=tuple(map(str, args.actions)),
     )
     if options.actions and options.actions[0] == "help":
