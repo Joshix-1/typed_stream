@@ -59,6 +59,54 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
     print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).sum())
     <BLANKLINE>
+    >>> sys.stdin = io.StringIO("300\\n1000\\n20\\n4")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         actions=("map", "int", "collect", "builtins.sum")
+    ...     ))
+    1324
+    >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
+    print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).collect(builtins.sum))
+    <BLANKLINE>
+    >>> sys.stdin = io.StringIO("")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     ret = run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         actions=("map", "int", "(°_°)")
+    ...     ))
+    >>> assert not err.getvalue()
+    >>> assert isinstance(ret, str)
+    >>> assert "SyntaxError" in ret
+    >>> assert "(°_°)" in ret
+    >>> sys.stdin = io.StringIO("")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     ret = run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         actions=("map", "xxx")
+    ...     ))
+    >>> assert not err.getvalue()
+    >>> assert isinstance(ret, str)
+    >>> assert "NameError" in ret
+    >>> assert "xxx" in ret
+    >>> sys.stdin = io.StringIO("")
+    >>> with contextlib.redirect_stderr(io.StringIO()) as err:
+    ...     ret = run_program(Options(
+    ...         debug=True,
+    ...         bytes=False,
+    ...         keep_ends=False,
+    ...         actions=("map", "int", "collect", "sum")
+    ...     ))
+    >>> assert not err.getvalue()
+    >>> print(ret)
+    StreamableSequence object has no attribute 'sum'. \
+To pass it as argument to Stream.collect use 'builtins.sum'.
     >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"200\\n1000\\n30\\n4"))
     >>> with contextlib.redirect_stderr(io.StringIO()) as err:
     ...     run_program(Options(
