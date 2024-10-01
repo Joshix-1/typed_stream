@@ -153,8 +153,8 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
 
     method: None | Callable[[object], object] = None
     args: list[object] = []
-    for index, action in Stream(options.actions).map(str.strip).enumerate(1):
-        if action.startswith("_"):
+    for index, action in Stream(options.actions).enumerate(1):
+        if action.lstrip().startswith("_"):
             return f"{index}: {action!r} isn't allowed to start with '_'."
         args_left = (
             count_required_positional_arguments(method) - len(args)
@@ -191,7 +191,10 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
             if not method:
                 return f"{action!r} needs to be a Stream method."
             full_action_qual: str
-            if action in functions.__all__:
+            if action.isspace():
+                args.append(action)
+                full_action_qual = repr(action)
+            elif action in functions.__all__:
                 args.append(getattr(functions, action))
                 full_action_qual = f"typed_stream.functions.{action}"
             elif action in collections.__all__:
