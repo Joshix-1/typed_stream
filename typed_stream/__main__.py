@@ -144,7 +144,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     ...         debug=True,
     ...         bytes=False,
     ...         keep_ends=True,
-    ...         no_eval=False,
+    ...         no_eval=True,
     ...         actions=("map", "int", "filter", "is_even", "map", "mul", "10")
     ...     ))
     20
@@ -214,6 +214,9 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
             if action.isspace():
                 args.append(action)
                 full_action_qual = repr(action)
+            elif action.isdigit():
+                args.append(int(action))
+                full_action_qual = action
             elif action in functions.__all__:
                 args.append(getattr(functions, action))
                 full_action_qual = f"typed_stream.functions.{action}"
