@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import builtins
 import collections
 import dataclasses
 import inspect
@@ -21,8 +22,11 @@ from ._impl import Stream, functions
 from ._impl._utils import count_required_positional_arguments
 
 EVAL_GLOBALS: Mapping[str, object] = dict(
-    Stream([operator, functions, collections]).flat_map(
-        lambda mod: ((name, getattr(mod, name)) for name in mod.__all__)
+    Stream((collections, functions, operator))
+    .flat_map(lambda mod: ((name, getattr(mod, name)) for name in mod.__all__))
+    .chain(
+        (mod.__name__, mod)
+        for mod in (builtins, collections, functions, operator)
     )
 )
 
@@ -38,7 +42,7 @@ class Options:
 
 
 def run_program(options: Options) -> str | None:  # noqa: C901
-    # pylint: disable=too-complex, too-many-branches, too-many-statements
+    # pylint: disable=too-complex, too-many-branches, too-many-locals, too-many-statements  # noqa: B950
     """Run the program with the options.
 
     >>> import contextlib, io
@@ -117,6 +121,22 @@ def run_program(options: Options) -> str | None:  # noqa: C901
                     code[-1] = ")"
                 else:
                     code.append(")")
+                if not hasattr(stream, action):
+                    type_name = (
+                        type(stream).__qualname__ or type(stream).__name__
+                    )
+                    meth_name = method.__qualname__ or method.__name__
+                    if hasattr(builtins, action):
+                        fix = f"builtins.{action}"
+                        confident = True
+                    else:
+                        fix = f"({action})"
+                        confident = action in EVAL_GLOBALS
+                    use = "use" if confident else "try"
+                    return (
+                        f"{type_name} object has no attribute {action!r}. "
+                        f"To pass it as argument to {meth_name} {use} {fix!r}."
+                    )
             method = getattr(stream, action)
             code.append(f".{action}(")
         else:
