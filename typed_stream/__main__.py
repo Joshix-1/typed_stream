@@ -273,7 +273,7 @@ def main() -> str | None:  # noqa: C901
     arg_parser.add_argument("--debug", action="store_true")
     arg_parser.add_argument("--bytes", action="store_true")
     arg_parser.add_argument("--keep-ends", action="store_true")
-    arg_parser.add_argument("--no-eval", action="store_true")
+    # arg_parser.add_argument("--no-eval", action="store_true")
     arg_parser.add_argument("actions", nargs="+")
 
     args = arg_parser.parse_args()
@@ -281,7 +281,7 @@ def main() -> str | None:  # noqa: C901
         debug=bool(args.debug),
         bytes=bool(args.bytes),
         keep_ends=bool(args.keep_ends),
-        no_eval=bool(args.no_eval),
+        no_eval=False,
         actions=tuple(map(str, args.actions)),
     )
     if options.actions and options.actions[0] == "help":
