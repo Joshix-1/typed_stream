@@ -14,11 +14,17 @@ import operator
 import sys
 import textwrap
 import traceback
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import cast
 
 from ._impl import Stream, functions
 from ._impl._utils import count_required_positional_arguments
+
+EVAL_GLOBALS: Mapping[str, object] = dict(
+    Stream([operator, functions, collections]).flat_map(
+        lambda mod: ((name, getattr(mod, name)) for name in mod.__all__)
+    )
+)
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -129,7 +135,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
             else:
                 try:
                     # pylint: disable-next=eval-used
-                    arg = eval(action, {})  # nosec: B307
+                    arg = eval(action, dict(EVAL_GLOBALS))  # nosec: B307
                     # pylint: disable-next=broad-except
                 except BaseException as exc:  # noqa: B036
                     err = traceback.format_exception_only(exc)[-1].strip()
