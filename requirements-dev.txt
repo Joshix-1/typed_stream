@@ -12,7 +12,7 @@ coverage==7.*
 # typechecking
 # pyre-check==0.9.*
 # pyright==1.*
-mypy==1.12.*
+mypy==1.13.*
 typing-extensions==4.*
 pytype==2024.10.11
 
