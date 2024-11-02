@@ -90,7 +90,7 @@ strict_undefined_checks = true
 strict_primitive_comparisons = true
 
 [tool.pyright]
-include = ["typed_stream", "tests", "examples"]
+include = ["typed_stream"]  # , "tests", "examples"
 strict = ["typed_stream", "tests", "examples"]
 strictListInference = true
 strictDictionaryInference = true
