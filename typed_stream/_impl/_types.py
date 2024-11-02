@@ -12,7 +12,7 @@ from collections.abc import Callable, Iterable, Iterator
 from os import PathLike
 from typing import Generic, Protocol, TypeAlias, TypeGuard, TypeVar
 
-from ._typing import override
+from ._typing import Self, override
 
 __all__ = (
     "ClassWithCleanUp",
@@ -166,7 +166,7 @@ class IteratorProxy(Iterator[V], Generic[V, T], PrettyRepr, abc.ABC):
         self._iterator = iter(iterable)
 
     @override
-    def __iter__(self) -> Iterator[V]:
+    def __iter__(self) -> Self:
         """Return self."""
         return self
 

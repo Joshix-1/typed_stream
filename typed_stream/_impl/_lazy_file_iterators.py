@@ -12,7 +12,7 @@ from io import BytesIO
 from typing import IO, AnyStr, TextIO, TypeGuard, TypeVar, overload
 
 from ._types import Closeable, PathLikeType, PrettyRepr
-from ._typing import override
+from ._typing import Self, override
 
 __all__ = (
     "LazyFileIterator",
@@ -86,7 +86,7 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
         self._file_object = None
 
     @override
-    def __iter__(self) -> Iterator[AnyStr]:
+    def __iter__(self) -> Self:
         """Return self."""
         return self
 

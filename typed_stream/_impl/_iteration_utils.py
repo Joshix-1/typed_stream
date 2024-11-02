@@ -14,7 +14,7 @@ from typing import Generic, Literal, TypeVar, cast, overload
 
 from ..streamable import Streamable
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
-from ._typing import override
+from ._typing import Self, override
 from ._utils import (
     FunctionWrapperIgnoringArgs,
     IndexValueTuple,
@@ -280,7 +280,7 @@ class IterWithCleanUp(Iterator[T], ClassWithCleanUp):
         self.iterator = iter(iterable)
 
     @override
-    def __iter__(self: V) -> V:
+    def __iter__(self) -> Self:
         """Return self."""
         return self
 
