@@ -91,6 +91,7 @@ strict_primitive_comparisons = true
 
 [tool.pyright]
 include = ["typed_stream", "tests", "examples"]
+strict = ["typed_stream", "tests", "examples"]
 strictListInference = true
 strictDictionaryInference = true
 strictSetInference = true
