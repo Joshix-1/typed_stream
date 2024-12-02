@@ -13,7 +13,7 @@ import itertools
 import operator
 import sys
 import typing
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from numbers import Number, Real
 from types import EllipsisType
 
@@ -964,6 +964,32 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         if isinstance(min_, _DefaultValueType):
             raise exceptions.StreamEmptyError() from None
         return self._finish(min_, close_source=True)
+
+    def multi_reduce(self, *funs: Callable[[T, T], T]) -> Sequence[T]:
+        """Reduce the values of this stream with multiple functions.
+
+        >>> data = [1, 2, 3, 4, 5]
+        >>> sum_, count = Stream(data).multi_reduce(operator.add, lambda x, _: x + 1)
+        >>> sum_
+        15
+        >>> count
+        5
+        """
+        iterator = iter(self._data)
+        try:
+            first_value = next(iterator)
+        except StopIteration:
+            raise exceptions.StreamEmptyError() from None
+
+        def multi_update(acc: list[T], value: T) -> list[T]:
+            for idx, fun in enumerate(funs):
+                acc[idx] = fun(acc[idx], value)
+            return acc
+
+        return self._finish(
+            functools.reduce(multi_update, iterator, [first_value] * len(funs)),
+            True,
+        )
 
     @typing.overload
     def nth(self, index: int, /) -> T: ...  # noqa: D102
