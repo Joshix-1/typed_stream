@@ -79,12 +79,16 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
         """Nobody inspects the spammish repetition."""
 
     @overload
-    def __getitem__(self, item: slice, /) -> StreamableSequence[T]:
+    def __getitem__(
+        self, item: slice[int | None, int | None, int | None], /  # noqa: W504
+    ) -> StreamableSequence[T]:
         """Nobody inspects the spammish repetition."""
 
     @override
     def __getitem__(
-        self, item: slice | SupportsIndex, /  # noqa: W504
+        self,
+        item: slice[int | None, int | None, int | None] | SupportsIndex,
+        /,  # noqa: W504
     ) -> StreamableSequence[T] | T:
         """Finish the stream by collecting."""
         if isinstance(item, slice):

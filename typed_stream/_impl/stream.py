@@ -92,11 +92,15 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """Nobody inspects the spammish repetition."""
 
     @typing.overload
-    def __getitem__(self, item: slice, /) -> streamable.StreamableSequence[T]:
+    def __getitem__(
+        self, item: slice[int | None, int | None, int | None], /  # noqa: W504
+    ) -> streamable.StreamableSequence[T]:
         """Nobody inspects the spammish repetition."""
 
     def __getitem__(
-        self, item: slice | int, /  # noqa: W504
+        self,
+        item: slice[int | None, int | None, int | None] | int,
+        /,  # noqa: W504
     ) -> streamable.StreamableSequence[T] | T:
         """Finish the stream by collecting.
 
@@ -396,7 +400,8 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
             """
             return self._finish(
                 Stream(
-                    itertools.batched(self._data, size),
+                    # add strict=False if min version is 3.13 (is the default)
+                    itertools.batched(self._data, size),  # noqa: B911
                 )
             )
 
