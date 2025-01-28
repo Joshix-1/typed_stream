@@ -4,7 +4,7 @@ build==1.2.2.post1
 # formatting and fixing
 autoflake==2.*
 black==24.*
-isort==5.*
+isort==6.*
 
 # tests
 coverage==7.*
