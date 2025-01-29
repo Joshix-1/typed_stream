@@ -3,7 +3,7 @@ build==1.2.2.post1
 
 # formatting and fixing
 autoflake==2.*
-black==24.*
+black==25.*
 isort==6.*
 
 # tests
