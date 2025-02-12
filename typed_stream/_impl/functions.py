@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import operator
+import typing
 from collections.abc import Callable, Sequence
 from numbers import Number, Real
 from typing import Concatenate, Generic, Literal, ParamSpec, TypeVar
@@ -129,8 +130,10 @@ class method_partial(Generic[TArg, TRet, PApplied]):  # noqa: N801,D301
     """
 
     _fun: Callable[Concatenate[TArg, PApplied], TRet]
-    _args: PApplied.args
-    _kwargs: PApplied.kwargs
+    # PApplied.args
+    _args: typing.Any  # type: ignore[explicit-any]
+    # PApplied.kwargs
+    _kwargs: typing.Any  # type: ignore[explicit-any]
 
     __slots__ = ("_fun", "_args", "_kwargs")
 

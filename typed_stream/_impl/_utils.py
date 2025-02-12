@@ -12,6 +12,7 @@ from typing import (
     Generic,
     Literal,
     NoReturn,
+    ParamSpec,
     TypeGuard,
     TypeVar,
     final,
@@ -117,8 +118,11 @@ class NotNoneChecker:
         return value is not None
 
 
-def count_required_positional_arguments(  # type: ignore[misc]
-    fun: Callable[..., object], /  # noqa: W504
+_P = ParamSpec("_P")
+
+
+def count_required_positional_arguments(
+    fun: Callable[_P, object], /  # noqa: W504
 ) -> int:
     """Count the required positional arguments."""
     return len(
