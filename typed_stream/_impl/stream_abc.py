@@ -106,10 +106,10 @@ class StreamABC(Generic[T], Closeable, PrettyRepr, abc.ABC):
         >>> from typed_stream import Stream
         >>> StreamABC.distinct(Stream([1, 2, 2, 2, 3, 2, 2])).collect()
         (1, 2, 3)
-        >>> StreamABC.distinct(Stream([{1}, {2}, {3}, {2}, {2}])).collect()
+        >>> StreamABC.distinct(Stream([{1}, {2}, {3}, {2}, {2}])).collect()  # doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
-        TypeError: unhashable type: 'set'
+        TypeError: ...unhashable type: 'set'...
         >>> StreamABC.distinct(Stream([{1}, {2}, {1}]), use_set=False).collect()
         ({1}, {2})
         """
