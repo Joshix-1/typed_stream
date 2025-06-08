@@ -112,6 +112,7 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
         return *super()._get_args(), self._curr_idx
 
 
+# pylint: disable-next=consider-alternative-union-syntax
 class ExceptionHandler(IteratorProxy[Union[T, U], T], Generic[T, U, Exc]):
     """Handle Exceptions in iterators."""
 
@@ -177,6 +178,7 @@ class ExceptionHandler(IteratorProxy[Union[T, U], T], Generic[T, U, Exc]):
         )
 
 
+# pylint: disable-next=consider-alternative-union-syntax
 class IfElseMap(IteratorProxy[Union[U, V], T], Generic[T, U, V]):
     """Map combined with conditions."""
 
