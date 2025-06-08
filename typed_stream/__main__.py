@@ -11,6 +11,7 @@ import builtins
 import collections
 import dataclasses
 import inspect
+import json
 import operator
 import sys
 import textwrap
@@ -134,9 +135,9 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     ...         no_eval=True,
     ...         actions=("flat_map", "iter", "map", "hex", "collect", "Counter")
     ...     ))
-    Counter({'0x30': 6, '0xa': 3, '0x32': 1, '0x31': 1, '0x33': 1, '0x34': 1})
+    {"0x32": 1, "0x30": 6, "0xa": 3, "0x31": 1, "0x33": 1, "0x34": 1}
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
-    print(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))
+    print(json.dumps(dict(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))))
     <BLANKLINE>
     >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"1\\n2\\n3\\n4"))
     >>> with contextlib.redirect_stderr(io.StringIO()) as err:
@@ -254,6 +255,10 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
         stream.for_each(print)
         # pytype: enable=attribute-error
         code.append(".for_each(print)")
+    elif isinstance(stream, Mapping):
+        print(json.dumps(dict(stream)))
+        code.insert(0, 'print(json.dumps(dict(')
+        code.append(')))')
     elif stream:
         print(stream)
         code.insert(0, "print(")
