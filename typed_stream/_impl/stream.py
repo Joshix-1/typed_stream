@@ -607,10 +607,10 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> from typed_stream import Stream
         >>> Stream([1, 2, 2, 2, 3, 2, 2]).distinct().collect()
         (1, 2, 3)
-        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct().collect()
+        >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct().collect()  # doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
-        TypeError: unhashable type: 'set'
+        TypeError: ...unhashable type: 'set'...
         >>> Stream([{1}, {2}, {3}, {2}, {2}]).distinct(use_set=False).collect()
         ({1}, {2}, {3})
         """

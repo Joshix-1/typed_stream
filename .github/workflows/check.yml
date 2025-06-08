@@ -101,7 +101,7 @@ jobs:
       - name: Setup RustPython
         run: |
           rustup update stable && rustup default stable
-          cargo install --features "bz2,encodings,ssl" --git https://github.com/RustPython/RustPython.git rustpython
+          cargo install --features encodings,ssl --git https://github.com/RustPython/RustPython.git rustpython
           rustpython -m ensurepip
       - name: Run tests
         run: |
