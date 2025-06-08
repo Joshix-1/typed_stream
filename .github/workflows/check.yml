@@ -300,6 +300,10 @@ jobs:
         run: grep "^build==" requirements-dev.txt | xargs pip install
       - name: Build
         run: make build
+      - name: Compress
+        run: |
+          gzip -d dist/*.tar.gz
+          pigz -11 dist/*.tar
       - name: Upload as build artifact
         uses: actions/upload-artifact@v4
         with:
