@@ -219,7 +219,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
                 full_action_qual = action
             elif action in functions.__all__:
                 args.append(getattr(functions, action))
-                full_action_qual = f"typed_stream.functions.{action}"
+                full_action_qual = f"typed_stream.functions.{action}"  # TODO??
             elif action in collections.__all__:
                 args.append(getattr(collections, action))
                 full_action_qual = f"collections.{action}"
