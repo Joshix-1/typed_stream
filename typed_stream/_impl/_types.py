@@ -44,17 +44,15 @@ class TypeGuardingCallable(Protocol[T_co, V_contra]):
         """Return True if value isinstance of T_co."""
 
 
-# pylint: disable=invalid-name
-SC_IN_contra = TypeVar("SC_IN_contra", contravariant=True)
-SC_OUT_co = TypeVar("SC_OUT_co", covariant=True)
-# pylint: enable=invalid-name
+ScIn_contra = TypeVar("ScIn_contra", contravariant=True)
+ScOut_co = TypeVar("ScOut_co", covariant=True)
 
 
-class StarCallable(Protocol[SC_IN_contra, SC_OUT_co]):
+class StarCallable(Protocol[ScIn_contra, ScOut_co]):
     """A class representing a function, that takes many arguments."""
 
     @abstractmethod
-    def __call__(self, *args: SC_IN_contra) -> SC_OUT_co:
+    def __call__(self, *args: ScIn_contra) -> ScOut_co:
         """Handle the arguments."""
 
 
