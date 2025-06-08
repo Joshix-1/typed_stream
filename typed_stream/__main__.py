@@ -22,13 +22,17 @@ from typing import cast
 from ._impl import Stream, functions
 from ._impl._utils import count_required_positional_arguments
 
-EVAL_GLOBALS: Mapping[str, object] = dict(
-    Stream((collections, functions, operator))
-    .flat_map(lambda mod: ((name, getattr(mod, name)) for name in mod.__all__))
-    .chain(
-        (mod.__name__, mod)
-        for mod in (builtins, collections, functions, operator)
+MODULES = (builtins, collections, functions, operator)
+MODULE_FULL_NAMES: Mapping[str, str] = {
+    mod.__name__: (
+        "typed_stream.functions" if mod is functions else mod.__name__
     )
+    for mod in MODULES
+}
+EVAL_GLOBALS: Mapping[str, object] = dict(
+    Stream(MODULES[1:])
+    .flat_map(lambda mod: ((name, getattr(mod, name)) for name in mod.__all__))
+    .chain((mod.__name__, mod) for mod in MODULES)
 )
 
 
@@ -60,7 +64,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...     ))
     1234
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
-    print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).sum())
+    import sys,typed_stream;print(typed_stream.Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).sum())
     <BLANKLINE>
     >>> sys.stdin = io.StringIO("300\\n1000\\n20\\n4")
     >>> with contextlib.redirect_stderr(io.StringIO()) as err:
@@ -73,7 +77,7 @@ def run_program(options: Options) -> str | None:  # noqa: C901
     ...     ))
     1324
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
-    print(Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).collect(builtins.sum))
+    import builtins,sys,typed_stream;print(typed_stream.Stream(sys.stdin).map(str.removesuffix, "\\n").map(int).collect(builtins.sum))
     <BLANKLINE>
     >>> sys.stdin = io.StringIO("")
     >>> with contextlib.redirect_stderr(io.StringIO()) as err:
@@ -137,7 +141,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     ...     ))
     {"0x32": 1, "0x30": 6, "0xa": 3, "0x31": 1, "0x33": 1, "0x34": 1}
     >>> print("\\n".join(err.getvalue().split("\\n")[-2:]))
-    print(json.dumps(dict(Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))))
+    import collections,json,sys,typed_stream;print(json.dumps(dict(typed_stream.Stream(sys.stdin.buffer).flat_map(iter).map(hex).collect(collections.Counter))))
     <BLANKLINE>
     >>> sys.stdin = io.TextIOWrapper(io.BytesIO(b"1\\n2\\n3\\n4"))
     >>> with contextlib.redirect_stderr(io.StringIO()) as err:
@@ -157,17 +161,18 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     True
     >>> sys.stdin = in_
     """  # noqa: D301
+    imports: set[str] = {"typed_stream", "sys"}
     code: list[str]
     stream: Stream[bytes] | Stream[str] | object
     if options.bytes:
         stream = Stream(sys.stdin.buffer)
-        code = ["Stream(sys.stdin.buffer)"]
+        code = ["typed_stream.Stream(sys.stdin.buffer)"]
         if not options.keep_ends:
             code.append(r""".map(bytes.removesuffix, b"\n")""")
             stream = stream.map(bytes.removesuffix, b"\n")
     else:
         stream = Stream(sys.stdin)
-        code = ["Stream(sys.stdin)"]
+        code = ["typed_stream.Stream(sys.stdin)"]
         if not options.keep_ends:
             code.append(r""".map(str.removesuffix, "\n")""")
             stream = stream.map(str.removesuffix, "\n")
@@ -224,9 +229,11 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
             elif action in collections.__all__:
                 args.append(getattr(collections, action))
                 full_action_qual = f"collections.{action}"
+                imports.add("collections")
             elif action in operator.__all__:
                 args.append(getattr(operator, action))
                 full_action_qual = f"operator.{action}"
+                imports.add("operator")
             elif hasattr(builtins, action):
                 args.append(getattr(builtins, action))
                 full_action_qual = f"{action}"
@@ -240,6 +247,14 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
                 except BaseException as exc:  # noqa: B036
                     err = traceback.format_exception_only(exc)[-1].strip()
                     return f"Failed to evaluate {action!r}: {err}"
+
+                imports.update(
+                    {
+                        full
+                        for mod, full in MODULE_FULL_NAMES.items()
+                        if action.startswith(f"{mod}.")
+                    }
+                )
                 args.append(arg)
                 full_action_qual = action
             code.extend((full_action_qual, ","))
@@ -256,13 +271,16 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
         # pytype: enable=attribute-error
         code.append(".for_each(print)")
     elif isinstance(stream, Mapping):
+        imports.add("json")
         print(json.dumps(dict(stream)))
-        code.insert(0, 'print(json.dumps(dict(')
-        code.append(')))')
+        code.insert(0, "print(json.dumps(dict(")
+        code.append(")))")
     elif stream:
         print(stream)
         code.insert(0, "print(")
         code.append(")")
+
+    code.insert(0, f"import {','.join(sorted(imports))};")
 
     sys.stdout.flush()
 
