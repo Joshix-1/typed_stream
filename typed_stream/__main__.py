@@ -48,7 +48,7 @@ class Options:
 
 
 def run_program(options: Options) -> str | None:  # noqa: C901
-    # pylint: disable=too-complex, too-many-branches, too-many-locals, too-many-statements  # noqa: B950
+    # pylint: disable=too-complex, too-many-branches, too-many-locals, too-many-statements, line-too-long
     """Run the program with the options.
 
     >>> import contextlib, io
