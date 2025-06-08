@@ -10,7 +10,7 @@ import collections
 import contextlib
 import itertools
 from collections.abc import Callable, Iterable, Iterator
-from typing import Generic, Literal, TypeVar, cast, overload
+from typing import Generic, Literal, TypeVar, Union, cast, overload
 
 from ..streamable import Streamable
 from ._types import ClassWithCleanUp, IteratorProxy, PrettyRepr
@@ -112,7 +112,7 @@ class Enumerator(IteratorProxy[IndexValueTuple[T], T], Generic[T]):
         return *super()._get_args(), self._curr_idx
 
 
-class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
+class ExceptionHandler(IteratorProxy[Union[T, U], T], Generic[T, U, Exc]):
     """Handle Exceptions in iterators."""
 
     _exception_class: type[Exc] | tuple[type[Exc], ...]
@@ -177,7 +177,7 @@ class ExceptionHandler(IteratorProxy[T | U, T], Generic[T, U, Exc]):
         )
 
 
-class IfElseMap(IteratorProxy[U | V, T], Generic[T, U, V]):
+class IfElseMap(IteratorProxy[Union[U, V], T], Generic[T, U, V]):
     """Map combined with conditions."""
 
     _condition: Callable[[T], bool | object]
