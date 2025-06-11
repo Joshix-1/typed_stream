@@ -48,7 +48,7 @@ jobs:
           cat "${TMP_FILE}" > README.md
           rm "${TMP_FILE}"
       - name: Push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "🤦"
 
