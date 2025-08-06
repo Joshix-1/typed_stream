@@ -236,7 +236,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Download coverage
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: coverage-3.13
       - name: Install Coverage.py
@@ -341,7 +341,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: build
       - name: Install Twine
@@ -364,7 +364,7 @@ jobs:
       - get_version
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: build
       - name: Create release
