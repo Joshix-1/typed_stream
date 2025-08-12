@@ -20,7 +20,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
@@ -70,7 +70,7 @@ jobs:
           - "pypy3.10"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -97,7 +97,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup RustPython
         run: |
           rustup update stable && rustup default stable
@@ -123,7 +123,7 @@ jobs:
           - "3.13"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -141,7 +141,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -159,7 +159,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -177,7 +177,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -195,7 +195,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -228,7 +228,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Setup Python
@@ -266,7 +266,7 @@ jobs:
       latest_version: ${{ steps.latest_version.outputs.latest_version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -291,7 +291,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v5
         with:

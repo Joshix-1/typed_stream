@@ -23,7 +23,7 @@ jobs:
           - Python
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Install libcurl4-openssl-dev for compiling PycURL
       if: matrix.language == 'Python'
       run: |
