@@ -25,7 +25,7 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install requirements
@@ -72,7 +72,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Coverage.py
@@ -125,7 +125,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install requirements
@@ -143,7 +143,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install requirements
@@ -161,7 +161,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install requirements
@@ -179,7 +179,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install requirements
@@ -197,7 +197,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install requirements
@@ -232,7 +232,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Download coverage
@@ -272,7 +272,7 @@ jobs:
           fetch-tags: true
           filter: blob:none
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Get current version
@@ -293,7 +293,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install build frontend
@@ -337,7 +337,7 @@ jobs:
     permissions: {}
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Download artifact
