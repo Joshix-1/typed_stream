@@ -55,7 +55,7 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
 
     @override
     def __add__(
-        self, other: tuple[T | V, ...], /  # noqa: W504
+        self, other: tuple[V, ...], /  # noqa: W504
     ) -> StreamableSequence[T | V]:
         """Add another StreamableSequence to this."""
         if (result := super().__add__(other)) is NotImplemented:
