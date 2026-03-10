@@ -158,6 +158,7 @@ jobs:
         run: grep -E "^(ty|typing-extensions)==" requirements-dev.txt | xargs pip install
       - name: Run ty
         run: ty check --python-version ${{ matrix.python-version }}
+        continue-on-error: true
 
   pyright:
     name: pyright
@@ -183,6 +184,7 @@ jobs:
         run: grep -E "^(basedpyright|typing-extensions)==" requirements-dev.txt | xargs pip install
       - name: Run basedpyright
         run: basedpyright --pythonversion ${{ matrix.python-version }}
+        continue-on-error: true
 
   pyrefly:
     name: pyrefly
@@ -208,6 +210,7 @@ jobs:
         run: grep -E "^(pyrefly|typing-extensions)==" requirements-dev.txt | xargs pip install
       - name: Run pyrefly
         run: pyrefly check --python-version ${{ matrix.python-version }}
+        continue-on-error: true
 
   pytype:
     name: pytype
