@@ -165,17 +165,24 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.12"
+          - "3.14"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - name: Install requirements
         run: grep -E "^(basedpyright|typing-extensions)==" requirements-dev.txt | xargs pip install
       - name: Run basedpyright
-        run: basedpyright
+        run: basedpyright --pythonversion ${{ matrix.python-version }}
 
   pyrefly:
     name: pyrefly
@@ -183,17 +190,24 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.12"
+          - "3.14"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - name: Install requirements
         run: grep -E "^(pyrefly|typing-extensions)==" requirements-dev.txt | xargs pip install
       - name: Run pyrefly
-        run: pyrefly check
+        run: pyrefly check --python-version ${{ matrix.python-version }}
 
   pytype:
     name: pytype

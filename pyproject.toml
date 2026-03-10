@@ -91,3 +91,6 @@ strict_primitive_comparisons = true
 
 [tool.pyright]
 include = ["typed_stream", "tests", "examples"]
+
+[tool.pyrefly]
+enabled-ignores = ["pyre"]
