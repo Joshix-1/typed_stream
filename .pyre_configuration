@@ -1,7 +1,0 @@
-{
-  "source_directories": [
-    "typed_stream"
-  ],
-  "strict": true,
-  "site_package_search_strategy": "none"
-}
