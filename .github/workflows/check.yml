@@ -66,7 +66,8 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
-          - "3.14-dev"
+          - "3.14"
+          - "3.15-dev"
           - "pypy3.10"
     steps:
       - name: Checkout repository
@@ -120,7 +121,7 @@ jobs:
         python-version:
           - "3.10"
           - "3.12"
-          - "3.13"
+          - "3.14"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -132,6 +133,67 @@ jobs:
         run: grep -E "^(mypy|typing-extensions)" requirements-dev.txt | xargs pip install
       - name: Run mypy
         run: mypy --python-version  ${{ matrix.python-version }}
+
+  ty:
+    name: ty
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.12"
+          - "3.14"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install requirements
+        run: grep -E "^(ty|typing-extensions)==" requirements-dev.txt | xargs pip install
+      - name: Run ty
+        run: ty check --python-version ${{ matrix.python-version }}
+
+  pyright:
+    name: pyright
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install requirements
+        run: grep -E "^(basedpyright|typing-extensions)==" requirements-dev.txt | xargs pip install
+      - name: Run basedpyright
+        run: basedpyright
+
+  pyrefly:
+    name: pyrefly
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install requirements
+        run: grep -E "^(pyrefly|typing-extensions)==" requirements-dev.txt | xargs pip install
+      - name: Run pyrefly
+        run: pyrefly check
 
   pytype:
     name: pytype
