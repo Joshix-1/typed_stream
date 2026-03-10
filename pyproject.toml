@@ -94,3 +94,6 @@ include = ["typed_stream", "tests", "examples"]
 
 [tool.pyrefly]
 enabled-ignores = ["pyre"]
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false

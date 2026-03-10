@@ -369,7 +369,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
                     self._data, exception_class, handler, default
                 )
             )
-        )
+        )  # ty:ignore[invalid-return-type]
 
     def chain(self, *iterables: Iterable[T]) -> Self:
         """Add another iterable to the end of the Stream.
@@ -402,7 +402,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
                 Stream(
                     # add strict=False if min version is 3.13 (is the default)
                     itertools.batched(self._data, size),  # noqa: B911
-                )
+                )  # ty:ignore[invalid-argument-type]
             )
 
     else:  # pragma: no cover
@@ -598,7 +598,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         def _map(k: T, g: Iterator[T]) -> tuple[T, int]:
             return (k, _iteration_utils.count(g))
 
-        return Stream(itertools.starmap(_map, itertools.groupby(self)))
+        return Stream(itertools.starmap(_map, itertools.groupby(self)))  # ty:ignore[invalid-return-type]
 
     @override
     def distinct(self, *, use_set: bool = True) -> Self:
@@ -680,7 +680,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         ({0: 'a'}, {1: 'b'}, {2: 'c'})
         """
         return self._finish(
-            Stream(_iteration_utils.Enumerator(self._data, start_index))
+            Stream(_iteration_utils.Enumerator(self._data, start_index))  # ty:ignore[invalid-argument-type]
         )
 
     @typing.overload
@@ -1057,7 +1057,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         ((1, 2, 3, 4), (2, 3, 4, 5))
         """
         return self._finish(
-            Stream(_iteration_utils.sliding_window(self._data, size))
+            Stream(_iteration_utils.sliding_window(self._data, size))  # ty:ignore[invalid-argument-type]
         )
 
     @override
@@ -1160,7 +1160,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         >>> Stream(([1], [2], [3])).sum()
         [1, 2, 3]
         """
-        return self.reduce(add)
+        return self.reduce(add)  # ty:ignore[invalid-argument-type]
 
     def tail(self, c: int, /) -> streamable.StreamableSequence[T]:
         """Return a Sequence with the last count items.

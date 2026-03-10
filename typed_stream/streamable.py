@@ -62,7 +62,7 @@ class StreamableSequence(tuple[T, ...], Streamable[T]):
             return NotImplemented
         if isinstance(result, StreamableSequence):
             return result
-        return StreamableSequence(result)
+        return StreamableSequence(result)  # ty:ignore[invalid-return-type]
 
     @override
     def __mul__(self, other: SupportsIndex, /) -> StreamableSequence[T]:
