@@ -94,7 +94,7 @@ class LazyFileIterator(Iterator[AnyStr], PrettyRepr, Closeable):
     def __next__(self: LazyFileIterator[AnyStr]) -> AnyStr:
         """Get the next line."""
         if self._iterator is None:
-            self._file_object = self._open_file()  # ty:ignore[no-matching-overload]
+            self._file_object = self._open_file()
             self._iterator = iter(self._file_object)
 
         try:

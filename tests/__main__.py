@@ -164,14 +164,14 @@ assert_raises(ValueError, lambda: Stream(()).catch(StopIteration, TypeError))
 assert_raises(ValueError, lambda: Stream(()).catch(ValueError, StopIteration))
 assert (
     assert_type(
-        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum(), int  # ty:ignore[invalid-argument-type]
-    )  # ty:ignore[type-assertion-failure]
+        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(ValueError).sum(), int
+    )
     == 45
 )
 assert (
     assert_type(
-        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum(), int  # ty:ignore[invalid-argument-type]
-    )  # ty:ignore[type-assertion-failure]
+        Stream("1a2b3c4d5e6f7g8h9").map(int).catch(Exception).sum(), int
+    )
     == 45
 )
 
@@ -192,23 +192,23 @@ assert assert_type(
     .conditional_map(is_even, lambda x: x * 2, lambda x: -x)
     .collect(),
     StreamableSequence[int],
-) == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)  # ty:ignore[type-assertion-failure]
+) == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
 assert assert_type(
     Stream.range(10).conditional_map(is_odd, lambda x: -x, lambda x: x * 2),
     Stream[int],
-).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)  # ty:ignore[type-assertion-failure]
+).collect() == (0, -1, 4, -3, 8, -5, 12, -7, 16, -9)
 assert (
     assert_type(
         Stream.range(10)
         .conditional_map(is_even, lambda _: ..., lambda x: None)
         .collect(),
         StreamableSequence[None | EllipsisType],
-    )  # ty:ignore[type-assertion-failure]
+    )
     == (..., None) * 5
 )
 assert assert_type(
     Stream.range(10).conditional_map(is_odd, lambda x: -x), Stream[int]
-).collect() == (  # ty:ignore[type-assertion-failure]
+).collect() == (
     -1,
     -3,
     -5,
@@ -219,7 +219,7 @@ assert (
     assert_type(
         Stream.range(10).conditional_map(is_even, lambda _: ...).collect(),
         StreamableSequence[EllipsisType],
-    )  # ty:ignore[type-assertion-failure]
+    )
     == (...,) * 5
 )
 
@@ -241,7 +241,7 @@ assert assert_type(
     .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: -1)
     .collect(),
     StreamableSequence[int],
-) == (0, -1, 2, -1, 4, -1)  # ty:ignore[type-assertion-failure]
+) == (0, -1, 2, -1, 4, -1)
 
 assert assert_type(
     Stream.range(6)
@@ -263,16 +263,16 @@ assert assert_type(
     )
     .collect(),
     StreamableSequence[str],
-) == ("0", "E1", "2", "E3", "4", "E5")  # ty:ignore[type-assertion-failure]
+) == ("0", "E1", "2", "E3", "4", "E5")
 
 assert (
     assert_type(
         Stream.range(20)
         .map(raise_exceptions)
         .catch(ValueError, TypeError, ZeroDivisionError)
-        .sum(),  # ty:ignore[invalid-argument-type]
+        .sum(),
         int,
-    )  # ty:ignore[type-assertion-failure]
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 assert (
@@ -280,9 +280,9 @@ assert (
         Stream.range(20)
         .map(raise_exceptions)
         .catch(ValueError, TypeError, ZeroDivisionError, default=lambda: 0)
-        .sum(),  # ty:ignore[invalid-argument-type]
+        .sum(),
         int,
-    )  # ty:ignore[type-assertion-failure]
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 assert (
@@ -290,9 +290,9 @@ assert (
         Stream.range(20)
         .map(raise_exceptions)
         .catch(ValueError, TypeError, ZeroDivisionError, default=lambda _: 0)
-        .sum(),  # ty:ignore[invalid-argument-type]
+        .sum(),
         int,
-    )  # ty:ignore[type-assertion-failure]
+    )
     == sum(range(20)) - 1 - 3 - 5
 )
 
@@ -303,9 +303,9 @@ assert (
         Stream("1a2b3c4d5e6f7g8h9")
         .map(int)
         .catch(ValueError, handler=errors.append, default=lambda: 100)
-        .sum(),  # ty:ignore[invalid-argument-type]
+        .sum(),
         int,
-    )  # ty:ignore[type-assertion-failure]
+    )
     == 845
 )
 assert (
@@ -322,9 +322,9 @@ assert (
             handler=errors.append,
             default=lambda _: len(_.args) * 1000,
         )
-        .sum(),  # ty:ignore[invalid-argument-type]
+        .sum(),
         int,
-    )  # ty:ignore[type-assertion-failure]
+    )
     == 8045
 )
 value_error: ValueError
@@ -349,7 +349,7 @@ assert optional_float_list == [None, 5.0, 2.5]
 
 assert (
     Stream.range(69).collect()
-    == Stream.range(69).nwise(1).sum()  # ty:ignore[invalid-argument-type]
+    == Stream.range(69).nwise(1).sum()
     == Stream.range(69).map(lambda x: (x,)).sum()
     == Stream.range(69).nwise(1).flat_map(lambda x: x).collect(tuple)
     == Stream.range(69).map(lambda x: (x,)).flat_map(lambda x: x).collect(tuple)
@@ -359,7 +359,7 @@ assert (
     == Stream.range(69).map(lambda x: [x]).sum()
     == Stream.range(69).map(lambda x: [x]).flat_map(lambda x: x).collect(list)
 )
-assert Stream.range(10).enumerate(-10).sum() == Stream.range(10).enumerate(  # ty:ignore[invalid-argument-type]
+assert Stream.range(10).enumerate(-10).sum() == Stream.range(10).enumerate(
     -10
 ).flat_map(lambda x: x).collect(tuple)
 
@@ -436,7 +436,7 @@ assert "3" not in Stream.range(3).map(str)
 assert assert_type("".join(reversed(Stream("abc"))), str) == "cba"
 assert tuple(reversed(Stream([1, 2, 3, 4]))) == (4, 3, 2, 1)
 
-assert assert_type(Stream([1, 2, 3]).collect(tuple), tuple[int, ...]) == (  # ty:ignore[type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).collect(tuple), tuple[int, ...]) == (
     1,
     2,
     3,
@@ -447,14 +447,14 @@ mapping: dict[int, str] = (
 )
 assert mapping == {1: "1", 2: "2", 3: "3"}
 
-assert assert_type(Stream([1, 2, 3]).sum(), int) == 6  # ty:ignore[invalid-argument-type, type-assertion-failure]
-assert assert_type(Stream([1, 2, 3]).max(), int) == 3  # ty:ignore[no-matching-overload, type-assertion-failure]
-assert assert_type(Stream([1, 2, 3]).min(), int) == 1  # ty:ignore[no-matching-overload, type-assertion-failure]
-assert assert_type(Stream([1, 2, 3]).min(default=0), int) == 1  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).sum(), int) == 6
+assert assert_type(Stream([1, 2, 3]).max(), int) == 3
+assert assert_type(Stream([1, 2, 3]).min(), int) == 1
+assert assert_type(Stream([1, 2, 3]).min(default=0), int) == 1
 
-assert assert_type(Stream(["1", "2", "3"]).max(), str) == "3"  # ty:ignore[no-matching-overload, type-assertion-failure]
-assert assert_type(Stream(["1", "2", "3"]).min(), str) == "1"  # ty:ignore[no-matching-overload, type-assertion-failure]
-assert assert_type(Stream(["1", "2", "3"]).min(default="a"), str) == "1"  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream(["1", "2", "3"]).max(), str) == "3"
+assert assert_type(Stream(["1", "2", "3"]).min(), str) == "1"
+assert assert_type(Stream(["1", "2", "3"]).min(default="a"), str) == "1"
 
 _stream1 = Stream.from_value(69).enumerate().nwise(3).catch()
 assert isinstance(
@@ -511,20 +511,20 @@ assert assert_type(
 assert assert_type(
     Stream.range(5).map(str).enumerate().map(lambda x: x.idx).collect(list),
     list[int],
-) == list(range(5))  # ty:ignore[type-assertion-failure]
+) == list(range(5))
 enumeration_stream = assert_type(
     Stream.range(5).map(str).enumerate(), Stream[IndexValueTuple[str]]
 )
 assert assert_type(
     enumeration_stream.map(lambda x: x.val).collect(list), list[str]
-) == list(map(str, range(5)))  # ty:ignore[type-assertion-failure]
+) == list(map(str, range(5)))
 assert assert_type(
     Stream.range(5).map(str).enumerate().map(lambda x: x.val).collect(list),
     list[str],
-) == list(map(str, range(5)))  # ty:ignore[type-assertion-failure]
+) == list(map(str, range(5)))
 assert assert_type(
     Stream.range(5).map(str).enumerate().collect(dict), dict[int, str]
-) == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}  # ty:ignore[type-assertion-failure]
+) == {0: "0", 1: "1", 2: "2", 3: "3", 4: "4"}
 
 assert assert_type(
     list(Stream.range(999).enumerate().starmap(int.__eq__).distinct()),
@@ -535,11 +535,11 @@ assert assert_type(
     list[Any],
 ) == [True]
 assert (
-    assert_type(Stream.range(10).nwise(1).starmap(str).sum(), str)  # ty:ignore[invalid-argument-type, type-assertion-failure]
+    assert_type(Stream.range(10).nwise(1).starmap(str).sum(), str)
     == "0123456789"
 )
 assert (
-    assert_type(Stream.range(6).nwise(2).starmap(int.__mul__).sum(), int) == 40  # ty:ignore[invalid-argument-type, type-assertion-failure]
+    assert_type(Stream.range(6).nwise(2).starmap(int.__mul__).sum(), int) == 40
 )
 assert (
     assert_type(Stream.range(6).nwise(2).starmap(operator.mul).sum(), Any) == 40
@@ -551,7 +551,7 @@ assert (
     == "pjwa nsvoidfb,cmg"
 )
 assert (
-    assert_type(Stream(STRING).distinct(use_set=False).sum(), str)  # ty:ignore[invalid-argument-type, type-assertion-failure]
+    assert_type(Stream(STRING).distinct(use_set=False).sum(), str)
     == "pjwa nsvoidfb,cmg"
 )
 
@@ -568,38 +568,38 @@ assert (
     == assert_type(create_int_stream().reduce(int.__add__), int)
     == assert_type(create_int_stream().reduce(add, 0), int)
     == assert_type(create_int_stream().reduce(add), int)
-    == assert_type(create_int_stream().sum(), int)  # ty:ignore[invalid-argument-type, type-assertion-failure]
-    == assert_type(create_int_stream().collect(lambda x: sum(x)), int)  # ty:ignore[type-assertion-failure]
+    == assert_type(create_int_stream().sum(), int)
+    == assert_type(create_int_stream().collect(lambda x: sum(x)), int)
     == assert_type(create_int_stream().collect(sum), int)
 )
 
-assert assert_type(Stream([1, 2, 3, -1]).max(), int) == 3  # ty:ignore[no-matching-overload, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3, -1]).max(), int) == 3
 assert assert_type(
     Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).max(key=len), set[int]
-) == {3, 4, 5}  # ty:ignore[type-assertion-failure]
-assert assert_type(Stream([1, 2, -1, 3]).min(), int) == -1  # ty:ignore[no-matching-overload, type-assertion-failure]
+) == {3, 4, 5}
+assert assert_type(Stream([1, 2, -1, 3]).min(), int) == -1
 assert assert_type(
     Stream([{0, 1}, {2}, {3, 4, 5}, {6}]).min(key=len), set[int]
-) == {2}  # ty:ignore[type-assertion-failure]
+) == {2}
 
-assert assert_type(Stream([1, 2, 3]).max(default=None), None | int) == 3  # ty:ignore[invalid-argument-type, type-assertion-failure]
-assert not assert_type(Stream([1]).limit(0).max(default=None), None | int)  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).max(default=None), None | int) == 3
+assert not assert_type(Stream([1]).limit(0).max(default=None), None | int)
 assert assert_type(Stream([1, 2, 3]).first(default=None), None | int) == 1
 assert not assert_type(Stream([1]).limit(0).first(default=None), None | int)
-assert assert_type(Stream([1, 2, 3]).min(default=None), None | int) == 1  # ty:ignore[invalid-argument-type, type-assertion-failure]
-assert not assert_type(Stream([1]).limit(0).min(default=None), None | int)  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).min(default=None), None | int) == 1
+assert not assert_type(Stream([1]).limit(0).min(default=None), None | int)
 
-assert assert_type(Stream([1, 2, 3]).max(default="None"), str | int) == 3  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).max(default="None"), str | int) == 3
 assert (
-    assert_type(Stream([1]).limit(0).max(default="None"), str | int) == "None"  # ty:ignore[invalid-argument-type, type-assertion-failure]
+    assert_type(Stream([1]).limit(0).max(default="None"), str | int) == "None"
 )
-assert assert_type(Stream([1, 2, 3]).first(default="None"), str | int) == 1  # ty:ignore[type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).first(default="None"), str | int) == 1
 assert (
-    assert_type(Stream([1]).limit(0).first(default="None"), str | int) == "None"  # ty:ignore[type-assertion-failure]
+    assert_type(Stream([1]).limit(0).first(default="None"), str | int) == "None"
 )
-assert assert_type(Stream([1, 2, 3]).min(default="None"), str | int) == 1  # ty:ignore[invalid-argument-type, type-assertion-failure]
+assert assert_type(Stream([1, 2, 3]).min(default="None"), str | int) == 1
 assert (
-    assert_type(Stream([1]).limit(0).min(default="None"), str | int) == "None"  # ty:ignore[invalid-argument-type, type-assertion-failure]
+    assert_type(Stream([1]).limit(0).min(default="None"), str | int) == "None"
 )
 
 assert Stream((1,)).drop(100).reduce(add, 1) == 1
@@ -676,7 +676,7 @@ assert (
     FileStream(INPUT_TXT)
     .filter(lambda string: string and not string.startswith("#"))
     .map(int)
-    .sum()  # ty:ignore[invalid-argument-type]
+    .sum()
     == 7
 )
 assert (
@@ -684,10 +684,10 @@ assert (
     .filter()
     .exclude(method_partial(str.startswith, "#"))
     .map(int)
-    .sum()  # ty:ignore[invalid-argument-type]
+    .sum()
     == 7
 )
-assert FileStream(INPUT_TXT).map(int).catch(ValueError).sum() == 7  # ty:ignore[invalid-argument-type]
+assert FileStream(INPUT_TXT).map(int).catch(ValueError).sum() == 7
 
 assert FileStream(INPUT_TXT, keep_line_ends=True).map(
     lambda x: x[-1]

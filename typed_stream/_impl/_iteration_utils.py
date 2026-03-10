@@ -141,7 +141,7 @@ class ExceptionHandler(IteratorProxy[Union[T, U], T], Generic[T, U, Exc]):
         self._log_fun = log_callable
         if default_factory is not None:
             def_fun = default_factory
-            if not count_required_positional_arguments(def_fun):  # ty:ignore[invalid-argument-type]
+            if not count_required_positional_arguments(def_fun):
                 self._default_fun = FunctionWrapperIgnoringArgs(
                     cast(Callable[[], U], def_fun)
                 )
@@ -160,9 +160,9 @@ class ExceptionHandler(IteratorProxy[Union[T, U], T], Generic[T, U, Exc]):
                 raise
             except self._exception_class as exc:
                 if self._log_fun:
-                    self._log_fun(exc)  # ty:ignore[invalid-argument-type]
+                    self._log_fun(exc)
                 if self._default_fun:
-                    return self._default_fun(exc)  # ty:ignore[invalid-argument-type]
+                    return self._default_fun(exc)
                 # if no default fun is available just return the next element
             else:
                 return value
