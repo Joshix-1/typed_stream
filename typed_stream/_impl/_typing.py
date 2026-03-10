@@ -36,6 +36,7 @@ else:
         """Never call this."""
         raise AssertionError(f"{arg} was not never")
 
+    # pylint: disable=invalid-name
     Self = getattr(typing, "Self", ...)
     TypeVarTuple = getattr(typing, "TypeVarTuple", return_arg)
     Unpack = getattr(typing, "Unpack", ...)

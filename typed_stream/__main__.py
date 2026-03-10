@@ -165,17 +165,19 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
     code: list[str]
     stream: Stream[bytes] | Stream[str] | object
     if options.bytes:
-        stream = Stream(sys.stdin.buffer)
+        bytes_stream = Stream(sys.stdin.buffer)
         code = ["typed_stream.Stream(sys.stdin.buffer)"]
         if not options.keep_ends:
             code.append(r""".map(bytes.removesuffix, b"\n")""")
-            stream = stream.map(bytes.removesuffix, b"\n")
+            bytes_stream = bytes_stream.map(bytes.removesuffix, b"\n")
+        stream = bytes_stream
     else:
-        stream = Stream(sys.stdin)
+        str_stream = Stream(sys.stdin)
         code = ["typed_stream.Stream(sys.stdin)"]
         if not options.keep_ends:
             code.append(r""".map(str.removesuffix, "\n")""")
-            stream = stream.map(str.removesuffix, "\n")
+            str_stream = str_stream.map(str.removesuffix, "\n")
+        stream = str_stream
 
     method: None | Callable[[object], object] = None
     args: list[object] = []
@@ -189,7 +191,7 @@ To pass it as argument to Stream.collect use 'builtins.sum'.
         )
         if (not args_left or args_left < 0) and hasattr(stream, action):
             if method:
-                stream = method(*args)  # pylint: disable=not-callable
+                stream = method(*args)
                 args.clear()
                 if code and code[-1] == ",":
                     code[-1] = ")"
