@@ -31,6 +31,7 @@ Examples:
 ...     .max(key=len))
 'flake8-no-implicit-concat'
 """
+
 # isort:skip_file
 
 from . import _impl, exceptions, streamable, version
