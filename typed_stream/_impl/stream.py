@@ -21,6 +21,7 @@ from .. import exceptions, streamable
 from . import _iteration_utils, functions, stream_abc
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
+from ._types import SupportsAverage
 from ._typing import Self, TypeVarTuple, Unpack, override
 
 # pylint: disable=too-many-lines
@@ -315,8 +316,32 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """
         return self._finish(all(self._data), close_source=True)
 
+    def avg(self: Stream[SupportsAverage[K]]) -> K:
+        """Calculate the average of the elements in self.
+
+        Raises StreamEmptyError if the stream is empty.
+
+        >>> Stream(data := range(1, 5)).avg()
+        2.5
+        >>> Stream(data).map(int).avg()
+        2.5
+        >>> Stream(data).map(float).avg()
+        2.5
+        >>> Stream(data).map(__import__("decimal").Decimal).avg()
+        Decimal('2.5')
+        >>> Stream(data).map(__import__("fractions").Fraction).avg()
+        Fraction(5, 2)
+        >>> Stream([]).avg()
+        Traceback (most recent call last):
+        ...
+        typed_stream.exceptions.StreamEmptyError
+        """
+        counter = itertools.count()
+
+        return self.peek(lambda _: next(counter)).sum() / next(counter)
+
     @typing.overload
-    def catch(  # noqa: D102
+    def catch(
         self,
         *exception_class: type[Exc],
     ) -> Self: ...
