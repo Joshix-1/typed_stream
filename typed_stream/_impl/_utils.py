@@ -7,7 +7,9 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable
+import itertools
+import sys
+from collections.abc import Callable, Iterable
 from typing import (
     Generic,
     Literal,
@@ -19,6 +21,8 @@ from typing import (
     overload,
 )
 
+from ._typing import TypeVarTuple, Unpack
+
 __all__ = (
     "FunctionWrapperIgnoringArgs",
     "IndexValueTuple",
@@ -26,12 +30,15 @@ __all__ = (
     "NoneChecker",
     "NotNoneChecker",
     "count_required_positional_arguments",
+    "map_with_additional_args",
     "raise_exception",
     "wrap_in_tuple",
 )
 
 
 T = TypeVar("T")
+U = TypeVar("U")
+Tvt = TypeVarTuple("Tvt")
 
 
 class FunctionWrapperIgnoringArgs(Generic[T]):
@@ -137,6 +144,36 @@ def count_required_positional_arguments(
             if param.default == inspect.Parameter.empty
         ]
     )
+
+
+if sys.version_info >= (3, 14):
+
+    def map_with_additional_args(
+        iterable: Iterable[T],
+        fun: Callable[[T, Unpack[Tvt]], U],
+        args: tuple[Unpack[Tvt]],
+        /,
+    ) -> Iterable[U]:
+        """Map with constant additional arguments for each value."""
+        return map(
+            fun,
+            iterable,
+            *(itertools.repeat(arg) for arg in args),
+            strict=False,
+        )
+
+else:
+
+    def map_with_additional_args(
+        iterable: Iterable[T],
+        fun: Callable[[T, Unpack[Tvt]], U],
+        args: tuple[Unpack[Tvt]],
+        /,
+    ) -> Iterable[U]:
+        """Map with constant additional arguments for each value."""
+        return map(  # noqa: B912
+            fun, iterable, *(itertools.repeat(arg) for arg in args)
+        )
 
 
 def raise_exception(exc: BaseException, /) -> NoReturn:

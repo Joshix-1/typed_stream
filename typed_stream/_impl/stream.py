@@ -22,6 +22,7 @@ from . import _iteration_utils, functions, stream_abc
 from ._default_value import DEFAULT_VALUE as _DEFAULT_VALUE
 from ._default_value import DefaultValueType as _DefaultValueType
 from ._typing import Self, TypeVarTuple, Unpack, override
+from ._utils import map_with_additional_args
 
 # pylint: disable=too-many-lines
 __all__: tuple[typing.Literal["Stream"]] = ("Stream",)
@@ -816,7 +817,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         """
         return Stream(
             itertools.chain.from_iterable(
-                map(fun, self._data, *(itertools.repeat(arg) for arg in args))
+                map_with_additional_args(self._data, fun, args)
             )
         )
 
@@ -881,9 +882,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
         (3, 6, 9)
         """
         return self._finish(
-            Stream(
-                map(fun, self._data, *(itertools.repeat(arg) for arg in args))
-            )
+            Stream(map_with_additional_args(self._data, fun, args))
         )
 
     @typing.overload
