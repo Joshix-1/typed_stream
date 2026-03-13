@@ -474,20 +474,10 @@ assert (
     + "(<bound method StreamABC.close of typed_stream.Stream"
     + "(repeat(69))>,repeat(69))"
 )
-try:
-    assert (
-        repr(Peeker(print))
-        == "typed_stream._impl._iteration_utils.Peeker(<built-in function print>)"
-    )
-except AssertionError:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        traceback.print_exc()
-    else:
-        raise
-else:  # pragma: no cover
-    if sys.implementation.name == "rustpython":
-        raise AssertionError("Doesn't fail anymore on RustPython")
-
+assert (
+    repr(Peeker(print))
+    == "typed_stream._impl._iteration_utils.Peeker(<built-in function print>)"
+)
 
 assert str(Stream(...)) == "typed_stream.Stream(...)"
 assert repr(Stream(...)) == "typed_stream.Stream(...)"
