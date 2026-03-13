@@ -10,7 +10,7 @@ from __future__ import annotations
 
 __all__ = ("VERSION", "version_info")
 
-version_info: tuple[int, int, int] = (0, 155, 0)
+version_info: tuple[int, int, int] = (0, 155, 1)
 VERSION = ".".join(map(str, version_info))
 
 if __name__ == "__main__":  # pragma: no cover
