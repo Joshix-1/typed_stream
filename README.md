@@ -2,7 +2,7 @@
 ![License](https://img.shields.io/pypi/l/typed-stream?label=License)
 ![Python](https://img.shields.io/pypi/pyversions/typed-stream?label=Python)
 ![Implementation](https://img.shields.io/pypi/implementation/typed-stream?label=Implementation)
-![Total lines](https://img.shields.io/tokei/lines/github.com/Joshix-1/typed_stream?label=Total%20lines)
+[![Total lines](https://img.shields.io/endpoint?url=https%3A%2F%2Ftokei.kojix2.net%2Fbadge%2Fgithub%2FJoshix-1%2Ftyped_stream%2Flines&label=Total%20lines)](https://tokei.kojix2.net/github/Joshix-1/typed_stream)
 ![Code size](https://img.shields.io/github/languages/code-size/Joshix-1/typed_stream)
 [![Style: Black](https://img.shields.io/badge/Code%20Style-Black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/Imports-isort-1674b1.svg?labelColor=ef8336)](https://pycqa.github.io/isort)
