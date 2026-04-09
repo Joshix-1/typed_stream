@@ -135,6 +135,32 @@ jobs:
       - name: Run mypy
         run: mypy --python-version  ${{ matrix.python-version }}
 
+
+  zuban:
+    name: zuban
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.12"
+          - "3.14"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install requirements
+        run: grep -E "^(zuban|typing-extensions)" requirements-dev.txt | xargs pip install
+      - name: Run mypy
+        run: zuban mypy --python-version  ${{ matrix.python-version }}
+
   ty:
     name: ty
     runs-on: ubuntu-latest
