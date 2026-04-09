@@ -22,7 +22,7 @@ bandit[toml]==1.*
 pylint==4.0.*
 flake8==7.3.*
 flake8-builtins==3.0.*
-flake8-bugbear==25.10.21
+flake8-bugbear==25.11.29
 flake8-comprehensions==3.*
 flake8-docstrings==1.*
 flake8-no-pep420==2.*
