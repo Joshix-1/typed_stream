@@ -10,7 +10,7 @@ isort==8.*
 coverage==7.*
 
 # typechecking
-pyrefly==0.56.*
+pyrefly==0.61.*
 basedpyright==1.39.*
 mypy==1.19.*
 typing-extensions==4.*
