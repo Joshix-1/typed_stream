@@ -12,7 +12,7 @@ coverage==7.*
 # typechecking
 pyrefly==0.56.*
 basedpyright==1.39.*
-mypy==1.19.*
+mypy==1.20.*
 typing-extensions==4.*
 pytype==2024.10.11
 ty==0.0.29
