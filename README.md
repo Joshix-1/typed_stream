@@ -42,6 +42,7 @@ This library heavily uses itertools for great performance and simple code.
 >>> (typed_stream.FileStream("requirements-dev.txt")
 ...     .filter()
 ...     .exclude(typed_stream.functions.method_partial(str.startswith, "#"))
+...     .exclude(typed_stream.functions.method_partial(str.__contains__, "git+"))
 ...     .map(str.split, "==")
 ...     .starmap(lambda name, version = None: name)
 ...     .max(key=len))
