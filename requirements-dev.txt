@@ -12,7 +12,7 @@ coverage==7.*
 # typechecking
 pyrefly==0.61.*
 basedpyright==1.39.*
-mypy==1.19.*
+mypy==1.20.*
 typing-extensions==4.*
 pytype==2024.10.11
 ty==0.0.29
@@ -28,9 +28,10 @@ flake8-docstrings==1.*
 flake8-no-pep420==2.*
 flake8-scream==0.1.*
 flake8-simplify==0.30.*
-flake8-return==1.2.*
 flake8-no-implicit-concat==0.3.*
 pep8-naming==0.15.*
 # flake8-rst-docstrings==0.3.*
 # flake8-slots==0.1.*
 # flake8-function-order==0.0.5
+# 1.2.* with 3.14 support
+flake8-return @ git+https://github.com/afonasev/flake8-return@fab98c7245f44d893e5aa5cc7e6dedc1c3097fb7

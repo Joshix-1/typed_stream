@@ -101,7 +101,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
     def __getitem__(
         self,
         item: slice[int | None, int | None, int | None] | int,
-        /,  # noqa: W504
+        /,
     ) -> streamable.StreamableSequence[T] | T:
         """Finish the stream by collecting.
 
@@ -688,7 +688,7 @@ class Stream(stream_abc.StreamABC[T], Iterable[T]):
     def exclude(  # noqa: D102
         self: Stream[K | Prim],
         fun: _utils.InstanceChecker[Prim],
-        /,  # noqa: W504
+        /,
     ) -> Stream[K]: ...
 
     @typing.overload
