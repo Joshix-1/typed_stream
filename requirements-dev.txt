@@ -15,7 +15,7 @@ basedpyright==1.39.*
 mypy==2.2.*
 typing-extensions==4.*
 pytype==2024.10.11
-ty==0.0.57
+ty==0.0.61
 
 # linting
 bandit[toml]==1.*
