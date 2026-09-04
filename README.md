@@ -52,6 +52,27 @@ This library heavily uses itertools for great performance and simple code.
 
 In [examples](./examples) are more complex examples using Streams.
 
+## CLI
+
+This library also provides a `typed_stream` command.
+For good performance it's recommended to use pypy.
+Never call the binary with user-provided arguments. The programm tries to avoid arbitrary code execution, but the statements get evaluated using python, so no guarantees there.
+
+### Examples
+
+```sh
+$ printf '1\n2\n3' | typed_stream map int map mul 3
+3
+6
+9
+$ printf '1\n2\n3\n' | typed_stream map int sum
+6
+$ printf '1\n2\n3\n1' | typed_stream map int collect builtins.sum
+7
+$ printf '1\n2\n3\n1' | typed_stream map int collect Counter
+{"1": 2, "2": 1, "3": 1}
+```
+
 ## Not yet asked questions
 
 I'll try to answer questions that could occur.
