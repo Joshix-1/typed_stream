@@ -58,9 +58,8 @@ I'll try to answer questions that could occur.
 
 ### What do the versions mean?
 
-I try to follow something similar to sem-ver. For versions before 1.0.0 this means the format is `0.<major>.<patch>`.
-Any change that could be considered a breaking-change (adding things is not a breaking change) increases the `major` part. If only `patch` has changed, there was no breaking-change.
-I try to avoid changes that break my own code, so even if `major` has been changed, it should probably be safe to upgrade.
+I try to follow something similar to sem-ver.
+I try to avoid big breaking changes that break my own code, so even if the major version has been changed, it should probably be safe to upgrade.
 
 ### Why are there no changelogs?
 
@@ -72,7 +71,3 @@ If you need changelogs, please create an issue.
 - 🇪🇺
 - AGPL3 is too long
 - [Google EUPL Policy](https://opensource.google/documentation/reference/thirdparty/licenses#european_union_public_licence_eupl_not_allowed)
-
-### Is it production-ready?
-
-Probably.
