@@ -1,5 +1,5 @@
 # building
-build==1.6.0
+build==1.6.1
 
 # formatting and fixing
 autoflake==2.*
