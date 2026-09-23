@@ -22,6 +22,7 @@ __all__ = (
     "PrettyRepr",
     "StarCallable",
     "SupportsAdd",
+    "SupportsAverage",
     "SupportsComparison",
     "SupportsGreaterThan",
     "SupportsLessThan",
@@ -81,6 +82,16 @@ class SupportsAdd(Protocol):
     @abstractmethod
     def __add__(self: T, other: T) -> T:
         """Add another instance of the same type to self."""
+
+
+class SupportsAverage(Protocol[T_co]):
+    """A type that supports calculating an average if in an Iterable."""
+
+    def __add__(self, other: Self) -> Self:
+        """Add another instance of the same type to self."""
+
+    def __truediv__(self, other: int) -> T_co:
+        """Divide by an int."""
 
 
 class Closeable(abc.ABC):
